@@ -8757,10 +8757,10 @@ function Client() {
     ;
     this.update_server_list = function() {
         for (var c = 0, f = 0; f < client.server_list.length; f++)
-            c += client.server_list[f].players;
+            c += client.server_list[f].players.online;
         c = "<option disabled>Choose a server (" + c + " players)</option>";
         for (f = 0; f < this.server_list.length; f++)
-            c += "<option>" + this.server_list[f].name + " [" + this.server_list[f].players + "/" + this.server_list[f].maxPlayers + " players]</option>\n";
+            c += "<option>" + this.server_list[f].name + " [" + this.server_list[f].players.online + "/" + this.server_list[f].players.max + " players]</option>\n";
         f = document.getElementById("region_select");
         f.innerHTML = c;
         f.selectedIndex = Math.min(Math.floor(9 * Math.random() + 1), client.server_list.length);
@@ -10714,7 +10714,7 @@ function User() {
     };
 }
 var LOADER = {
-    SERVER_INFO_URL: "datas/server_info.json"
+    SERVER_INFO_URL: "servers"
 };
 function Loader(c, g, f) {
     this.can = c;

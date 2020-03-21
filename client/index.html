@@ -1,0 +1,231 @@
+<html>
+	<head>
+		<script type="text/javascript">
+			if (window.location.href == "https://starve.io/") location.href = "http://starve.io";
+		</script>
+		<title>Starve.io</title>
+		<meta charset="utf-8" />
+		<link rel="stylesheet" type="text/css" href="css/game_style.css">
+		<link rel="shortcut icon" type="image/x-icon" href="img/favicon.png" />
+		<link href="https://fonts.googleapis.com/css?family=Baloo+Paaji" rel="stylesheet">
+		<meta name="description" content="Survive the cold and hunger by collecting resources and crafting tools! !">
+		<meta name="keywords" content="starve, starve.io, starveio ,io games, .io, craft, browser game, html game, html5 game, agario, diepio, mopeio, flash game, jungle, nature, multiplayer, survival, hunger, cold, limaxio, mopeio, crafting game, cute, blob">
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+		<meta property="og:image" content="http://starve.io/img/share_banner.png">
+		<meta property="og:image:type" content="image/jpg">
+		<meta property="og:image:width" content="437">
+		<meta property="og:image:height" content="269">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="robots" content="index, follow">
+		<meta name="revisit-after" content="3 days">
+		<meta name="googlebot" content="all">
+	</head>
+
+	<body id="game_body">
+
+		<canvas id="game_canvas"></canvas>
+		<div id="loading">Loading</div>
+		<div id="nickname_block">
+			<input type="text" id="nickname_input" placeholder="Nickname" maxlength="16">
+		</div>
+
+		<div id="all_rights_reserved"> © Starve.io 2017 All Rights Reserved</div>
+
+		<!-- <div id="more_io_games">
+			<a href="http://iogames.space" target="_blank">More IO games</a>
+		</div> -->
+
+		<!-- <div id="creation">By the creators of <a href="http://oib.io" target="_blank">Oib.io </a>
+			 & <a href="http://limax.io" target="_blank">Limax.io </a>
+		</div> -->
+
+		<div id="creation">By Lapa modified by 6pak</div>
+
+		<div id="chat_block">
+			<input type="text" id="chat_input" placeholder="Enter text..." maxlength="70">
+		</div>
+
+		<select id="region_select">
+		</select>
+
+		<!-- <div id="parameter">
+			<img src="./img/gear.png" style="width:30px;" ></img>
+		</div> -->
+		<!-- <div id="parameter_box">
+			<div id="text" style="text-align:center;display:inline-block;margin-right:25px;">Keyboard</div>
+			<div id="azerty">AZERTY</div>
+			<div id="qwerty">QWERTY</div>
+			<div id="close">X</div>
+		</div> -->
+
+		<script src="js/client.min.js"></script>
+		<!-- <div id="walloffame">
+			<a href="score_today.html" target="_blank" >Leaderboard <br>WALL OF FAME</br></a>
+		</div> -->
+		<div id="wiki">
+			<a href="http://starveiopro.wikia.com/wiki/" target="_blank">WIKI <br>GUIDE</br></a>
+		</div>
+
+		<div id="discord">
+			<a href="https://discord.gg/fmESmas" target="_blank">DISCORD</a>
+		</div>
+
+		<div id="sidebox">
+			<div id="howtoplay">
+				<div id="title">HOW TO PLAY </div>
+				<div id="news">Survive cold and hunger by crafting items</div>
+				<div id="news"><span style="color:#3dba87;">ARROW KEYS</span> or <span style="color:#3dba87;">WASD</span> to move </div>
+				<div id="news"><span style="color:#3dba87;">LEFT CLICK</span> to collect resources and craft</div>
+				<div id="news"><span style="color:#3dba87;">RIGHT CLICK</span> to cancel crafting</div>
+				<div id="news"><span style="color:#3dba87;">ENTER</span> to chat with players around you</div>
+				<div id="news"><span style="color:#3dba87;">SHIFT</span> to add items 10 per 10</div>
+				<div id="news"><span style="color:#3dba87;">R</span> to Auto-Feed / <span style="color:#3dba87;">Y</span> to Zoom the minimap</div>
+				<div id="news"><span style="color:#3dba87;">P</span> to show spectators in hunger game mode</div>
+
+				<div id="news" style="padding-top:15px;text-align:center;font-size:18px;"><a href="https://web.archive.org/web/20170528182750/https://docs.google.com/spreadsheets/d/1ZdaBZgtgDC5mPk7v7iYcALG5x73WiMgIda02yt7wExo" style="color:#3dba87;" target="_blank">CHECK RECIPES</a></div>
+
+			<!-- <div id="news" style="text-align:center;padding-top:10px;">Need Feedbacks on <a href="http://reddit.com/r/starveio" style="color:#e2811d;" target="_blank">Reddit</a>!</div> -->
+			</div>
+			<!-- <div id="follow_us"> -->
+
+			<!-- <div style="height:12px;">&nbsp;</div> -->
+
+		 	<!-- <div id="fb-root"></div>
+			<script>(function(d, s, id) {
+			  var js, fjs = d.getElementsByTagName(s)[0];
+			  if (d.getElementById(id)) return;
+			  js = d.createElement(s); js.id = id;
+			  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.8";
+			  fjs.parentNode.insertBefore(js, fjs);
+			}(document, 'script', 'facebook-jssdk'));</script> -->
+
+
+			<!-- <div class="fb-like" data-href="https://www.facebook.com/limaxio-571818073000979/" data-layout="button_count" data-action="like" data-show-faces="true" data-share="true"></div> -->
+
+			<!-- <div style="height:12px;">&nbsp;</div> -->
+
+			<!-- <a href="https://twitter.com/lapamauve" class="twitter-follow-button" data-show-screen-name="false" data-show-count="true">Follow @lapamauve</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+			<a href="https://twitter.com/share" class="twitter-share-button"
+			data-url="http://starve.io" data-text="Try to survive in Starve.io !"
+			data-via="lapamauve">Tweet</a>
+			<script>!function(d,s,id){var
+				js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document,
+				'script', 'twitter-wjs');</script>
+		 	</div> -->
+
+			<div id="dateupdate">
+				<div id="title">Changelog</div>
+				<div id="date"> - March 21 - He is dead!</div>
+				<!-- <div id="news" style="font-size:15px;padding-top:10px;"><img src="./img/resurrection_stone.png"style="padding-right:5px;float:left;width:50px;"> </img><img src="./img/dragon_heart.png"style="padding-top:5px;padding-right:10px;float:left;width:30px;"> </img></div>
+				<div id="news" style="padding-top:5px;">Added RESURRECTION STONE & DRAGON HEART</div>
+				<div id="news" style="font-size:15px;padding-top:20px;"><img src="./img/lock.png"style="padding-right:10px;float:left;width:25px;"> </img><img src="./img/lockpick.png"style="padding-top:0px;padding-right:10px;float:left;width:15px;"> </img></div>
+				<div id="news" style="padding-top:10px;">Added LOCK & KEY</div>
+
+				<div id="news" style="padding-top:10px;text-align:center;">
+					<a href="changelog.html" target="_blank">- MORE INFORMATIONS -</a>
+				</div> -->
+			</div>
+			<!-- <div id="art">
+				<a href="paint.html" target="_blank">DRAW YOUR IDEA HERE</a> -->
+		 </div>
+	 </div>
+
+	 <!-- <div id="youtube">
+		<script src="https://apis.google.com/js/platform.js"></script>
+		<div class="g-ytsubscribe" data-channelid="UCs976IfAw9_NGetGa8fo8qA"
+		data-layout="default" data-count="default"></div>
+	 </div> -->
+
+	<div id="preroll"></div>
+
+	<!-- Adinplay START -->
+	<!-- <script async='async' src='https://www.googletagservices.com/tag/js/gpt.js'></script>
+	<script>
+	  var googletag = googletag || {};
+	  googletag.cmd = googletag.cmd || [];
+	</script>
+
+	<script>
+	  googletag.cmd.push(function() {
+	    googletag.defineSlot('/421469808/MFN_starve.io_300x250', [300, 250], 'div-gpt-ad-1490700538125-0').addService(googletag.pubads());
+	    googletag.pubads().enableSingleRequest();
+	    googletag.enableServices();
+	  });
+	</script> -->
+
+	<!-- /421469808/MFN_starve.io_300x250 -->
+	<!-- <div id="trevda">
+		<div id='div-gpt-ad-1490700538125-0' style='height:250px; width:300px;'>
+		<script>
+		googletag.cmd.push(function() { googletag.display('div-gpt-ad-1490700538125-0'); });
+		</script>
+		</div>
+	</div> -->
+	<!-- Adinplay END -->
+
+	<!-- <div id="deeeepio">
+		<a href="http://deeeep.io" target="_blank">
+			<img src="./img/alsotrydeeeepio.png"></img>
+		</a>
+	</div> -->
+
+	<!-- Start Culture G -->
+	<!--
+	<script src='//www.smartadserver.com/config.js?nwid=104' type="text/javascript"></script>
+	<script type="text/javascript">
+	    sas.setup({ domain: '//www.smartadserver.com'});
+	</script>
+
+	<script type="text/javascript">
+	if(document.location.pathname == "/")
+	cgPageId = 780587; //starve.io/hp
+	else
+	cgPageId = 780588; //starve.io/rg
+
+		sas.call("onecall", {
+			siteId:		151028,
+			pageId:		cgPageId,
+			formatId:	'32325,922',
+			target:		''
+		});
+	</script>
+
+	<div id="trevda">
+		<div id="cgdiv_922">
+		<script type="text/javascript">
+		    sas.render('922');  // Format : Pave300 300x250
+		</script>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+	    sas.render('32325');  // Format : Ad Control
+	</script>
+
+	<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+	new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+	j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+	'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+	})(window,document,'script','dataLayer','GTM-M9NH7NP');</script>
+	-->
+	<!-- End Culture G -->
+
+	</body>
+
+	<!-- <script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+		  ga('create', 'UA-78561996-3', 'auto');
+		  ga('send', 'pageview');
+	</script> -->
+</html>
+
+<!--
+ * For cookies manipulation, I use this fork
+ * - - - - - - - - - - - - - - - - - - - - - - - -
+ * JavaScript Cookie v2.1.3
+ * https://github.com/js-cookie/js-cookie
+-->

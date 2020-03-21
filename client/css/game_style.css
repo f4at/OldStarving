@@ -1,0 +1,397 @@
+html, body {
+	width: 100%;
+	height: 100%;
+	margin: 0px;
+	padding: 0;
+	overflow: hidden;
+}
+#game_body {
+
+	background-color: #133A2B;
+}
+div#loading {
+	display: none;
+	padding-bottom: 20px;
+	border-style: none;
+	border-radius: 20px;
+	text-align: center;
+	overflow: hidden;
+	background-color: #000;
+	font-family: "Baloo Paaji";
+	font-size: 100px;
+	color: #fff;
+	width: 500px;
+	height: 150px;
+	margin: auto;
+}
+
+div#nickname_block {
+	position: absolute;
+	display: none;
+	width: 300px;
+}
+#nickname_input {
+
+	height: 40px;
+	font-size: 20px;
+	width : 100%;
+	text-align: center;
+	box-sizing: border-box;
+	border-radius: 8px;
+	border: none;
+	outline: none;
+	background-color: #e6e6e6;
+	color: #262626;
+	font-family: "Baloo Paaji";
+}
+
+div#all_rights_reserved {
+	display: none;
+	position: absolute;
+	width: 350px;
+	height: 60px;
+	font-size: 18px;
+	color : #FFFFFF;
+	font-family: "Baloo Paaji";
+}
+
+div#more_io_games {
+	background-color: #12ad84;
+	border-radius: 10px;
+	display: none;
+	position: absolute;
+	width: 160px;
+	height: 60px;
+	font-size: 23px;
+	padding-left: 5px;
+	color : #FFFFFF;
+	font-family: "Baloo Paaji";
+}
+
+div#more_io_games:hover{
+	background-color: #2ec199;
+	border-radius: 10px;
+	display: none;
+	position: absolute;
+	width: 160px;
+	height: 60px;
+	font-size: 23px;
+	padding-left: 5px;
+	color : #FFFFFF;
+	font-family: "Baloo Paaji";
+}
+div#more_io_games:active{
+	background-color: #2ec199;
+	border-radius: 10px;
+	display: none;
+	position: absolute;
+	width: 160px;
+	height: 23px;
+	font-size: 20px;
+	padding-left: 5px;
+	margin-top:5px;
+	color : #FFFFFF;
+	font-family: "Baloo Paaji";
+}
+
+div#reddit {
+	display: none;
+	position: absolute;
+	width: 350px;
+	height: 60px;
+	font-size: 18px;
+	color : #FFFFFF;
+	font-family: "Baloo Paaji";
+}
+
+div#fullchangelog {
+	display: none;
+	position: absolute;
+	width: 140px;
+	height: 60px;
+	font-size: 18px;
+	color : #FFFFFF;
+	font-family: "Baloo Paaji";
+}
+
+div#dateupdate {
+	margin-top: 10px;
+	box-sizing: border-box;
+	border-radius: 10px;
+	border: none;
+	background-color: rgba(2, 26, 27, 0.8);
+	padding-bottom: 5px;
+	padding-right: 5px;
+}
+div#howtoplay {
+	box-sizing: border-box;
+	border-radius: 10px;
+	border: none;
+	background-color: rgba(2, 26, 27, 0.8);
+	padding-bottom: 10px;
+}
+
+div#sidebox {
+	width: 245px;
+	display: none;
+	position: absolute;
+}
+
+#title {
+	padding-bottom: 5px;
+	font-size: 18px;
+	color: #ffffff;
+	font-family: "Baloo Paaji";
+	text-align: center;
+}
+#date {
+	padding-left: 10px;
+	font-size: 14px;
+	color: #f7f7c1;
+	font-family: "Baloo Paaji";
+}
+#news {
+    padding-left: 10px;
+    font-size: 12px;
+    color: #ffffff;
+    font-family: "Baloo Paaji";
+    line-height: 16px;
+}
+div#news a{
+	text-decoration : underline;
+}
+div#creation {
+	display: none;
+	position: absolute;
+	height: 60px;
+	font-size: 18px;
+	color : #FFFFFF;
+	font-family: "Baloo Paaji";
+}
+div#creation a{
+	text-decoration : underline;
+}
+
+a:link {
+	text-decoration: none;
+	color: white;
+}
+a:visited {
+	text-decoration: none;
+	color: white;
+}
+
+canvas#game_canvas {
+	position: absolute;
+}
+
+
+div#chat_block {
+	position: absolute;
+	display: none;
+	width: 300px;
+}
+
+#chat_input {
+
+	height: 30px;
+	font-size: 20px;
+	width : 100%;
+	text-align: center;
+	box-sizing: border-box;
+	border-radius: 10px;
+	border: none;
+	outline: none;
+	opacity: 0.8;
+	background-color: #dedede;
+	color: #4A4A4A;
+	font-family: "Baloo Paaji";
+}
+
+#region_select {
+	display: none;
+	position: absolute;
+	width: 300px;
+	height: 30px;
+	left: 10px;
+	padding-left: 5px;
+	color: #0d5542;
+	background: #35a879;
+	border-radius: 10px;
+	border-color: #35a879;
+	font-family : "Baloo Paaji";
+	font-size : 15px;
+}
+
+#follow_us {
+	z-index: 1;
+	overflow: hidden;
+}
+
+#youtube {
+	display: none;
+	position: absolute;
+	z-index: 1;
+	overflow: hidden;
+}
+#changelog_body {
+	background-color: #032428;
+	margin-bottom: 50px;
+	margin-top: 0px;
+	overflow: scroll;
+}
+#title_update {
+	padding-left: 50px;
+	padding-top: 30px;
+	font-size: 18px;
+	color : #FFFFFF;
+	font-family: "Baloo Paaji";
+}
+#news2 {
+	font-size: 13px;
+	color: #ffffff;
+	font-family: "Arial";
+	font-weight:normal;
+	letter-spacing: 1px;
+	padding-left:80px;
+}
+#news2 a{
+	text-decoration : underline;
+}
+#art{
+	text-align:center;
+	padding-top:3px;
+}
+#art a{
+	background-color: #4CAF50;
+  border: none;
+	border-radius: 10px;
+	color: white;
+	padding: 2px 12px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 16px;
+	margin: 4px 2px;
+	cursor: pointer;
+	font-family: "Baloo Paaji";
+	box-shadow: 0px 4px #111a16;
+	outline: none;
+}
+ #art:hover a{
+ 	background-color: #70d474;
+	box-shadow: 0px 4px #111a16;
+	outline: none;
+}
+	#art:active a{
+	 background-color: #3a833d;
+	 box-shadow: 0px -4px #111a16;
+	 outline: none;
+}
+
+div#discord {
+	background-color: #7289da;
+	text-align: center;
+	line-height: 15px;
+	border-radius: 10px;
+	display: none;
+	position: absolute;
+	font-size: 15px;
+	padding-left: 5px;
+	padding-top: 35px;
+	padding-right: 5px;
+	height: 37px;
+	color : #FFFFFF;
+	font-family: "Baloo Paaji";
+}
+div#discord:hover{
+	background-color: #95aaf1;
+	text-align: center;
+	line-height: 15px;
+	border-radius: 10px;
+	display: none;
+	position: absolute;
+	font-size: 15px;
+	padding-left: 5px;
+	padding-top: 35px;
+	padding-right: 5px;
+	height: 37px;
+	color : #FFFFFF;
+	font-family: "Baloo Paaji";
+}
+div#discord:active{
+	background-color: #7289da;
+	text-align: center;
+	line-height: 15px;
+	border-radius: 10px;
+	display: none;
+	position: absolute;
+	font-size: 15px;
+	padding-left: 5px;
+	padding-top: 35px;
+	padding-right: 5px;
+	height: 37px;
+	color : #FFFFFF;
+	font-family: "Baloo Paaji";
+}
+
+div#wiki {
+	background-color: #37d78f;
+	border-radius: 10px;
+	text-align: center;
+	line-height: 15px;
+	display: none;
+	position: absolute;
+	font-size: 15px;
+	padding-left: 5px;
+	padding-top: 35px;
+	padding-right: 5px;
+	height: 37px;
+	color : #FFFFFF;
+	font-family: "Baloo Paaji";
+}
+div#wiki:hover{
+	background-color: #4be49f;
+	border-radius: 10px;
+	text-align: center;
+	line-height: 15px;
+	display: none;
+	position: absolute;
+	font-size: 15px;
+	padding-left: 5px;
+	padding-top: 35px;
+	padding-right: 5px;
+	height: 37px;
+	color : #FFFFFF;
+	font-family: "Baloo Paaji";
+}
+div#wiki:active{
+	background-color: #2bc881;
+	border-radius: 10px;
+	text-align: center;
+	line-height: 15px;
+	display: none;
+	position: absolute;
+	font-size: 15px;
+	padding-left: 5px;
+	padding-top: 35px;
+	padding-right: 5px;
+	height: 37px;
+	color : #FFFFFF;
+	font-family: "Baloo Paaji";
+}
+
+div#trevda {
+	position: absolute;
+	display: none;
+	border-radius: 10px;
+	background-color: rgba(2, 26, 27, 0.8);
+	padding:5px;
+
+}
+
+div#deeeepio {
+	position: absolute;
+	display: none;
+	width: 300px;
+}

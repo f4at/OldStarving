@@ -1,9 +1,0 @@
-[
-    {
-        "players": 0,
-        "maxPlayers": 100,
-        "ip": "localhost",
-        "port": 8080,
-        "name": "localhost"
-    }
-]

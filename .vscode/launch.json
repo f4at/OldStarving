@@ -8,6 +8,18 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Launch server",
+            "args": ["src/index.ts"],
+            "runtimeArgs": ["-r", "ts-node/register"],
+            "cwd": "${workspaceRoot}/server",
+            "protocol": "inspector",
+            "sourceMaps": true,
+            "console": "integratedTerminal",
+            "internalConsoleOptions":"neverOpen"
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Launch web",
             "args": ["src/index.ts"],
             "runtimeArgs": ["-r", "ts-node/register"],

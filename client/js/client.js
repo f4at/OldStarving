@@ -9385,7 +9385,7 @@ function Client() {
     ;
     this.connect_timeout = function() {
         var g = ui.server_list.id.selectedIndex - 1;
-        this.socket = new WebSocket("ws://" + this.server_list[g].ip + ":" + this.server_list[g].port);
+        this.socket = new WebSocket((this.server_list[g].ssl ? "wss" : "ws") + "://" + this.server_list[g].ip + ":" + this.server_list[g].port);
         this.socket.binaryType = "arraybuffer";
         this.socket._current_id = this._current_id;
         this.socket.onmessage = function(f) {

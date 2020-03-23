@@ -1,5 +1,6 @@
 import * as http from "http";
 import * as fs from "fs";
+import * as mime from 'mime';
 
 const server = http.createServer((req, res) => {
     if (req.url == "/servers") {
@@ -13,8 +14,10 @@ const server = http.createServer((req, res) => {
                 res.end(JSON.stringify(err));
                 return;
             }
-            res.writeHead(200);
+            res.writeHead(200, { 'Content-Type': mime.getType(req.url) });
             res.end(data);
         });
     }
 }).listen(80);
+
+console.log("Listening on port 80");

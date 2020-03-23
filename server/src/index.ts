@@ -29,12 +29,14 @@ enum EntityType {
 }
 
 class createWorld {
-    items = {STONE_SWORD:{id:0, range: 75, range2:25 , damage:19, odamage:2, itype:EntityType.SWORD },
+    items = {SWORD:{id:0, range: 75, range2:25 , damage:19, odamage:2, itype:EntityType.SWORD },
         HAND:{id:14, range: 50, range2: 25, damage: 5, odamge:1, itype:EntityType.PICKAXE },
-        WOOD_WALL:{id:16, sid: 0/* ah id is useless only for crafting needs spirite id atleast in modern version*/ hp: 1500, tier:0, itype:EntityType.WALL },
-        AME_SWORD:{id:50, range:80 ,range2:25, damage:30, odamage:10, itype:EntityType.SWORD},
-        DIA_HELMET:{id:45, coldProt:0, dmgProt:5, itype:EntityType.HAT},
+        WALL:{id:16, sid: 0/* ah id is useless only for crafting needs spirite id atleast in modern version*/, hp: 1500, tier:0, itype:EntityType.WALL },
+        SWORD_AMETHYST:{id:50, range:80 ,range2:25, damage:30, odamage:10, itype:EntityType.SWORD},
+        DIAMOND_HELMET:{id:45, coldProt:0, dmgProt:5, itype:EntityType.HAT},
         };
+    //recipes = [{ r: [[3, 30], [2, 5]], w: 0, f: 0, id: this.items.FIRE, time: .1 }, { r: [[3, 40], [2, 20]], w: 0, f: 0, id: this.items.WORKBENCH, time: 1 / 15 }, { r: [[3, 60], [2, 30]], w: 1, f: 0, id: this.items.SWORD, time: 1 / 15 }, { r: [[15, 1], [3, 60], [2, 20]], w: 1, f: 0, id: this.items.PICK, time: 1 / 15 }, { r: [[4, 3], [3, 20]], w: 0, f: 1, id: this.items.SEED, time: .1 }, { r: [[3, 60], [5, 30], [2, 40], [1, 1]], w: 1, f: 0, id: this.items.PICK_GOLD, time: .05 }, { r: [[6, 30], [5, 60], [2, 100], [7, 1]], w: 1, f: 0, id: this.items.PICK_DIAMOND, time: 1 / 30 }, { r: [[3, 80], [5, 50], [2, 60], [0, 1]], w: 1, f: 0, id: this.items.SWORD_GOLD, time: .05 }, { r: [[6, 50], [5, 80], [2, 100], [9, 1]], w: 1, f: 0, id: this.items.SWORD_DIAMOND, time: 1 / 30 }, { r: [[3, 15]], w: 0, f: 0, id: this.items.PICK_WOOD, time: .2 }, { r: [[3, 20]], w: 1, f: 0, id: this.items.WALL, time: .2 }, { r: [[16, 1], [3, 20], [2, 15]], w: 1, f: 0, id: this.items.SPIKE, time: .05 }, { r: [[18, 1]], w: 0, f: 1, id: this.items.COOKED_MEAT, time: .1 }, { r: [[11, 1], [3, 40], [2, 10]], w: 0, f: 0, id: this.items.BIG_FIRE, time: .1 }, { r: [[22, 3]], w: 1, f: 0, id: this.items.BANDAGE, time: .2 }, { r: [[16, 1], [2, 20]], w: 1, f: 0, id: this.items.STONE_WALL, time: .2 }, { r: [[23, 1], [5, 20]], w: 1, f: 0, id: this.items.GOLD_WALL, time: .2 }, { r: [[24, 1], [6, 20]], w: 1, f: 0, id: this.items.DIAMOND_WALL, time: .2 }, { r: [[3, 60]], w: 1, f: 0, id: this.items.WOOD_DOOR, time: .125 }, { r: [[3, 60], [2, 20], [5, 10]], w: 1, f: 0, id: this.items.CHEST, time: .05 }, { r: [[23, 1], [2, 35]], w: 1, f: 0, id: this.items.STONE_SPIKE, time: .05 }, { r: [[24, 1], [5, 20], [2, 15]], w: 1, f: 0, id: this.items.GOLD_SPIKE, time: .05 }, { r: [[25, 1], [6, 20], [2, 15]], w: 1, f: 0, id: this.items.DIAMOND_SPIKE, time: .05 }, { r: [[26, 1], [2, 60]], w: 1, f: 0, id: this.items.STONE_DOOR, time: .125 }, { r: [[31, 1], [5, 60]], w: 1, f: 0, id: this.items.GOLD_DOOR, time: .125 }, { r: [[32, 1], [6, 60]], w: 1, f: 0, id: this.items.DIAMOND_DOOR, time: .125 }, { r: [[34, 8], [22, 4]], w: 1, f: 0, id: this.items.EARMUFFS, time: 1 / 15 }, { r: [[36, 1], [34, 5], [35, 10], [22, 6]], w: 1, f: 0, id: this.items.COAT, time: .04 }, { r: [[3, 80], [2, 20]], w: 1, f: 0, id: this.items.SPEAR, time: 1 / 15 }, { r: [[3, 120], [5, 40], [2, 50], [38, 1]], w: 1, f: 0, id: this.items.GOLD_SPEAR, time: .05 }, { r: [[3, 250], [6, 50], [5, 80], [39, 1]], w: 1, f: 0, id: this.items.DIAMOND_SPEAR, time: 1 / 30 }, { r: [[3, 150], [2, 100], [5, 50]], w: 1, f: 0, id: this.items.FURNACE, time: .05 }, { r: [[47, 3], [34, 2]], w: 1, f: 0, id: this.items.EXPLORER_HAT, time: 1 / 15 }, { r: [[2, 150], [3, 100]], w: 1, f: 0, id: this.items.STONE_HELMET, time: .05 }, { r: [[2, 180], [3, 120], [5, 100], [43, 1]], w: 1, f: 0, id: this.items.GOLD_HELMET, time: .025 }, { r: [[2, 200], [5, 100], [6, 160], [44, 1]], w: 1, f: 0, id: this.items.DIAMOND_HELMET, time: 1 / 60 }, { r: [[47, 5], [22, 5], [35, 5]], w: 1, f: 0, id: this.items.BOOK, time: 1 / 30 }, { r: [[3, 30]], w: 0, f: 1, id: this.items.PAPER, time: 1 / 3 }, { r: [[22, 10], [35, 5]], w: 1, f: 0, id: this.items.BAG, time: .05 }, { r: [[6, 80], [5, 130], [49, 50], [10, 1]], w: 1, f: 0, id: this.items.SWORD_AMETHYST, time: .025 }, { r: [[6, 60], [5, 90], [49, 30], [8, 1]], w: 1, f: 0, id: this.items.PICK_AMETHYST, time: .025 }, { r: [[49, 50], [6, 100], [5, 120], [40, 1]], w: 1, f: 0, id: this.items.AMETHYST_SPEAR, time: .025 }, { r: [[3, 120], [2, 60]], w: 1, f: 0, id: this.items.HAMMER, time: 1 / 15 }, { r: [[3, 160], [2, 120], [5, 80], [53, 1]], w: 1, f: 0, id: this.items.HAMMER_GOLD, time: .05 }, { r: [[6, 80], [2, 200], [5, 150], [54, 1]], w: 1, f: 0, id: this.items.HAMMER_DIAMOND, time: 1 / 30 }, { r: [[6, 160], [49, 60], [5, 250], [55, 1]], w: 1, f: 0, id: this.items.HAMMER_AMETHYST, time: .025 }, { r: [[25, 1], [49, 20]], w: 1, f: 0, id: this.items.AMETHYST_WALL, time: .2 }, { r: [[57, 1], [49, 20], [2, 15]], w: 1, f: 0, id: this.items.AMETHYST_SPIKE, time: .05 }, { r: [[33, 1], [49, 60]], w: 1, f: 0, id: this.items.AMETHYST_DOOR, time: .125 }, { r: [[37, 1], [61, 20], [62, 10]], w: 1, f: 0, id: this.items.CAP_SCARF, time: 1 / 60 }, { r: [[6, 1], [22, 1]], w: 1, f: 0, id: this.items.BLUE_CORD, time: 1 / 3 }];
+    recipes = [];
     players = [];
     mapSize = {x: 10, y: 10 };
     chunks = new Array(this.mapSize.x);
@@ -110,7 +112,10 @@ class Player {
     tool = world.items.HAND;
     hat = world.items.DIA_HELMET;
     bag: boolean;
-    score: number = 0;
+    score: number = 0
+    inv = new Array(10); // don't know what is max(with bag)
+    water: boolean;
+    fire: boolean;
 
     //UPDATING
     moving: boolean;
@@ -119,6 +124,7 @@ class Player {
     updating: boolean;
     updateLoop: NodeJS.Timeout;
     attackLoop: NodeJS.Timeout;
+    craftLoop: any;
     movVector: Vector;
 
     //BARS
@@ -228,7 +234,8 @@ class Player {
     damage(dmg,player) {
         this.health -= dmg;
         this.action |= EntityState.Hurt;
-        if (this.health < 0) {
+        if (this.health <= 0) {
+            player.score += Math.floor(this.score/3)
             this.die();
         }
     }
@@ -301,6 +308,21 @@ class Player {
                         }
                     }
                 }
+            }
+        }
+    }
+    craft(id) {
+        if (!this.craftLoop) {
+            let recipe = world.recipes.find(e => e.id==id);
+            recipe = recipe ? recipe : {r:[],w:0,f:0,time:0};
+            let Slot = this.inv.find(e=> e.id == id);
+            if (!Slot) {Slot = this.inv.find(e=> e.id)};
+            if (Slot && (this.water || !recipe.w) && (this.fire || !recipe.f)) {
+                //check if recipe in INV and remove them.
+                this.craftLoop = setTimeout(()=>{
+                    Slot.id = id;
+                    Slot.am = Slot.am ? Slot.am+1 : 1;
+                },recipe.time*1000);
             }
         }
     }

@@ -7734,7 +7734,7 @@ function Client() {
             var f = Math.floor(c.x / 100);
             var d = Math.floor(c.y / 100);
             if (this.last_cam.i != f || this.last_cam.j != d) {
-                this.socket.send(JSON.stringify([1, Math.floor(-c.x), Math.floor(-c.y)]));
+                //this.socket.send(JSON.stringify([1, Math.floor(-c.x), Math.floor(-c.y)])); lol LAPA ? retarded ?
                 this.last_cam.i = f;
                 this.last_cam.j = d;
             }

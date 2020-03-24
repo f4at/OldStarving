@@ -1,6 +1,21 @@
+import Cookies from 'https://cdn.jsdelivr.net/npm/js-cookie@3.0.0-rc.0/dist/js.cookie.min.mjs'
+
 export function start(ModdedStarving) {
     var proxy = new Proxy({}, { get(target, name) { try { return eval(name); } catch (e) { return undefined; } }, set(target, name, value) { return eval(name + "=JSON.parse('" + JSON.stringify(value) + "')"); } });
-    ModdedStarving.on("start", proxy);  
+    ModdedStarving.on("start", proxy);
+    const session = {
+        load() {
+            this.token = Cookies.get("session_token") || Array(15).fill(null).map(() => Math.random().toString(36).substr(2)).join('');
+            this.id = Cookies.get("session_id") || "";
+            this.save();
+        },
+
+        save() {
+            Cookies.set("session_token", this.token);
+            Cookies.set("session_id", this.id);
+        }
+    }
+    session.load();
     const Utils = {
         open_in_new_tab: function (c) {
             window.open(c, "_blank").focus();
@@ -206,88 +221,88 @@ export function start(ModdedStarving) {
         }
     };
     (function () {
-        var c = function () {
-            function c() {
-                var c = 0;
-                for (var d = {}; c < arguments.length; c++) {
-                    var e = arguments[c];
-                    var g;
-                    for (g in e) {
-                        d[g] = e[g];
-                    }
-                }
-                return d;
-            }
-            function g(f) {
-                function d(e, g, p) {
-                    var n;
-                    if (typeof document !== "undefined") {
-                        if (1 < arguments.length) {
-                            p = c({ path: "/" }, d.defaults, p);
-                            if (typeof p.expires === "number") {
-                                var r = new Date;
-                                r.setMilliseconds(r.getMilliseconds() + 864e5 * p.expires);
-                                p.expires = r;
-                            }
-                            try {
-                                n = JSON.stringify(g);
-                                if (/^[\{\[]/.test(n)) {
-                                    g = n;
-                                }
-                            } catch (A) { }
-                            g = f.write ? f.write(g, e) : encodeURIComponent(String(g)).replace(/%(23|24|26|2B|3A|3C|3E|3D|2F|3F|40|5B|5D|5E|60|7B|7D|7C)/g, decodeURIComponent);
-                            e = encodeURIComponent(String(e));
-                            e = e.replace(/%(23|24|26|2B|5E|60|7C)/g, decodeURIComponent);
-                            e = e.replace(/[\(\)]/g, escape);
-                            return document.cookie = [e, "=", g, p.expires ? "; expires=" + p.expires.toUTCString() : "", p.path ? "; path=" + p.path : "", p.domain ? "; domain=" + p.domain : "", p.secure ? "; secure" : ""].join("");
-                        }
-                        if (!e) {
-                            n = {};
-                        }
-                        var r = document.cookie ? document.cookie.split("; ") : [];
-                        var u = /(%[0-9A-Z]{2})+/g;
-                        for (var q = 0; q < r.length; q++) {
-                            var v = r[q].split("=");
-                            var t = v.slice(1).join("=");
-                            if (t.charAt(0) === '"') {
-                                t = t.slice(1, -1);
-                            }
-                            try {
-                                var z = v[0].replace(u, decodeURIComponent);
-                                var t = f.read ? f.read(t, z) : f(t, z) || t.replace(u, decodeURIComponent);
-                                if (this.json) {
-                                    try {
-                                        t = JSON.parse(t);
-                                    } catch (A) { }
-                                }
-                                if (e === z) {
-                                    n = t;
-                                    break;
-                                }
-                                if (!e) {
-                                    n[z] = t;
-                                }
-                            } catch (A) { }
-                        }
-                        return n;
-                    }
-                }
-                d.set = d;
-                d.get = function (c) {
-                    return d.call(d, c);
-                };
-                d.getJSON = function () {
-                    return d.apply({ json: true }, [].slice.call(arguments));
-                };
-                d.defaults = {};
-                d.remove = function (e, f) {
-                    d(e, "", c(f, { expires: -1 }));
-                };
-                d.withConverter = g;
-                return d;
-            }
-            return g(function () { });
-        };
+        // var c = function () {
+        //     function c() {
+        //         var c = 0;
+        //         for (var d = {}; c < arguments.length; c++) {
+        //             var e = arguments[c];
+        //             var g;
+        //             for (g in e) {
+        //                 d[g] = e[g];
+        //             }
+        //         }
+        //         return d;
+        //     }
+        //     function g(f) {
+        //         function d(e, g, p) {
+        //             var n;
+        //             if (typeof document !== "undefined") {
+        //                 if (1 < arguments.length) {
+        //                     p = c({ path: "/" }, d.defaults, p);
+        //                     if (typeof p.expires === "number") {
+        //                         var r = new Date;
+        //                         r.setMilliseconds(r.getMilliseconds() + 864e5 * p.expires);
+        //                         p.expires = r;
+        //                     }
+        //                     try {
+        //                         n = JSON.stringify(g);
+        //                         if (/^[\{\[]/.test(n)) {
+        //                             g = n;
+        //                         }
+        //                     } catch (A) { }
+        //                     g = f.write ? f.write(g, e) : encodeURIComponent(String(g)).replace(/%(23|24|26|2B|3A|3C|3E|3D|2F|3F|40|5B|5D|5E|60|7B|7D|7C)/g, decodeURIComponent);
+        //                     e = encodeURIComponent(String(e));
+        //                     e = e.replace(/%(23|24|26|2B|5E|60|7C)/g, decodeURIComponent);
+        //                     e = e.replace(/[\(\)]/g, escape);
+        //                     return document.cookie = [e, "=", g, p.expires ? "; expires=" + p.expires.toUTCString() : "", p.path ? "; path=" + p.path : "", p.domain ? "; domain=" + p.domain : "", p.secure ? "; secure" : ""].join("");
+        //                 }
+        //                 if (!e) {
+        //                     n = {};
+        //                 }
+        //                 var r = document.cookie ? document.cookie.split("; ") : [];
+        //                 var u = /(%[0-9A-Z]{2})+/g;
+        //                 for (var q = 0; q < r.length; q++) {
+        //                     var v = r[q].split("=");
+        //                     var t = v.slice(1).join("=");
+        //                     if (t.charAt(0) === '"') {
+        //                         t = t.slice(1, -1);
+        //                     }
+        //                     try {
+        //                         var z = v[0].replace(u, decodeURIComponent);
+        //                         var t = f.read ? f.read(t, z) : f(t, z) || t.replace(u, decodeURIComponent);
+        //                         if (this.json) {
+        //                             try {
+        //                                 t = JSON.parse(t);
+        //                             } catch (A) { }
+        //                         }
+        //                         if (e === z) {
+        //                             n = t;
+        //                             break;
+        //                         }
+        //                         if (!e) {
+        //                             n[z] = t;
+        //                         }
+        //                     } catch (A) { }
+        //                 }
+        //                 return n;
+        //             }
+        //         }
+        //         d.set = d;
+        //         d.get = function (c) {
+        //             return d.call(d, c);
+        //         };
+        //         d.getJSON = function () {
+        //             return d.apply({ json: true }, [].slice.call(arguments));
+        //         };
+        //         d.defaults = {};
+        //         d.remove = function (e, f) {
+        //             d(e, "", c(f, { expires: -1 }));
+        //         };
+        //         d.withConverter = g;
+        //         return d;
+        //     }
+        //     return g(function () { });
+        // };
         var g = false;
         if (typeof define === "function" && define.amd) {
             define(c);
@@ -298,8 +313,8 @@ export function start(ModdedStarving) {
             g = true;
         }
         if (!g) {
-            var f = window.Cookies;
-            var d = window.Cookies = c();
+            var f = Cookies;
+            var d = Cookies;// = c();
             d.noConflict = function () {
                 window.Cookies = f;
                 return d;
@@ -590,7 +605,54 @@ export function start(ModdedStarving) {
         d.drawImage(g, -g.width / 2, -g.height / 2);
         return f;
     }
+    function strokeMixedText(ctx, args, x, y, maxWidth) {
+        mixedText(ctx, args, x, y, maxWidth, "strokeText");
+    }
+    function fillMixedText(ctx, args, x, y, maxWidth) {
+        mixedText(ctx, args, x, y, maxWidth, "fillText");
+    }
+    function mixedText(ctx, args, x, y, maxWidth, func) {
+        let defaultFillStyle = ctx.fillStyle;
+        let defaultFont = ctx.font;
+
+        ctx.save();
+        args.forEach(({ text, fillStyle, font }) => {
+            ctx.fillStyle = fillStyle || defaultFillStyle;
+            ctx.font = font || defaultFont;
+            ctx[func](text, x, y, maxWidth);
+            x += ctx.measureText(text).width;
+        });
+        ctx.restore();
+    }
+    // https://www.colorschemer.com/minecraft-color-codes/
+    const colorCodes = {'4': "#AA0000", 'c': "#FF5555", '6': "#FFAA00", 'e': "#FFFF55", '2': "#00AA00", 'a': "#55FF55", 'b': "#55FFFF", '3': "#00AAAA", '1': "#0000AA", '9': "#5555FF", 'd': "#FF55FF", '5': "#AA00AA", 'f': "#FFFFFF", '7': "#AAAAAA", '8': "#555555", '0': "#000000"};
+    function formatText(text) {
+        let args = [];
+        args.fullText = "";
+        let arg = 0;
+        let waitingForColor = false;
+        for (var i = 0; i < text.length; i++) {
+            let char = text.charAt(i);
+            if (char === '§' && text.charAt(i - 1) !== '\\') {
+                arg++;
+                waitingForColor = true;
+                continue;
+            }
+            args[arg] = args[arg] || { text: "" };
+            if (text.charAt(i - 1) === '§' && waitingForColor) {
+                waitingForColor = false;
+                args[arg].fillStyle = colorCodes[char];
+                continue;
+            }
+            args[arg].text = args[arg].text + char;
+            args.fullText = args.fullText + char;
+        }
+
+        return args;
+    }
     function create_message(c, g) {
+        const formatted = formatText(g);
+        g = formatted.fullText;
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
         var e = Math.floor(28 * c);
@@ -608,7 +670,7 @@ export function start(ModdedStarving) {
         d.font = m + "px Baloo Paaji";
         d.beginPath();
         d.fillStyle = "#FFF";
-        d.fillText(g, p, e / 2);
+        fillMixedText(d, formatted, p, e / 2);
         return f;
     }
     function create_hurt_player(c, g) {
@@ -2151,6 +2213,9 @@ export function start(ModdedStarving) {
         return g;
     }
     function create_text(c, g, f, d, e, m, p, n, r, u, q) {
+        const formatted = formatText(g);
+        g = formatted.fullText;
+        
         var v = document.createElement("canvas");
         var t = v.getContext("2d");
         m = m ? m * c : 0;
@@ -2179,10 +2244,12 @@ export function start(ModdedStarving) {
         if (u) {
             t.strokeStyle = u;
             t.lineWidth = q;
-            t.strokeText(g, 0, (z - A) / 2, r);
+            strokeMixedText(t, formatted, 0, (z - A) / 2, r);
+            // t.strokeText(g, 0, (z - A) / 2, r);
         }
         t.fillStyle = d;
-        t.fillText(g, 0, (z - A) / 2, r);
+        fillMixedText(t, formatted, 0, (z - A) / 2, r);
+        // t.fillText(g, 0, (z - A) / 2, r);
         return v;
     }
     function create_stone(c, g, f) {
@@ -4969,7 +5036,7 @@ export function start(ModdedStarving) {
         d.textBaseline = "middle";
         d.textAlign = "center";
         d.font = c.size + "px " + c.font;
-        d.fillText(c.text, 0, 0);
+        fillMixedText(d, formatText(c.text), 0, 0);
         return f;
     }
     function create_button(c) {
@@ -7789,6 +7856,8 @@ export function start(ModdedStarving) {
             ___adsvid++;
             clearTimeout(this.timeout_handler);
             this.timeout_server = old_timestamp;
+            session.id = c[9];
+            session.save();
             user.gauges.cold.ed = user.gauges.cold.em;
             user.gauges.hunger.ed = user.gauges.hunger.em;
             user.gauges.l = 1;
@@ -7972,7 +8041,7 @@ export function start(ModdedStarving) {
             };
             this.socket.onopen = function () {
                 clearTimeout(c.timeout_handler);
-                c.socket.send(JSON.stringify([ui.nickname.input.value, CLIENT.VERSION_NUMBER]));
+                c.socket.send(JSON.stringify([ui.nickname.input.value, CLIENT.VERSION_NUMBER, session.token, session.id]));
                 c.timeout_handler = setTimeout(c.timeout, CLIENT.TIMEOUT_TIME);
             };
             this.timeout_handler = setTimeout(c.timeout, CLIENT.TIMEOUT_TIME);
@@ -8626,20 +8695,20 @@ export function start(ModdedStarving) {
                 this.style.display = "none";
                 this.input.value = "";
             }, run: function () {
-                if (!world.fast_units[user.uid].text) {
-                    if (this.open) {
-                        this.open = false;
-                        this.style.display = "none";
-                        if (this.input.value) {
-                            client.send_chat(this.input.value);
-                            this.input.value = "";
-                        }
-                    } else {
-                        this.open = true;
-                        this.style.display = "inline-block";
-                        this.input.focus();
+                // if (!world.fast_units[user.uid].text) {
+                if (this.open && !world.fast_units[user.uid].text) {
+                    this.open = false;
+                    this.style.display = "none";
+                    if (this.input.value) {
+                        client.send_chat(this.input.value);
+                        this.input.value = "";
                     }
+                } else {
+                    this.open = true;
+                    this.style.display = "inline-block";
+                    this.input.focus();
                 }
+                // }
             }
         };
         this.winter = {
@@ -8939,6 +9008,25 @@ export function start(ModdedStarving) {
                 this.play.draw(this.ctx);
             }
             user.alert.draw("#FFFFFF", "#4acb76");
+
+            this.draw_please();
+        };
+        let rotation = 0;
+        this.draw_please = function () {
+            this.ctx.fillStyle = "white";
+            this.ctx.font = "30px Comic Sans MS";
+            const text = "lapa don't sue us plz";
+            const size = this.ctx.measureText(text);
+            const x = 150;
+            const y = 150;
+
+            this.ctx.save();
+            this.ctx.translate(x + size.width / 2, y + size.actualBoundingBoxAscent / 2);
+            this.ctx.rotate(rotation += 0.05);
+            this.ctx.translate(-x - size.width / 2, -y - size.actualBoundingBoxAscent / 2);
+
+            this.ctx.fillText(text, x, y);
+            this.ctx.restore();
         };
         this.trigger_mousedown = (c) => {
             c = get_mouse_pos(this.can, c);

@@ -131,9 +131,7 @@ class Player {
             }
         }
         world.players.push(this);
-        this.ws.send(JSON.stringify([3, this.pid, 256, Utils.getLeaderboard(), this.pos.x, this.pos.y, 256, 0, 0, null, [], 0]));
         this.chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
-        this.sendInfos();
         world.chunks[this.chunk.x][this.chunk.y].push(this);
         Utils.broadcastPacket(JSON.stringify([2, this.pid, this.nick]));
         this.getInfos();
@@ -278,7 +276,7 @@ class Player {
             for (let player of to) {
                 arr = Utils.concatUint8(arr, player.infoPacket(visible));
                 player.ws.send(this.infoPacket(visible));
-            }
+            }   
             this.ws.send(arr);
         } else {
             this.sendToRange(this.infoPacket(visible));
@@ -347,11 +345,17 @@ wss.on("connection", (ws, req) => {
             } else {
                 let data = JSON.parse(message.toString());
                 if (!player) {
-                    // player = world.players.find(e => e.token == data[1]);
-                    // if (!player) {
-                    //   player = new Player(data[1], data[2], ws);
-                    // }
-                    player = new Player(data[0], null, ws);
+                    player = world.players.find(e => e.token == data[2]);
+                    if (!player) {
+                        // TODO for zero 
+                        console.log("session token = " + data[2]);
+                        console.log("session id = " + data[3]);
+                        player = new Player(data[0], data[2], ws);
+                    }
+                    player.online = true;
+                    // TODO for zero
+                    ws.send(JSON.stringify([3, player.pid, 256, Utils.getLeaderboard(), player.pos.x, player.pos.y, 256, 0, 0, "id123", [], 0]));
+                    player.sendInfos();
                 } else {
                     switch (data[0]) {
                         case 2:

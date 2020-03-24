@@ -49,11 +49,6 @@ mime@^2.4.4:
   resolved "https://registry.yarnpkg.com/mime/-/mime-2.4.4.tgz#bd7b91135fc6b01cde3e9bae33d659b63d8857e5"
   integrity sha512-LRxmNwziLPT828z+4YkNzloCFC2YM4wrB99k+AV5ZbEyfGNWfG8SO1FUXLmLDBSo89NrJZ4DIWeLjy1CHGhMGA==
 
-mine@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/mine/-/mine-0.1.0.tgz#91937531216183d1fce497c01ce0eef61f8e73d3"
-  integrity sha1-kZN1MSFhg9H85JfAHODu9h+Oc9M=
-
 source-map-support@^0.5.6:
   version "0.5.16"
   resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.5.16.tgz#0ae069e7fe3ba7538c64c98515e35339eac5a042"

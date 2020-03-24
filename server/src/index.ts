@@ -1,7 +1,8 @@
 import * as WebSocket from "ws";
 import * as https from "https";
 import * as fs from "fs";
-import { Tool, Armor, Items } from './Item';
+import {EntityType, Entity, Clothes, Tool, Items, DamageType, Usable} from './Item';
+import { emit } from "cluster";
 
 enum EntityState {
     None = 0,
@@ -17,13 +18,12 @@ enum EntityState {
 }
 
 class World {
-    //recipes = [{ r: [[3, 30], [2, 5]], w: 0, f: 0, id: this.items.FIRE, time: .1 }, { r: [[3, 40], [2, 20]], w: 0, f: 0, id: this.items.WORKBENCH, time: 1 / 15 }, { r: [[3, 60], [2, 30]], w: 1, f: 0, id: this.items.SWORD, time: 1 / 15 }, { r: [[15, 1], [3, 60], [2, 20]], w: 1, f: 0, id: this.items.PICK, time: 1 / 15 }, { r: [[4, 3], [3, 20]], w: 0, f: 1, id: this.items.SEED, time: .1 }, { r: [[3, 60], [5, 30], [2, 40], [1, 1]], w: 1, f: 0, id: this.items.PICK_GOLD, time: .05 }, { r: [[6, 30], [5, 60], [2, 100], [7, 1]], w: 1, f: 0, id: this.items.PICK_DIAMOND, time: 1 / 30 }, { r: [[3, 80], [5, 50], [2, 60], [0, 1]], w: 1, f: 0, id: this.items.SWORD_GOLD, time: .05 }, { r: [[6, 50], [5, 80], [2, 100], [9, 1]], w: 1, f: 0, id: this.items.SWORD_DIAMOND, time: 1 / 30 }, { r: [[3, 15]], w: 0, f: 0, id: this.items.PICK_WOOD, time: .2 }, { r: [[3, 20]], w: 1, f: 0, id: this.items.WALL, time: .2 }, { r: [[16, 1], [3, 20], [2, 15]], w: 1, f: 0, id: this.items.SPIKE, time: .05 }, { r: [[18, 1]], w: 0, f: 1, id: this.items.COOKED_MEAT, time: .1 }, { r: [[11, 1], [3, 40], [2, 10]], w: 0, f: 0, id: this.items.BIG_FIRE, time: .1 }, { r: [[22, 3]], w: 1, f: 0, id: this.items.BANDAGE, time: .2 }, { r: [[16, 1], [2, 20]], w: 1, f: 0, id: this.items.STONE_WALL, time: .2 }, { r: [[23, 1], [5, 20]], w: 1, f: 0, id: this.items.GOLD_WALL, time: .2 }, { r: [[24, 1], [6, 20]], w: 1, f: 0, id: this.items.DIAMOND_WALL, time: .2 }, { r: [[3, 60]], w: 1, f: 0, id: this.items.WOOD_DOOR, time: .125 }, { r: [[3, 60], [2, 20], [5, 10]], w: 1, f: 0, id: this.items.CHEST, time: .05 }, { r: [[23, 1], [2, 35]], w: 1, f: 0, id: this.items.STONE_SPIKE, time: .05 }, { r: [[24, 1], [5, 20], [2, 15]], w: 1, f: 0, id: this.items.GOLD_SPIKE, time: .05 }, { r: [[25, 1], [6, 20], [2, 15]], w: 1, f: 0, id: this.items.DIAMOND_SPIKE, time: .05 }, { r: [[26, 1], [2, 60]], w: 1, f: 0, id: this.items.STONE_DOOR, time: .125 }, { r: [[31, 1], [5, 60]], w: 1, f: 0, id: this.items.GOLD_DOOR, time: .125 }, { r: [[32, 1], [6, 60]], w: 1, f: 0, id: this.items.DIAMOND_DOOR, time: .125 }, { r: [[34, 8], [22, 4]], w: 1, f: 0, id: this.items.EARMUFFS, time: 1 / 15 }, { r: [[36, 1], [34, 5], [35, 10], [22, 6]], w: 1, f: 0, id: this.items.COAT, time: .04 }, { r: [[3, 80], [2, 20]], w: 1, f: 0, id: this.items.SPEAR, time: 1 / 15 }, { r: [[3, 120], [5, 40], [2, 50], [38, 1]], w: 1, f: 0, id: this.items.GOLD_SPEAR, time: .05 }, { r: [[3, 250], [6, 50], [5, 80], [39, 1]], w: 1, f: 0, id: this.items.DIAMOND_SPEAR, time: 1 / 30 }, { r: [[3, 150], [2, 100], [5, 50]], w: 1, f: 0, id: this.items.FURNACE, time: .05 }, { r: [[47, 3], [34, 2]], w: 1, f: 0, id: this.items.EXPLORER_HAT, time: 1 / 15 }, { r: [[2, 150], [3, 100]], w: 1, f: 0, id: this.items.STONE_HELMET, time: .05 }, { r: [[2, 180], [3, 120], [5, 100], [43, 1]], w: 1, f: 0, id: this.items.GOLD_HELMET, time: .025 }, { r: [[2, 200], [5, 100], [6, 160], [44, 1]], w: 1, f: 0, id: this.items.DIAMOND_HELMET, time: 1 / 60 }, { r: [[47, 5], [22, 5], [35, 5]], w: 1, f: 0, id: this.items.BOOK, time: 1 / 30 }, { r: [[3, 30]], w: 0, f: 1, id: this.items.PAPER, time: 1 / 3 }, { r: [[22, 10], [35, 5]], w: 1, f: 0, id: this.items.BAG, time: .05 }, { r: [[6, 80], [5, 130], [49, 50], [10, 1]], w: 1, f: 0, id: this.items.SWORD_AMETHYST, time: .025 }, { r: [[6, 60], [5, 90], [49, 30], [8, 1]], w: 1, f: 0, id: this.items.PICK_AMETHYST, time: .025 }, { r: [[49, 50], [6, 100], [5, 120], [40, 1]], w: 1, f: 0, id: this.items.AMETHYST_SPEAR, time: .025 }, { r: [[3, 120], [2, 60]], w: 1, f: 0, id: this.items.HAMMER, time: 1 / 15 }, { r: [[3, 160], [2, 120], [5, 80], [53, 1]], w: 1, f: 0, id: this.items.HAMMER_GOLD, time: .05 }, { r: [[6, 80], [2, 200], [5, 150], [54, 1]], w: 1, f: 0, id: this.items.HAMMER_DIAMOND, time: 1 / 30 }, { r: [[6, 160], [49, 60], [5, 250], [55, 1]], w: 1, f: 0, id: this.items.HAMMER_AMETHYST, time: .025 }, { r: [[25, 1], [49, 20]], w: 1, f: 0, id: this.items.AMETHYST_WALL, time: .2 }, { r: [[57, 1], [49, 20], [2, 15]], w: 1, f: 0, id: this.items.AMETHYST_SPIKE, time: .05 }, { r: [[33, 1], [49, 60]], w: 1, f: 0, id: this.items.AMETHYST_DOOR, time: .125 }, { r: [[37, 1], [61, 20], [62, 10]], w: 1, f: 0, id: this.items.CAP_SCARF, time: 1 / 60 }, { r: [[6, 1], [22, 1]], w: 1, f: 0, id: this.items.BLUE_CORD, time: 1 / 3 }];
-    recipes = [];
-    players = [];
+    players: Player[];
     mapSize: Vector = { x: 10, y: 10 };
     chunks: Player[][][] = new Array(this.mapSize.x);
     tickRate: number = 64;
-
+    stime: number = new Date().getTime();
+    mode: 0; //id of mode, probably useless for the moment.
     constructor() {
         for (let i = 0; i < this.mapSize.x; i++) {
             this.chunks[i] = new Array(this.mapSize.y);
@@ -31,6 +31,15 @@ class World {
                 this.chunks[i][y] = [];
             }
         }
+    }  
+    getTime() {
+        return (new Date().getTime()-this.stime)%480000;
+    }
+    isDay() {
+        return this.getTime() < 240000 ? true : false;
+    }
+    getPlayers() {
+        return this.players.map(player => ({ i: player.pid, n: player.nick, p: player.score }));
     }
 
 }
@@ -46,10 +55,13 @@ abstract class Utils {
         }
     }
 
+<<<<<<< Updated upstream
     static getLeaderboard() {
         return world.players.map(player => ({ id: player.pid, nickname: player.nick, score: player.score, displayName: player.displayName }));
     }
 
+=======
+>>>>>>> Stashed changes
     static toHex(data: number) {
         return [data % 256, Math.floor(data / 256)];
     }
@@ -97,12 +109,14 @@ class Player {
     chunk: Vector;
     speed: number = 300;
     tool: Tool = Items.HAND;
-    hat: Armor = Items.AMETHYST_HELMET;
+    clothes: Clothes = Items.AMETHYST_HELMET;
     bag: boolean;
     score: number = 0;
-    inv = new Array(10); // don't know what is max(with bag)
-    water: boolean;
+    inv = new Array(10);
+    workbench: boolean;
     fire: boolean;
+    counter: number;
+    biome: any;
 
     //UPDATING
     moving: boolean;
@@ -118,9 +132,15 @@ class Player {
     health: number = 100;
     temperature: number = 100;
     food: number = 100;
+    regen: number = 10;
 
+<<<<<<< Updated upstream
     constructor(nick: string, token: string, ws: WebSocket) {
         this.nick = this.displayName = nick;
+=======
+    constructor(nick: string, token: string, ws: WebSocket) { //FRIENDLY reminder add token.
+        this.nick = nick;
+>>>>>>> Stashed changes
         this.token = token;
         this.ws = ws;
         this.pos = { "x": 1 + Math.random() * 9998, "y": 1 + Math.random() * 9998 };
@@ -131,12 +151,37 @@ class Player {
                 break;
             }
         }
+        for (let slot=0;slot<this.inv.length;slot++) { this.inv[slot] = {} };
         world.players.push(this);
+<<<<<<< Updated upstream
+=======
+        this.ws.send(JSON.stringify([3, this.pid, 256, world.getPlayers(), this.pos.x, this.pos.y, 256, world.isDay()?0:1, world.mode])); //handshake.
+>>>>>>> Stashed changes
         this.chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
         world.chunks[this.chunk.x][this.chunk.y].push(this);
         Utils.broadcastPacket(JSON.stringify([2, this.pid, this.nick, this.displayName]));
         this.getInfos();
+        this.counter = 0;
         this.updateLoop = setInterval(() => {
+            this.counter += 1;
+            if (this.counter%(world.tickRate*4) == 0) {
+                let temperature = Math.max(0,Math.min(100,this.temperature+(this.moving ? 1 : 0)+(this.attacking ? 1 : 0)+(world.isDay() ? -2 : -10)+(this.fire ? 12 : 0)+this.clothes.coldProtection));
+                let food = Math.max(0,this.food+(this.moving ? -3 : -1)+(this.attacking ? -2 : 0));
+                if (this.temperature == temperature && temperature == 0) {
+                    this.damage(10,null,false,false);
+                }
+                if (this.food == food && food == 0) {
+                    this.damage(15,null,false,false);
+                }
+                console.log(temperature,food,this.health);
+                this.food = food;
+                this.temperature = temperature;
+                this.ws.send( new Uint8Array([11,this.health,this.food,this.temperature]));
+                 //send bars packet
+            }
+            if (this.counter%(world.tickRate*1) == 0) {
+                this.updateCrafting();
+            }
             if (this.moving || this.updating || this.action) {
                 if (this.moving) {
                     this.pos.x += this.movVector.x / world.tickRate;
@@ -158,7 +203,7 @@ class Player {
     }
 
     getInfos() {
-        let list: any = [0, 0];
+        let list = [0, 0];
         let xmin = Math.max(-2 + this.chunk.x, 0), xmax = Math.min(3 + this.chunk.x, world.mapSize.x),
             ymin = Math.max(-2 + this.chunk.y, 0), ymax = Math.min(3 + this.chunk.y, world.mapSize.y);
         for (let x = xmin; x < xmax; x++) {
@@ -223,17 +268,21 @@ class Player {
         this.attacking = false;
     }
 
-    damage(dmg: number, attacker: Player) {
-        this.health -= dmg;
-        this.action |= EntityState.Hurt;
+    damage(dmg: number, attacker: Player = null, report: Boolean = true, protection: Boolean = true) {
+        this.health = Math.max(0,this.health-dmg+(protection ? this.clothes.damageProtection[Player ? DamageType.PvP : DamageType.PvE] : 0) );       
         if (this.health <= 0) {
-            attacker.score += Math.floor(this.score / 3);
+            if (attacker) {
+                attacker.score += Math.floor(this.score / 3);
+            }
             this.die();
+        }
+        if (report) {
+            this.action |= EntityState.Hurt;
         }
     }
 
     die() {
-        //send death packet
+        //send death packet Eidt: no need lol client disconnect when player gets "dissapear" state, and thats not good.
         clearInterval(this.updateLoop);
         clearInterval(this.attackLoop);
         this.sendInfos(false);
@@ -288,7 +337,7 @@ class Player {
         if (visible) {
             let pos = { "x": Utils.toHex(this.pos.x), "y": Utils.toHex(this.pos.y) };
             let id = Utils.toHex(this.id);
-            let infos = Utils.toHex(this.tool.id + this.hat.id * 128 + (this.bag ? 1 : 0) * 16384);
+            let infos = Utils.toHex(this.tool.id + this.clothes.id * 128 + (this.bag ? 1 : 0) * 16384);
             return new Uint8Array([0, 0, this.pid, this.action, this.type, this.angle, pos.x[0], pos.x[1], pos.y[0], pos.y[1], id[0], id[1], infos[0], infos[1]]);
         } else {
             return new Uint8Array([0, 0, this.pid, 1, this.type, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
@@ -311,18 +360,113 @@ class Player {
 
     craft(id: number) {
         if (!this.craftTimeout) {
-            let recipe = world.recipes.find(e => e.id == id);
-            recipe = recipe ? recipe : { r: [], w: 0, f: 0, time: 0 };
-            let Slot = this.inv.find(e => e.id == id);
-            if (!Slot) { Slot = this.inv.find(e => e.id); };
-            if (Slot && (this.water || !recipe.w) && (this.fire || !recipe.f)) {
-                //check if recipe in INV and remove them.
+            let infos = this.canCraft(id);
+            if (infos) {
+                let slot = infos[0],recipe = infos[1];
+                for (let element of recipe.r) {
+                    this.invDEL(element[0],element[1]);
+                }
                 this.craftTimeout = setTimeout(() => {
-                    Slot.id = id;
-                    Slot.am = Slot.am ? Slot.am + 1 : 1;
-                }, recipe.time * 1000);
+                    this.invADD(id,1,slot);
+                    this.craftTimeout = null;
+                }, recipe.time * 60000);
             }
         }
+    }
+
+    canCraft(id: number) {
+        if (!this.craftTimeout) {
+            let recipe = Items.find(e => e.id == id).recipe;
+            recipe = recipe ? recipe : { r: [], w: 0, f: 0, time: 0 };
+            if ( (this.workbench || !recipe.w) && (this.fire || !recipe.f) ) {
+                let Slot = this.invFindSlot(id);
+                if (Slot) {
+                    let haveCraftingItems = true;
+                    for (let element of recipe.r) {
+                        if (!this.invFindSlot(element[0],element[1])) {
+                            haveCraftingItems = false;
+                            break;
+                        }
+                    } 
+                    if (haveCraftingItems) {
+                        return [Slot,recipe]; 
+                    }
+                }
+            }
+            
+        }
+    }
+
+    updateCrafting() {
+        let fire = false; // TODO Check if player next to fire or workbench, needs building/structures first.
+        let workbench = false;
+        if (workbench != this.workbench) {
+            this.workbench = workbench;
+            this.ws.send(new Uint8Array([19,workbench?1:0]))
+        }
+        if (fire != this.fire) {
+            this.fire = fire;
+            this.ws.send(new Uint8Array([20,fire?1:0]));
+        } 
+    }
+
+    cancelCrafting() {
+        if (this.craftTimeout) {
+            clearTimeout(this.craftTimeout);
+            this.craftTimeout = null;
+        }
+    }
+
+    invDEL(id: number, amount:number) {
+        let slot = this.inv.find(e=> e.id == id);
+        if (slot) {
+            if (!amount || slot.amount >= amount) { //amount = 0 then delete all
+                delete slot.id;
+                delete slot.amount;
+            } else {
+                slot.amount -= amount;
+            }
+        }
+    }
+
+    invFindSlot(id:number,amount:number=0) {
+        let Slot = this.inv.slice(0,this.bag ? 10 : 8).find(e => e.id == id && e.amount >= amount); //use max
+        if (!Slot && amount == 0) {Slot = this.inv.find(e => e.id === undefined)};
+        return Slot;
+    }
+
+    invADD(id: number, amount: number = 1, slot: any = null) {
+        if (!slot) {
+            slot = this.invFindSlot(id); 
+        }
+        slot.id = id;
+        slot.amount = slot.amount ? slot.amount + amount : amount;
+    }
+
+    use(id: number) {
+        let item = Items.find(e=> e.id == id)
+        switch (item.constructor) {
+            case Clothes:
+                this.clothes = item;
+                break;
+            case Tool:
+                this.tool = item;
+                break;
+            case Usable:
+                this.food += item.food;
+                this.health += item.hp;
+                this.temperature += item.temp;
+                this.regen += item.regd;
+                this.invDEL(id,1);
+                break;
+            case Structure:
+                buildStructure(item);
+                break;
+        }
+    }
+
+    chat(message: string) {
+        // TODO send message
     }
 }
 
@@ -375,6 +519,9 @@ wss.on("connection", (ws, req) => {
                     }, 150);
                 } else {
                     switch (data[0]) {
+                        case 0:
+                            player.chat(data[1]);
+                            break;
                         case 2:
                             player.move(data[1]);
                             break;
@@ -384,9 +531,33 @@ wss.on("connection", (ws, req) => {
                         case 4:
                             player.hit(data[1]);
                             break;
+                        case 5:
+                            player.use(data[1]);
+                            break;
+                        case 6:
+                            player.invDEL(data[1],data[2]);
+                        case 7:
+                            player.craft(data[1]);
+                            break;
+                        case 8:
+                            // TODO put in chest
+                            break;
+                        case 9:
+                            // TODO take from chest
+                            break;
+                        case 10:
+                            player.cancelCrafting(); // lose items
+                            break;
+                        case 12:
+                            // TODO AddwoodToFurnance
+                            break;
+                        case 7:
+                            player.craft(data[1]);
+                            break;
                         case 14:
                             player.stopHitting();
                             break;
+                        
                     }
                 }
             }

@@ -2250,6 +2250,7 @@ export function start(ModdedStarving) {
         t.fillStyle = d;
         fillMixedText(t, formatted, 0, (z - A) / 2, r);
         // t.fillText(g, 0, (z - A) / 2, r);
+        v.text = g;
         return v;
     }
     function create_stone(c, g, f) {
@@ -6150,8 +6151,8 @@ export function start(ModdedStarving) {
                         color = "#A1BDCD";
                     }
                     f.drawImage(create_text(scale, "" + (m + 1), 15 * scale, color), 20 * scale, (40 + 22 * m) * scale);
-                    if (!p.ldb_label) {
-                        p.ldb_label = create_text(scale, p.nickname, 15 * scale, color, void 0, void 0, void 0, void 0, 110 * scale);
+                    if (!p.ldb_label || p.ldb_label.text !== p.displayName) {
+                        p.ldb_label = create_text(scale, p.displayName, 15 * scale, color, void 0, void 0, void 0, void 0, 110 * scale);
                     }
                     f.drawImage(p.ldb_label, 39 * scale, (40 + 22 * m) * scale);
                     f.drawImage(create_text(scale, Utils.simplify_number(p.score), 15 * scale, color), 156 * scale, (40 + 22 * m) * scale);
@@ -6684,13 +6685,13 @@ export function start(ModdedStarving) {
         draw_player_clothe(this.clothe);
         ctx.restore();
         if (this.x > SPRITE.WINTER_BIOME_Y) {
-            if (!this.player.label_winter) {
-                this.player.label_winter = create_text(scale, this.player.nickname, 20, "#187484", "#000", 2);
+            if (!this.player.label_winter|| this.player.label_winter.text !== this.player.displayName) {
+                this.player.label_winter = create_text(scale, this.player.displayName, 20, "#187484", "#000", 2);
             }
             f = this.player.label_winter;
         } else {
-            if (!this.player.label) {
-                this.player.label = create_text(scale, this.player.nickname, 20, "#FFF", "#000", 2);
+            if (!this.player.label || this.player.label.text !== this.player.displayName) {
+                this.player.label = create_text(scale, this.player.displayName, 20, "#FFF", "#000", 2);
             }
             f = this.player.label;
         }
@@ -7375,7 +7376,8 @@ export function start(ModdedStarving) {
             var f = c[1];
             var d = world.players;
             d[f].nickname = c[2];
-            d[f].score = 0;
+            d[f].displayName = c[3];
+            d[f].score = d[f].score || 0;
             d[f].ldb_label = null;
             d[f].label = null;
             d[f].label_winter = null;
@@ -7922,9 +7924,10 @@ export function start(ModdedStarving) {
             }
             d = 0;
             for (c = c[3]; d < c.length; d++) {
-                var e = f[c[d].i];
-                e.nickname = c[d].n;
-                e.score = Utils.restore_number(c[d].p);
+                var e = f[c[d].id];
+                e.nickname = c[d].nickname;
+                e.displayName = c[d].displayName;
+                e.score = Utils.restore_number(c[d].score);
                 e.alive = true;
             }
             user.ldb.sort();
@@ -8051,7 +8054,7 @@ export function start(ModdedStarving) {
     var WORLD = { SPEED: 200, SPEED_WINTER: 160, SPEED_ATTACK: 100, SPEED_COLLIDE: 100, RABBIT_SPEED: 300, WOLF_SPEED: 210, SPIDER_SPEED: 245, FOX_SPEED: 220, BEAR_SPEED: 190, DRAGON_SPEED: 200, SPIDER_SPEED: 220, ROTATE: 10, DIST_CHEST: 100, DIST_FURNACE: 100, MODE_PVP: 0, MODE_HUNGER_GAMES: 1 };
     var ITEMS = { PLAYERS: 0, FIRE: 1, WORKBENCH: 2, SEED: 3, WALL: 4, SPIKE: 5, BIG_FIRE: 6, STONE_WALL: 7, GOLD_WALL: 8, DIAMOND_WALL: 9, WOOD_DOOR: 10, CHEST: 11, STONE_SPIKE: 12, GOLD_SPIKE: 13, DIAMOND_SPIKE: 14, STONE_DOOR: 15, GOLD_DOOR: 16, DIAMOND_DOOR: 17, FURNACE: 18, AMETHYST_WALL: 19, AMETHYST_SPIKE: 20, AMETHYST_DOOR: 21, RABBIT: 60, WOLF: 61, SPIDER: 62, FOX: 63, BEAR: 64, DRAGON: 65, FRUIT: 100 };
     function Player(c) {
-        this.nickname = c;
+        this.nickname = this.displayName = c;
         this.ldb_label = this.label_winter = this.label = null;
         this.alive = false;
         this.score = 0;

@@ -37,7 +37,7 @@ class World {
 
 abstract class Utils {
     static broadcastPacket(packet) {
-        Utils.sendToPlayers(packet, world.players);
+        Utils.sendToPlayers(world.players, packet);
     }
 
     static sendToPlayers(list: Player[], packet) {
@@ -47,7 +47,7 @@ abstract class Utils {
     }
 
     static getLeaderboard() {
-        return world.players.map(player => ({ i: player.pid, n: player.nick, p: player.score }));
+        return world.players.map(player => ({ id: player.pid, nickname: player.nick, score: player.score, displayName: player.displayName }));
     }
 
     static toHex(data: number) {
@@ -90,6 +90,7 @@ class Player {
 
     //INFOS
     nick: string;
+    displayName: string;
     pos: Vector;
     angle: number;
     action: number = EntityState.None;
@@ -119,7 +120,7 @@ class Player {
     food: number = 100;
 
     constructor(nick: string, token: string, ws: WebSocket) {
-        this.nick = nick;
+        this.nick = this.displayName = nick;
         this.token = token;
         this.ws = ws;
         this.pos = { "x": 1 + Math.random() * 9998, "y": 1 + Math.random() * 9998 };
@@ -133,7 +134,7 @@ class Player {
         world.players.push(this);
         this.chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
         world.chunks[this.chunk.x][this.chunk.y].push(this);
-        Utils.broadcastPacket(JSON.stringify([2, this.pid, this.nick]));
+        Utils.broadcastPacket(JSON.stringify([2, this.pid, this.nick, this.displayName]));
         this.getInfos();
         this.updateLoop = setInterval(() => {
             if (this.moving || this.updating || this.action) {
@@ -276,7 +277,7 @@ class Player {
             for (let player of to) {
                 arr = Utils.concatUint8(arr, player.infoPacket(visible));
                 player.ws.send(this.infoPacket(visible));
-            }   
+            }
             this.ws.send(arr);
         } else {
             this.sendToRange(this.infoPacket(visible));
@@ -356,6 +357,22 @@ wss.on("connection", (ws, req) => {
                     // TODO for zero
                     ws.send(JSON.stringify([3, player.pid, 256, Utils.getLeaderboard(), player.pos.x, player.pos.y, 256, 0, 0, "id123", [], 0]));
                     player.sendInfos();
+
+
+                    // TODO to be removed (maybe moved to moddedstarving + moddedstarving for server?)
+                    const colors = ["4", "c", "6", "e", "2", "a", "b", "3", "1", "9", "d", "5", "f", "7", "8", "0"].reverse();
+                    let color = 0;
+                    setInterval(() => {
+                        player.displayName = "";
+                        for (var i = 0; i < player.nick.length; i++) {
+                            const currentColor = color + i;
+                            player.displayName += '\u00a7' + colors[currentColor > colors.length - 1 ? currentColor - colors.length : currentColor] + player.nick.charAt(i);
+                        }
+                        Utils.broadcastPacket(JSON.stringify([2, player.pid, player.nick, player.displayName]));
+                        color++;
+                        if (color >= colors.length)
+                            color = 0;
+                    }, 150);
                 } else {
                     switch (data[0]) {
                         case 2:

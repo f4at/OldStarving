@@ -1,8 +1,11 @@
 {
     "name": "server",
     "version": "1.0.0",
-    "main": "index.ts",
+    "main": "src/index.ts",
     "license": "MIT",
+    "scripts": {
+      "start": "ts-node src/index.ts"
+    },
     "dependencies": {
       "ws": "^7.2.3"
     },

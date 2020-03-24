@@ -1,7 +1,18 @@
-import Cookies from 'https://cdn.jsdelivr.net/npm/js-cookie@3.0.0-rc.0/dist/js.cookie.min.mjs'
+import Cookies from 'https://cdn.jsdelivr.net/npm/js-cookie@3.0.0-rc.0/dist/js.cookie.min.mjs';
 
 export function start(ModdedStarving) {
-    var proxy = new Proxy({}, { get(target, name) { try { return eval(name); } catch (e) { return undefined; } }, set(target, name, value) { return eval(name + "=JSON.parse('" + JSON.stringify(value) + "')"); } });
+    var proxy = new Proxy({}, {
+        get(target, name) {
+            try {
+                return eval(name);
+            } catch (e) {
+                return undefined;
+            }
+        },
+        set(target, name, value) {
+            return eval(name + "=JSON.parse('" + JSON.stringify(value) + "')");
+        }
+    });
     ModdedStarving.on("start", proxy);
     const session = {
         load() {
@@ -14,19 +25,21 @@ export function start(ModdedStarving) {
             Cookies.set("session_token", this.token);
             Cookies.set("session_id", this.id);
         }
-    }
+    };
     session.load();
     const Utils = {
         open_in_new_tab: function (c) {
             window.open(c, "_blank").focus();
-        }, compare_object: function (c, g) {
+        },
+        compare_object: function (c, g) {
             for (var f in c) {
                 if (c[f] != g[f]) {
                     return false;
                 }
             }
             return true;
-        }, compare_array: function (c, g) {
+        },
+        compare_array: function (c, g) {
             if (c.length != g.length) {
                 return false;
             }
@@ -40,69 +53,109 @@ export function start(ModdedStarving) {
                 }
             }
             return true;
-        }, copy_vector: function (c, g) {
+        },
+        copy_vector: function (c, g) {
             g.x = c.x;
             g.y = c.y;
-        }, get_vector: function (c, g) {
-            return { x: c.x - g.x, y: c.y - g.y };
-        }, mul_vector: function (c, g) {
+        },
+        get_vector: function (c, g) {
+            return {
+                x: c.x - g.x,
+                y: c.y - g.y
+            };
+        },
+        mul_vector: function (c, g) {
             c.x *= g;
             c.y *= g;
-        }, scalar_product: function (c, g) {
+        },
+        scalar_product: function (c, g) {
             return c.x * g.x + c.y * g.y;
-        }, norm: function (c) {
+        },
+        norm: function (c) {
             return Math.sqrt(c.x * c.x + c.y * c.y);
-        }, sign: function (c) {
+        },
+        sign: function (c) {
             if (0 > c) {
                 return -1;
             } else {
                 return 1;
             }
-        }, cross_product: function (c, g) {
+        },
+        cross_product: function (c, g) {
             return c.x * g.y - c.y * g.x;
-        }, get_angle: function (c, g) {
+        },
+        get_angle: function (c, g) {
             return Math.acos(this.scalar_product(c, g) / (this.norm(c) * this.norm(g))) * this.sign(this.cross_product(c, g));
-        }, get_std_angle: function (c, g) {
-            return this.get_angle({ x: 1, y: 0 }, this.get_vector(c, g));
-        }, dist: function (c, g) {
+        },
+        get_std_angle: function (c, g) {
+            return this.get_angle({
+                x: 1,
+                y: 0
+            }, this.get_vector(c, g));
+        },
+        dist: function (c, g) {
             return Math.sqrt((g.x - c.x) * (g.x - c.x) + (g.y - c.y) * (g.y - c.y));
-        }, build_vector: function (c, g) {
-            return { x: Math.cos(g) * c, y: Math.sin(g) * c };
-        }, add_vector: function (c, g) {
+        },
+        build_vector: function (c, g) {
+            return {
+                x: Math.cos(g) * c,
+                y: Math.sin(g) * c
+            };
+        },
+        add_vector: function (c, g) {
             c.x += g.x;
             c.y += g.y;
-        }, sub_vector: function (c, g) {
+        },
+        sub_vector: function (c, g) {
             c.x -= g.x;
             c.y -= g.y;
-        }, translate_vector: function (c, g, f) {
+        },
+        translate_vector: function (c, g, f) {
             c.x += g;
             c.y += f;
-        }, translate_new_vector: function (c, g, f) {
-            return { x: c.x + g, y: c.y + f };
-        }, move: function (c, g, f) {
+        },
+        translate_new_vector: function (c, g, f) {
+            return {
+                x: c.x + g,
+                y: c.y + f
+            };
+        },
+        move: function (c, g, f) {
             c.x += Math.cos(f) * g;
             c.y += Math.sin(f) * g;
-        }, middle: function (c, g) {
+        },
+        middle: function (c, g) {
             return Math.floor((c - g) / 2);
-        }, middle_point: function (c, g) {
-            return { x: (c.x + g.x) / 2, y: (c.y + g.y) / 2 };
-        }, rand_sign: function () {
+        },
+        middle_point: function (c, g) {
+            return {
+                x: (c.x + g.x) / 2,
+                y: (c.y + g.y) / 2
+            };
+        },
+        rand_sign: function () {
             if (.5 < Math.random()) {
                 return 1;
             } else {
                 return -1;
             }
-        }, get_rand_pos_in_circle: function (c, g, f) {
+        },
+        get_rand_pos_in_circle: function (c, g, f) {
             var d = this.rand_sign();
             var e = this.rand_sign();
             var m = Math.random() * Math.PI / 2;
-            return { x: Math.floor(c + Math.cos(m) * d * f), y: Math.floor(g + Math.sin(m) * e * f) };
-        }, Box: function (c, g, f, d) {
+            return {
+                x: Math.floor(c + Math.cos(m) * d * f),
+                y: Math.floor(g + Math.sin(m) * e * f)
+            };
+        },
+        Box: function (c, g, f, d) {
             this.x = c;
             this.y = g;
             this.w = f;
             this.h = d;
-        }, randomize_list: function (c) {
+        },
+        randomize_list: function (c) {
             a = [];
             a.push.apply(a, c);
             for (c = []; 0 < a.length;) {
@@ -111,14 +164,16 @@ export function start(ModdedStarving) {
                 a.splice(g, 1);
             }
             return c;
-        }, restore_number: function (c) {
+        },
+        restore_number: function (c) {
             if (2e4 <= c) {
                 c = 1e3 * (c - 2e4);
             } else if (1e4 <= c) {
                 c = 100 * (c - 1e4);
             }
             return c;
-        }, simplify_number: function (c) {
+        },
+        simplify_number: function (c) {
             if (1e4 <= c) {
                 var g = Math.max(0, 3 - (Math.floor(Math.log10(c)) - 2));
                 var f = Math.floor(c / 1e3).toString();
@@ -136,9 +191,11 @@ export function start(ModdedStarving) {
                 return f + "k";
             }
             return c.toString();
-        }, ease_out_quad: function (c) {
+        },
+        ease_out_quad: function (c) {
             return c * (2 - c);
-        }, LinearAnimation: function (c, g, f, d, e, m) {
+        },
+        LinearAnimation: function (c, g, f, d, e, m) {
             this.o = c;
             this.v = g;
             this.max = f;
@@ -163,9 +220,11 @@ export function start(ModdedStarving) {
                         this.v = c;
                     }
                 }
-            };
+            }
+                ;
             return false;
-        }, Ease: function (c, g, f, d, e, m) {
+        },
+        Ease: function (c, g, f, d, e, m) {
             this.fun = c;
             this.ed = g;
             this.em = f;
@@ -187,8 +246,10 @@ export function start(ModdedStarving) {
                         this.x = this.sx + (this.ex - this.sx) * c;
                     }
                 }
-            };
-        }, Ease2d: function (c, g, f, d, e, m, p, n, r) {
+            }
+                ;
+        },
+        Ease2d: function (c, g, f, d, e, m, p, n, r) {
             this.fun = c;
             this.ed = g;
             this.em = f;
@@ -217,7 +278,8 @@ export function start(ModdedStarving) {
                         this.y = this.sy + (this.ey - this.sy) * c;
                     }
                 }
-            };
+            }
+                ;
         }
     };
     (function () {
@@ -314,11 +376,13 @@ export function start(ModdedStarving) {
         }
         if (!g) {
             var f = Cookies;
-            var d = Cookies;// = c();
+            var d = Cookies;
+            // = c();
             d.noConflict = function () {
                 window.Cookies = f;
                 return d;
-            };
+            }
+                ;
         }
     }());
     function Mouse() {
@@ -327,7 +391,10 @@ export function start(ModdedStarving) {
         this.IDLE = 2;
         this.IN = 0;
         this.OUT = 1;
-        this.pos = { x: 0, y: 0 };
+        this.pos = {
+            x: 0,
+            y: 0
+        };
         this.angle = this.y_old = this.x_old = 0;
         this.state = this.IDLE;
         this.dist = this.IN;
@@ -471,11 +538,15 @@ export function start(ModdedStarving) {
     var canh = can.height;
     var canw2 = can.width / 2;
     var canh2 = can.height / 2;
-    var canm = { x: canw2, y: canh2 };
+    var canm = {
+        x: canw2,
+        y: canh2
+    };
     var scale = 1;
     can.oncontextmenu = function () {
         return false;
-    };
+    }
+        ;
     function CTI(c) {
         var g = new Image;
         g.src = c.toDataURL("image/png");
@@ -494,7 +565,10 @@ export function start(ModdedStarving) {
             canh = can.height;
             canh2 = can.height / 2;
         }
-        canm = { x: canw2, y: canh2 };
+        canm = {
+            x: canw2,
+            y: canh2
+        };
         if (user) {
             user.cam.rw = can.width;
             user.cam.rh = can.height;
@@ -510,10 +584,12 @@ export function start(ModdedStarving) {
     var game_body = document.getElementById("game_body");
     game_body.ondragstart = function () {
         return false;
-    };
+    }
+        ;
     game_body.ondrop = function () {
         return false;
-    };
+    }
+        ;
     game_body.onresize = resize_canvas;
     (function () {
         var c = 0;
@@ -531,16 +607,337 @@ export function start(ModdedStarving) {
                 }, g);
                 c = f + g;
                 return n;
-            };
+            }
+                ;
         }
         if (!window.cancelAnimationFrame) {
             window.cancelAnimationFrame = function (c) {
                 clearTimeout(c);
-            };
+            }
+                ;
         }
     }());
-    const IMAGES = { LOGO: "img/logo.png" };
-    const SPRITE = { GROUND: ["#133A2B", "#032428"], SNOW_GROUND: ["#EBF2F0", "#136167"], CRAFT_LOADING: ["#4EB687", "#187484"], DAY: 0, NIGHT: 1, WINTER_BIOME_Y: 10359, FLAKES_NUMBER: 34, FLAKES_SIZES: 5, STEP_SPACE: 50, SWORD: 0, PICK: 1, HAND: 2, TREE: 3, BODY: 4, STONES: 5, SEED: 6, PICK_GOLD: 7, PICK_DIAMOND: 8, SWORD_GOLD: 9, SWORD_DIAMOND: 10, WOOD_FIRE: 11, WORKBENCH: 12, PLANT_SEED: 13, CRAFT_PICK: 14, PICK_WOOD: 15, WALL: 16, SPIKE: 17, MEAT: 18, COOKED_MEAT: 19, INV_PLANT: 82, BANDAGE: 21, CRAFT_SWORD: 22, CRAFT_WORK: 88, RABBIT: 91, PLAY: 87, GAUGES: 99, LEADERBOARD: 105, HURT: 137, COLD: 140, HUNGER: 143, GROUND_FIRE: 147, COUNTER: 151, CRAFT_SEED: 154, HERB: 158, HAND_SHADOW: 162, PLANT_MINI: 168, GOLD: 149, DIAMOND: 187, FIRE: 191, HALO_FIRE: 195, CRAFT_SWORD_GOLD: 200, CRAFT_SWORD_DIAMOND: 216, INV_SWORD_GOLD: 220, INV_SWORD_DIAMOND: 224, PLANT: 228, FRUIT: 232, CRAFT_PICK_GOLD: 236, CRAFT_PICK_DIAMOND: 35, INV_PICK_GOLD: 49, INV_PICK_DIAMOND: 248, INV_GOLD: 252, INV_DIAMOND: 259, WOLF: 265, INV_MEAT: 269, GEAR2: 273, CRAFT_FIRE: 277, INV_BANDAGE: 281, CRAFT_BANDAGE: 285, CORD: 289, INV_CORD: 294, YOUR_SCORE: 298, TREE_BRANCH: 308, HEAL: 63, INV_FIRE: 64, INV_WORK: 65, INV_SEED: 66, INV_PICK: 67, INV_PICK_WOOD: 68, CRAFT_PICK_WOOD: 69, INV_STONE: 70, INV_WOOD: 71, INV_WALL: 72, CRAFT_WALL: 73, INV_SPIKE: 74, CRAFT_SPIKE: 75, HURT_RABBIT: 76, INV_COOKED_MEAT: 77, GEAR: 78, CRAFT_COOKED_MEAT: 79, MINIMAP: 80, HURT_WOLF: 81, BIG_FIRE_WOOD: 20, CRAFT_BIG_FIRE: 83, INV_BIG_FIRE: 84, SPIDER: 85, INV_SWORD: 86, DIAMOND_WALL: 25, STONE_WALL: 23, CRAFT_STONE_WALL: 89, INV_STONE_WALL: 90, GOLD_WALL: 24, CRAFT_GOLD_WALL: 92, INV_GOLD_WALL: 93, INV_DIAMOND_WALL: 94, CRAFT_DIAMOND_WALL: 95, HURT_SPIDER: 96, EMPTY_SLOT: 97, WEB: 98, DOOR_WOOD_CLOSE: 26, CRAFT_DOOR_WOOD_CLOSE: 100, INV_DOOR_WOOD_CLOSE: 101, DOOR_WOOD_OPEN: 102, CHEST: 27, INV_CHEST: 106, CRAFT_CHEST: 107, CHEST_SLOT: 108, CHEST_SWORD: 109, CHEST_PICK: 110, CHEST_STONE: 111, CHEST_WOOD: 112, CHEST_PLANT: 113, CHEST_GOLD: 114, CHEST_DIAMOND: 115, CHEST_PICK_GOLD: 116, CHEST_PICK_DIAMOND: 117, CHEST_SWORD_GOLD: 118, CHEST_SWORD_DIAMOND: 119, CHEST_FIRE: 120, CHEST_WORK: 121, CHEST_SEED: 122, CHEST_WALL: 123, CHEST_SPIKE: 124, CHEST_PICK_WOOD: 125, CHEST_COOKED_MEAT: 126, CHEST_MEAT: 127, CHEST_BIG_FIRE: 128, CHEST_BANDAGE: 129, CHEST_CORD: 130, CHEST_STONE_WALL: 131, CHEST_GOLD_WALL: 132, CHEST_DIAMOND_WALL: 133, CHEST_DOOR_WOOD_CLOSE: 134, CHEST_WORKBENCH: 135, CHEST_CHEST: 136, STONE_SPIKE: 28, CRAFT_STONE_SPIKE: 138, INV_STONE_SPIKE: 139, GOLD_SPIKE: 29, INV_GOLD_SPIKE: 141, CRAFT_GOLD_SPIKE: 142, DIAMOND_SPIKE: 30, INV_DIAMOND_SPIKE: 144, CRAFT_DIAMOND_SPIKE: 145, CHEST_PLUS: 146, BAG: 48, CRAFT_BAG: 148, FUR: 34, INV_FUR: 150, EARMUFFS: 36, INV_EARMUFFS: 152, CRAFT_EARMUFFS: 153, DOOR_STONE_CLOSE: 31, CRAFT_DOOR_STONE_CLOSE: 155, INV_DOOR_STONE_CLOSE: 156, DOOR_STONE_OPEN: 157, DOOR_GOLD_CLOSE: 32, CRAFT_DOOR_GOLD_CLOSE: 159, INV_DOOR_GOLD_CLOSE: 160, DOOR_GOLD_OPEN: 161, DOOR_DIAMOND_CLOSE: 33, CRAFT_DOOR_DIAMOND_CLOSE: 163, INV_DOOR_DIAMOND_CLOSE: 164, DOOR_DIAMOND_OPEN: 165, CRAFT_COAT: 166, INV_COAT: 167, COAT: 37, CHEST_STONE_SPIKE: 169, CHEST_GOLD_SPIKE: 170, CHEST_DIAMOND_SPIKE: 171, CHEST_BAG: 172, CHEST_FUR: 173, CHEST_EARMUFFS: 174, CHEST_DOOR_STONE_CLOSE: 175, CHEST_DOOR_GOLD_CLOSE: 176, CHEST_DOOR_DIAMOND_CLOSE: 177, CHEST_COAT: 178, INV_BAG: 179, FUR_WOLF: 180, INV_FUR_WOLF: 181, CHEST_FUR_WOLF: 182, SPEAR: 38, INV_SPEAR: 188, CRAFT_SPEAR: 189, CHEST_SPEAR: 190, GOLD_SPEAR: 39, INV_GOLD_SPEAR: 192, CRAFT_GOLD_SPEAR: 193, CHEST_GOLD_SPEAR: 194, DIAMOND_SPEAR: 40, INV_DIAMOND_SPEAR: 196, CRAFT_DIAMOND_SPEAR: 197, CHEST_DIAMOND_SPEAR: 198, FURNACE_ON: 199, FURNACE_OFF: 41, INV_FURNACE: 201, CRAFT_FURNACE: 202, CHEST_FURNACE: 203, FURNACE_SLOT: 204, FURNACE_BUTTON: 205, FIR: 206, STONES_WINTER: 209, GOLD_WINTER: 210, DIAMOND_WINTER: 211, GROUND_FIRE_WINTER: 212, AMETHYST: 213, INV_AMETHYST: 214, FOX: 215, EXPLORER_HAT: 42, INV_EXPLORER_HAT: 217, CRAFT_EXPLORER_HAT: 218, CHEST_EXPLORER_HAT: 219, STONE_HELMET: 43, INV_STONE_HELMET: 221, CRAFT_STONE_HELMET: 222, CHEST_STONE_HELMET: 223, GOLD_HELMET: 44, INV_GOLD_HELMET: 225, CRAFT_GOLD_HELMET: 226, CHEST_GOLD_HELMET: 227, DIAMOND_HELMET: 45, INV_DIAMOND_HELMET: 229, CRAFT_DIAMOND_HELMET: 230, CHEST_DIAMOND_HELMET: 231, BOOK: 46, INV_BOOK: 233, CRAFT_BOOK: 234, CHEST_BOOK: 235, PAPER: 47, INV_PAPER: 237, CRAFT_PAPER: 238, CHEST_PAPER: 239, HERB_WINTER: 240, BEAR: 241, CHEST_AMETHYST: 242, SNOW: 243, DRAGON_GROUND: 244, DRAGON: 245, WING_LEFT: 246, WING_RIGHT: 247, SWORD_AMETHYST: 50, INV_SWORD_AMETHYST: 249, CRAFT_SWORD_AMETHYST: 250, CHEST_SWORD_AMETHYST: 251, PICK_AMETHYST: 51, INV_PICK_AMETHYST: 253, CHEST_PICK_AMETHYST: 254, CRAFT_PICK_AMETHYST: 255, HURT_FOX: 256, HURT_BEAR: 257, HURT_DRAGON: 258, SLOT_NUMBER: 259, HURT_WING_LEFT: 208, HURT_WING_RIGHT: 207, FLAKES: 264, AMETHYST_SPEAR: 52, INV_AMETHYST_SPEAR: 260, CRAFT_AMETHYST_SPEAR: 261, CHEST_AMETHYST_SPEAR: 262, SNOW_STEP: 263, HAMMER: 53, INV_HAMMER: 266, CRAFT_HAMMER: 267, CHEST_HAMMER: 268, HAMMER_GOLD: 54, INV_HAMMER_GOLD: 270, CRAFT_HAMMER_GOLD: 271, CHEST_HAMMER_GOLD: 272, HAMMER_DIAMOND: 55, INV_HAMMER_DIAMOND: 274, CRAFT_HAMMER_DIAMOND: 275, CHEST_HAMMER_DIAMOND: 276, HAMMER_AMETHYST: 56, INV_HAMMER_AMETHYST: 278, CRAFT_HAMMER_AMETHYST: 279, CHEST_HAMMER_AMETHYST: 280, AMETHYST_WALL: 57, INV_AMETHYST_WALL: 282, CRAFT_AMETHYST_WALL: 283, CHEST_AMETHYST_WALL: 284, AMETHYST_SPIKE: 58, INV_AMETHYST_SPIKE: 286, CRAFT_AMETHYST_SPIKE: 287, CHEST_AMETHYST_SPIKE: 288, DOOR_AMETHYST_CLOSE: 59, CRAFT_DOOR_AMETHYST_CLOSE: 290, INV_DOOR_AMETHYST_CLOSE: 291, DOOR_AMETHYST_OPEN: 292, CHEST_DOOR_AMETHYST_CLOSE: 293, CAP_SCARF: 60, INV_CAP_SCARF: 295, CRAFT_CAP_SCARF: 296, CHEST_CAP_SCARF: 297, FUR_WINTER: 61, INV_FUR_WINTER: 299, CHEST_FUR_WINTER: 300, SLOT_NUMBER: 301, DOOR_WOOD_OPEN_WINTER: 302, DOOR_STONE_OPEN_WINTER: 303, DOOR_GOLD_OPEN_WINTER: 304, DOOR_DIAMOND_OPEN_WINTER: 305, DOOR_AMETHYST_OPEN_WINTER: 306, BLUE_CORD: 62, INV_BLUE_CORD: 307, CHEST_BLUE_CORD: 309, CRAFT_BLUE_CORD: 310, BIGMAP: 311 };
+    const IMAGES = {
+        LOGO: "img/logo.png"
+    };
+    const SPRITE = {
+        GROUND: ["#133A2B", "#032428"],
+        SNOW_GROUND: ["#EBF2F0", "#136167"],
+        CRAFT_LOADING: ["#4EB687", "#187484"],
+        DAY: 0,
+        NIGHT: 1,
+        WINTER_BIOME_Y: 10359,
+        FLAKES_NUMBER: 34,
+        FLAKES_SIZES: 5,
+        STEP_SPACE: 50,
+        SWORD: 0,
+        PICK: 1,
+        HAND: 2,
+        TREE: 3,
+        BODY: 4,
+        STONES: 5,
+        SEED: 6,
+        PICK_GOLD: 7,
+        PICK_DIAMOND: 8,
+        SWORD_GOLD: 9,
+        SWORD_DIAMOND: 10,
+        WOOD_FIRE: 11,
+        WORKBENCH: 12,
+        PLANT_SEED: 13,
+        CRAFT_PICK: 14,
+        PICK_WOOD: 15,
+        WALL: 16,
+        SPIKE: 17,
+        MEAT: 18,
+        COOKED_MEAT: 19,
+        INV_PLANT: 82,
+        BANDAGE: 21,
+        CRAFT_SWORD: 22,
+        CRAFT_WORK: 88,
+        RABBIT: 91,
+        PLAY: 87,
+        GAUGES: 99,
+        LEADERBOARD: 105,
+        HURT: 137,
+        COLD: 140,
+        HUNGER: 143,
+        GROUND_FIRE: 147,
+        COUNTER: 151,
+        CRAFT_SEED: 154,
+        HERB: 158,
+        HAND_SHADOW: 162,
+        PLANT_MINI: 168,
+        GOLD: 149,
+        DIAMOND: 187,
+        FIRE: 191,
+        HALO_FIRE: 195,
+        CRAFT_SWORD_GOLD: 200,
+        CRAFT_SWORD_DIAMOND: 216,
+        INV_SWORD_GOLD: 220,
+        INV_SWORD_DIAMOND: 224,
+        PLANT: 228,
+        FRUIT: 232,
+        CRAFT_PICK_GOLD: 236,
+        CRAFT_PICK_DIAMOND: 35,
+        INV_PICK_GOLD: 49,
+        INV_PICK_DIAMOND: 248,
+        INV_GOLD: 252,
+        INV_DIAMOND: 259,
+        WOLF: 265,
+        INV_MEAT: 269,
+        GEAR2: 273,
+        CRAFT_FIRE: 277,
+        INV_BANDAGE: 281,
+        CRAFT_BANDAGE: 285,
+        CORD: 289,
+        INV_CORD: 294,
+        YOUR_SCORE: 298,
+        TREE_BRANCH: 308,
+        HEAL: 63,
+        INV_FIRE: 64,
+        INV_WORK: 65,
+        INV_SEED: 66,
+        INV_PICK: 67,
+        INV_PICK_WOOD: 68,
+        CRAFT_PICK_WOOD: 69,
+        INV_STONE: 70,
+        INV_WOOD: 71,
+        INV_WALL: 72,
+        CRAFT_WALL: 73,
+        INV_SPIKE: 74,
+        CRAFT_SPIKE: 75,
+        HURT_RABBIT: 76,
+        INV_COOKED_MEAT: 77,
+        GEAR: 78,
+        CRAFT_COOKED_MEAT: 79,
+        MINIMAP: 80,
+        HURT_WOLF: 81,
+        BIG_FIRE_WOOD: 20,
+        CRAFT_BIG_FIRE: 83,
+        INV_BIG_FIRE: 84,
+        SPIDER: 85,
+        INV_SWORD: 86,
+        DIAMOND_WALL: 25,
+        STONE_WALL: 23,
+        CRAFT_STONE_WALL: 89,
+        INV_STONE_WALL: 90,
+        GOLD_WALL: 24,
+        CRAFT_GOLD_WALL: 92,
+        INV_GOLD_WALL: 93,
+        INV_DIAMOND_WALL: 94,
+        CRAFT_DIAMOND_WALL: 95,
+        HURT_SPIDER: 96,
+        EMPTY_SLOT: 97,
+        WEB: 98,
+        DOOR_WOOD_CLOSE: 26,
+        CRAFT_DOOR_WOOD_CLOSE: 100,
+        INV_DOOR_WOOD_CLOSE: 101,
+        DOOR_WOOD_OPEN: 102,
+        CHEST: 27,
+        INV_CHEST: 106,
+        CRAFT_CHEST: 107,
+        CHEST_SLOT: 108,
+        CHEST_SWORD: 109,
+        CHEST_PICK: 110,
+        CHEST_STONE: 111,
+        CHEST_WOOD: 112,
+        CHEST_PLANT: 113,
+        CHEST_GOLD: 114,
+        CHEST_DIAMOND: 115,
+        CHEST_PICK_GOLD: 116,
+        CHEST_PICK_DIAMOND: 117,
+        CHEST_SWORD_GOLD: 118,
+        CHEST_SWORD_DIAMOND: 119,
+        CHEST_FIRE: 120,
+        CHEST_WORK: 121,
+        CHEST_SEED: 122,
+        CHEST_WALL: 123,
+        CHEST_SPIKE: 124,
+        CHEST_PICK_WOOD: 125,
+        CHEST_COOKED_MEAT: 126,
+        CHEST_MEAT: 127,
+        CHEST_BIG_FIRE: 128,
+        CHEST_BANDAGE: 129,
+        CHEST_CORD: 130,
+        CHEST_STONE_WALL: 131,
+        CHEST_GOLD_WALL: 132,
+        CHEST_DIAMOND_WALL: 133,
+        CHEST_DOOR_WOOD_CLOSE: 134,
+        CHEST_WORKBENCH: 135,
+        CHEST_CHEST: 136,
+        STONE_SPIKE: 28,
+        CRAFT_STONE_SPIKE: 138,
+        INV_STONE_SPIKE: 139,
+        GOLD_SPIKE: 29,
+        INV_GOLD_SPIKE: 141,
+        CRAFT_GOLD_SPIKE: 142,
+        DIAMOND_SPIKE: 30,
+        INV_DIAMOND_SPIKE: 144,
+        CRAFT_DIAMOND_SPIKE: 145,
+        CHEST_PLUS: 146,
+        BAG: 48,
+        CRAFT_BAG: 148,
+        FUR: 34,
+        INV_FUR: 150,
+        EARMUFFS: 36,
+        INV_EARMUFFS: 152,
+        CRAFT_EARMUFFS: 153,
+        DOOR_STONE_CLOSE: 31,
+        CRAFT_DOOR_STONE_CLOSE: 155,
+        INV_DOOR_STONE_CLOSE: 156,
+        DOOR_STONE_OPEN: 157,
+        DOOR_GOLD_CLOSE: 32,
+        CRAFT_DOOR_GOLD_CLOSE: 159,
+        INV_DOOR_GOLD_CLOSE: 160,
+        DOOR_GOLD_OPEN: 161,
+        DOOR_DIAMOND_CLOSE: 33,
+        CRAFT_DOOR_DIAMOND_CLOSE: 163,
+        INV_DOOR_DIAMOND_CLOSE: 164,
+        DOOR_DIAMOND_OPEN: 165,
+        CRAFT_COAT: 166,
+        INV_COAT: 167,
+        COAT: 37,
+        CHEST_STONE_SPIKE: 169,
+        CHEST_GOLD_SPIKE: 170,
+        CHEST_DIAMOND_SPIKE: 171,
+        CHEST_BAG: 172,
+        CHEST_FUR: 173,
+        CHEST_EARMUFFS: 174,
+        CHEST_DOOR_STONE_CLOSE: 175,
+        CHEST_DOOR_GOLD_CLOSE: 176,
+        CHEST_DOOR_DIAMOND_CLOSE: 177,
+        CHEST_COAT: 178,
+        INV_BAG: 179,
+        FUR_WOLF: 180,
+        INV_FUR_WOLF: 181,
+        CHEST_FUR_WOLF: 182,
+        SPEAR: 38,
+        INV_SPEAR: 188,
+        CRAFT_SPEAR: 189,
+        CHEST_SPEAR: 190,
+        GOLD_SPEAR: 39,
+        INV_GOLD_SPEAR: 192,
+        CRAFT_GOLD_SPEAR: 193,
+        CHEST_GOLD_SPEAR: 194,
+        DIAMOND_SPEAR: 40,
+        INV_DIAMOND_SPEAR: 196,
+        CRAFT_DIAMOND_SPEAR: 197,
+        CHEST_DIAMOND_SPEAR: 198,
+        FURNACE_ON: 199,
+        FURNACE_OFF: 41,
+        INV_FURNACE: 201,
+        CRAFT_FURNACE: 202,
+        CHEST_FURNACE: 203,
+        FURNACE_SLOT: 204,
+        FURNACE_BUTTON: 205,
+        FIR: 206,
+        STONES_WINTER: 209,
+        GOLD_WINTER: 210,
+        DIAMOND_WINTER: 211,
+        GROUND_FIRE_WINTER: 212,
+        AMETHYST: 213,
+        INV_AMETHYST: 214,
+        FOX: 215,
+        EXPLORER_HAT: 42,
+        INV_EXPLORER_HAT: 217,
+        CRAFT_EXPLORER_HAT: 218,
+        CHEST_EXPLORER_HAT: 219,
+        STONE_HELMET: 43,
+        INV_STONE_HELMET: 221,
+        CRAFT_STONE_HELMET: 222,
+        CHEST_STONE_HELMET: 223,
+        GOLD_HELMET: 44,
+        INV_GOLD_HELMET: 225,
+        CRAFT_GOLD_HELMET: 226,
+        CHEST_GOLD_HELMET: 227,
+        DIAMOND_HELMET: 45,
+        INV_DIAMOND_HELMET: 229,
+        CRAFT_DIAMOND_HELMET: 230,
+        CHEST_DIAMOND_HELMET: 231,
+        BOOK: 46,
+        INV_BOOK: 233,
+        CRAFT_BOOK: 234,
+        CHEST_BOOK: 235,
+        PAPER: 47,
+        INV_PAPER: 237,
+        CRAFT_PAPER: 238,
+        CHEST_PAPER: 239,
+        HERB_WINTER: 240,
+        BEAR: 241,
+        CHEST_AMETHYST: 242,
+        SNOW: 243,
+        DRAGON_GROUND: 244,
+        DRAGON: 245,
+        WING_LEFT: 246,
+        WING_RIGHT: 247,
+        SWORD_AMETHYST: 50,
+        INV_SWORD_AMETHYST: 249,
+        CRAFT_SWORD_AMETHYST: 250,
+        CHEST_SWORD_AMETHYST: 251,
+        PICK_AMETHYST: 51,
+        INV_PICK_AMETHYST: 253,
+        CHEST_PICK_AMETHYST: 254,
+        CRAFT_PICK_AMETHYST: 255,
+        HURT_FOX: 256,
+        HURT_BEAR: 257,
+        HURT_DRAGON: 258,
+        SLOT_NUMBER: 259,
+        HURT_WING_LEFT: 208,
+        HURT_WING_RIGHT: 207,
+        FLAKES: 264,
+        AMETHYST_SPEAR: 52,
+        INV_AMETHYST_SPEAR: 260,
+        CRAFT_AMETHYST_SPEAR: 261,
+        CHEST_AMETHYST_SPEAR: 262,
+        SNOW_STEP: 263,
+        HAMMER: 53,
+        INV_HAMMER: 266,
+        CRAFT_HAMMER: 267,
+        CHEST_HAMMER: 268,
+        HAMMER_GOLD: 54,
+        INV_HAMMER_GOLD: 270,
+        CRAFT_HAMMER_GOLD: 271,
+        CHEST_HAMMER_GOLD: 272,
+        HAMMER_DIAMOND: 55,
+        INV_HAMMER_DIAMOND: 274,
+        CRAFT_HAMMER_DIAMOND: 275,
+        CHEST_HAMMER_DIAMOND: 276,
+        HAMMER_AMETHYST: 56,
+        INV_HAMMER_AMETHYST: 278,
+        CRAFT_HAMMER_AMETHYST: 279,
+        CHEST_HAMMER_AMETHYST: 280,
+        AMETHYST_WALL: 57,
+        INV_AMETHYST_WALL: 282,
+        CRAFT_AMETHYST_WALL: 283,
+        CHEST_AMETHYST_WALL: 284,
+        AMETHYST_SPIKE: 58,
+        INV_AMETHYST_SPIKE: 286,
+        CRAFT_AMETHYST_SPIKE: 287,
+        CHEST_AMETHYST_SPIKE: 288,
+        DOOR_AMETHYST_CLOSE: 59,
+        CRAFT_DOOR_AMETHYST_CLOSE: 290,
+        INV_DOOR_AMETHYST_CLOSE: 291,
+        DOOR_AMETHYST_OPEN: 292,
+        CHEST_DOOR_AMETHYST_CLOSE: 293,
+        CAP_SCARF: 60,
+        INV_CAP_SCARF: 295,
+        CRAFT_CAP_SCARF: 296,
+        CHEST_CAP_SCARF: 297,
+        FUR_WINTER: 61,
+        INV_FUR_WINTER: 299,
+        CHEST_FUR_WINTER: 300,
+        SLOT_NUMBER: 301,
+        DOOR_WOOD_OPEN_WINTER: 302,
+        DOOR_STONE_OPEN_WINTER: 303,
+        DOOR_GOLD_OPEN_WINTER: 304,
+        DOOR_DIAMOND_OPEN_WINTER: 305,
+        DOOR_AMETHYST_OPEN_WINTER: 306,
+        BLUE_CORD: 62,
+        INV_BLUE_CORD: 307,
+        CHEST_BLUE_CORD: 309,
+        CRAFT_BLUE_CORD: 310,
+        BIGMAP: 311
+    };
     const sprite = [];
     function fill_path(c, g, f, d) {
         if (g) {
@@ -578,10 +975,16 @@ export function start(ModdedStarving) {
     function round_regular_polygon(c, g, f, d) {
         var e = 2 * Math.PI / g;
         c.beginPath();
-        var m = [{ x: f, y: 0 }];
+        var m = [{
+            x: f,
+            y: 0
+        }];
         var p = [];
         for (var n = 1; n < g; n++) {
-            m.push({ x: Math.cos(n * e) * f, y: Math.sin(n * e) * f });
+            m.push({
+                x: Math.cos(n * e) * f,
+                y: Math.sin(n * e) * f
+            });
             var r = m.length;
             p.push(Utils.middle_point(m[r - 2], m[r - 1]));
         }
@@ -621,11 +1024,29 @@ export function start(ModdedStarving) {
             ctx.font = font || defaultFont;
             ctx[func](text, x, y, maxWidth);
             x += ctx.measureText(text).width;
-        });
+        }
+        );
         ctx.restore();
     }
     // https://www.colorschemer.com/minecraft-color-codes/
-    const colorCodes = {'4': "#AA0000", 'c': "#FF5555", '6': "#FFAA00", 'e': "#FFFF55", '2': "#00AA00", 'a': "#55FF55", 'b': "#55FFFF", '3': "#00AAAA", '1': "#0000AA", '9': "#5555FF", 'd': "#FF55FF", '5': "#AA00AA", 'f': "#FFFFFF", '7': "#AAAAAA", '8': "#555555", '0': "#000000"};
+    const colorCodes = {
+        '4': "#AA0000",
+        'c': "#FF5555",
+        '6': "#FFAA00",
+        'e': "#FFFF55",
+        '2': "#00AA00",
+        'a': "#55FF55",
+        'b': "#55FFFF",
+        '3': "#00AAAA",
+        '1': "#0000AA",
+        '9': "#5555FF",
+        'd': "#FF55FF",
+        '5': "#AA00AA",
+        'f': "#FFFFFF",
+        '7': "#AAAAAA",
+        '8': "#555555",
+        '0': "#000000"
+    };
     function formatText(text) {
         let args = [];
         args.fullText = "";
@@ -638,7 +1059,9 @@ export function start(ModdedStarving) {
                 waitingForColor = true;
                 continue;
             }
-            args[arg] = args[arg] || { text: "" };
+            args[arg] = args[arg] || {
+                text: ""
+            };
             if (text.charAt(i - 1) === '§' && waitingForColor) {
                 waitingForColor = false;
                 args[arg].fillStyle = colorCodes[char];
@@ -2215,7 +2638,7 @@ export function start(ModdedStarving) {
     function create_text(c, g, f, d, e, m, p, n, r, u, q) {
         const formatted = formatText(g);
         g = formatted.fullText;
-        
+
         var v = document.createElement("canvas");
         var t = v.getContext("2d");
         m = m ? m * c : 0;
@@ -5225,81 +5648,358 @@ export function start(ModdedStarving) {
         sprite[SPRITE.CRAFT_SEED] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(3 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_seed, x: 0, y: 0, a: 1, r: 0 }], .7, ["#756e52", "#898064", "#685b40"], .8);
-        sprite[SPRITE.INV_SEED] = create_craft_button(1, [{ f: create_seed, x: 0, y: 0, a: 1, r: 0, c: ["#756e52", "#898064", "#685b40"] }], .7, ["#3ba578", "#4eb687", "#3da34d"], .7);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_seed,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0
+        }], .7, ["#756e52", "#898064", "#685b40"], .8);
+        sprite[SPRITE.INV_SEED] = create_craft_button(1, [{
+            f: create_seed,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: ["#756e52", "#898064", "#685b40"]
+        }], .7, ["#3ba578", "#4eb687", "#3da34d"], .7);
         sprite[SPRITE.CRAFT_SWORD] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(7 * c, "#918770");
-            }, x: 2, y: 0, a: .3, r: 0
-        }, { f: create_sword, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#493d36", "#332b28", "#939393", "#5f6061"] }], .3, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 2,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_sword,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#493d36", "#332b28", "#939393", "#5f6061"]
+        }], .3, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.CRAFT_SWORD_GOLD] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(7 * c, "#918770");
-            }, x: 2, y: 0, a: .3, r: 0
-        }, { f: create_sword, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#493e26", "#382e19", "#c4bc51", "#b29c32"] }], .3, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 2,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_sword,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#493e26", "#382e19", "#c4bc51", "#b29c32"]
+        }], .3, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.CRAFT_SWORD_DIAMOND] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(7 * c, "#918770");
-            }, x: 2, y: 0, a: .3, r: 0
-        }, { f: create_sword, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#262114", "#211108", "#63c9d6", "#29aaa1"] }], .3, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 2,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_sword,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#262114", "#211108", "#63c9d6", "#29aaa1"]
+        }], .3, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.CRAFT_SWORD_AMETHYST] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(7 * c, "#918770");
-            }, x: 2, y: 0, a: .3, r: 0
-        }, { f: create_sword, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#262114", "#211108", "#b864d6", "#8c29aa"] }], .3, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 2,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_sword,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#262114", "#211108", "#b864d6", "#8c29aa"]
+        }], .3, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.CRAFT_PICK_WOOD] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(4.5 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_pickaxe, x: -2, y: 5, a: 1, r: -Math.PI / 5, c: "#0d1b1c #000000 #0d1b1c #4d2d14 #432516 #4d2d14 #432516".split(" ") }], .5, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_pickaxe,
+            x: -2,
+            y: 5,
+            a: 1,
+            r: -Math.PI / 5,
+            c: "#0d1b1c #000000 #0d1b1c #4d2d14 #432516 #4d2d14 #432516".split(" ")
+        }], .5, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.CRAFT_PICK] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(4.5 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_pickaxe, x: -2, y: 5, a: 1, r: -Math.PI / 5, c: "#0d1b1c #000000 #0d1b1c #4d2d14 #432516 #939393 #5f6061".split(" ") }], .5, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_pickaxe,
+            x: -2,
+            y: 5,
+            a: 1,
+            r: -Math.PI / 5,
+            c: "#0d1b1c #000000 #0d1b1c #4d2d14 #432516 #939393 #5f6061".split(" ")
+        }], .5, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.CRAFT_PICK_GOLD] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(4.5 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_pickaxe, x: -2, y: 5, a: 1, r: -Math.PI / 5, c: "#0d1b1c #000000 #0d1b1c #493e26 #382e19 #c4bc51 #b29c32".split(" ") }], .5, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_pickaxe,
+            x: -2,
+            y: 5,
+            a: 1,
+            r: -Math.PI / 5,
+            c: "#0d1b1c #000000 #0d1b1c #493e26 #382e19 #c4bc51 #b29c32".split(" ")
+        }], .5, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.CRAFT_PICK_DIAMOND] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(4.5 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_pickaxe, x: -2, y: 5, a: 1, r: -Math.PI / 5, c: "#0d1b1c #000000 #0d1b1c #262114 #211108 #63c9d6 #29aaa1".split(" ") }], .5, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_pickaxe,
+            x: -2,
+            y: 5,
+            a: 1,
+            r: -Math.PI / 5,
+            c: "#0d1b1c #000000 #0d1b1c #262114 #211108 #63c9d6 #29aaa1".split(" ")
+        }], .5, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.CRAFT_PICK_AMETHYST] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(4.5 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_pickaxe, x: -2, y: 5, a: 1, r: -Math.PI / 5, c: "#0d1b1c #000000 #0d1b1c #262114 #211108 #b864d6 #8c29aa".split(" ") }], .5, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_pickaxe,
+            x: -2,
+            y: 5,
+            a: 1,
+            r: -Math.PI / 5,
+            c: "#0d1b1c #000000 #0d1b1c #262114 #211108 #b864d6 #8c29aa".split(" ")
+        }], .5, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.CRAFT_FIRE] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(7 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_wood_fire, x: 0, y: 0, a: 1, r: -Math.PI / 7, c: ["#4d2d14", "#432516", "#58645F", "#75827D"] }, { f: create_fire, x: 0, y: 0, a: 1, r: -Math.PI / 7, c: ["#efd435", "#ec8d35", "#e96132"] }], .3, ["#756e52", "#898064", "#685b40"], .8);
-        sprite[SPRITE.INV_FIRE] = create_craft_button(1, [{ f: create_wood_fire, x: -2, y: -2, a: 1, r: -Math.PI / 7, c: ["#4d2d14", "#432516"] }, { f: create_fire, x: -2, y: -2, a: 1, r: -Math.PI / 7, c: ["#efd435", "#ec8d35", "#e96132"] }], .3, ["#3ba578", "#4eb687", "#3da34d"], .8);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_wood_fire,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: -Math.PI / 7,
+            c: ["#4d2d14", "#432516", "#58645F", "#75827D"]
+        }, {
+            f: create_fire,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: -Math.PI / 7,
+            c: ["#efd435", "#ec8d35", "#e96132"]
+        }], .3, ["#756e52", "#898064", "#685b40"], .8);
+        sprite[SPRITE.INV_FIRE] = create_craft_button(1, [{
+            f: create_wood_fire,
+            x: -2,
+            y: -2,
+            a: 1,
+            r: -Math.PI / 7,
+            c: ["#4d2d14", "#432516"]
+        }, {
+            f: create_fire,
+            x: -2,
+            y: -2,
+            a: 1,
+            r: -Math.PI / 7,
+            c: ["#efd435", "#ec8d35", "#e96132"]
+        }], .3, ["#3ba578", "#4eb687", "#3da34d"], .8);
         sprite[SPRITE.CRAFT_BIG_FIRE] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(7 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_big_fire_wood, x: -1, y: 0, a: 1, r: -Math.PI / 7, c: ["#4d2d14", "#432516", "#58645F", "#75827D", "#485548"] }, { f: create_fire, x: 0, y: 0, a: 1, r: -Math.PI / 7, c: ["#efd435", "#ec8d35", "#e96132"] }], .3, ["#756e52", "#898064", "#685b40"], .8);
-        sprite[SPRITE.INV_BIG_FIRE] = create_craft_button(1, [{ f: create_big_fire_wood, x: -2, y: -1, a: 1, r: -Math.PI / 7, c: ["#4d2d14", "#432516", "#58645F", "#75827D", "#0c2c2e"] }, { f: create_fire, x: -2, y: -1, a: 1, r: -Math.PI / 7, c: ["#efd435", "#ec8d35", "#e96132"] }], .3, ["#3ba578", "#4eb687", "#3da34d"], .8);
-        sprite[SPRITE.INV_SWORD] = create_craft_button(1, [{ f: create_sword, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#493d36", "#332b28", "#939393", "#5f6061"] }], .3, ["#3ba578", "#4eb687", "#3da34d"], 1);
-        sprite[SPRITE.INV_SWORD_GOLD] = create_craft_button(1, [{ f: create_sword, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#493e26", "#382e19", "#c4bc51", "#b29c32"] }], .3, ["#3ba578", "#4eb687", "#3da34d"], 1);
-        sprite[SPRITE.INV_SWORD_DIAMOND] = create_craft_button(1, [{ f: create_sword, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#262114", "#211108", "#63c9d6", "#29aaa1"] }], .3, ["#3ba578", "#4eb687", "#3da34d"], 1);
-        sprite[SPRITE.INV_SWORD_AMETHYST] = create_craft_button(1, [{ f: create_sword, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#262114", "#211108", "#b864d6", "#8c29aa"] }], .3, ["#3ba578", "#4eb687", "#3da34d"], 1);
-        sprite[SPRITE.INV_PICK_WOOD] = create_craft_button(1, [{ f: create_pickaxe, x: -2, y: 5, a: 1, r: -Math.PI / 5, c: "#0d1b1c #000000 #0d1b1c #4d2d14 #432516 #4d2d14 #432516".split(" ") }], .45, ["#3ba578", "#4eb687", "#3da34d"], 1);
-        sprite[SPRITE.INV_PICK] = create_craft_button(1, [{ f: create_pickaxe, x: -2, y: 5, a: 1, r: -Math.PI / 5, c: "#0d1b1c #000000 #0d1b1c #4d2d14 #432516 #939393 #5f6061".split(" ") }], .45, ["#3ba578", "#4eb687", "#3da34d"], 1);
-        sprite[SPRITE.INV_PICK_GOLD] = create_craft_button(1, [{ f: create_pickaxe, x: -2, y: 5, a: 1, r: -Math.PI / 5, c: "#0d1b1c #000000 #0d1b1c #493e26 #382e19 #c4bc51 #b29c32".split(" ") }], .45, ["#3ba578", "#4eb687", "#3da34d"], 1);
-        sprite[SPRITE.INV_PICK_DIAMOND] = create_craft_button(1, [{ f: create_pickaxe, x: -2, y: 5, a: 1, r: -Math.PI / 5, c: "#0d1b1c #000000 #0d1b1c #262114 #211108 #63c9d6 #29aaa1".split(" ") }], .45, ["#3ba578", "#4eb687", "#3da34d"], 1);
-        sprite[SPRITE.INV_PICK_AMETHYST] = create_craft_button(1, [{ f: create_pickaxe, x: -2, y: 5, a: 1, r: -Math.PI / 5, c: "#0d1b1c #000000 #0d1b1c #262114 #211108 #b864d6 #8c29aa".split(" ") }], .45, ["#3ba578", "#4eb687", "#3da34d"], 1);
-        sprite[SPRITE.INV_STONE] = create_craft_button(1, [{ f: create_stone, x: -5, y: -5, a: 1, r: 0, c: ["#252B28", "#58645F", "#75827D"] }], .23, ["#2b5c48", "#2b5c48", "#2b5c48"], .7);
-        sprite[SPRITE.INV_GOLD] = create_craft_button(1, [{ f: create_gold, x: -5, y: -5, a: 1, r: 0, c: ["#282823", "#877c2d", "#c4bc51"] }], .43, ["#2b5c48", "#2b5c48", "#2b5c48"], .7);
-        sprite[SPRITE.INV_DIAMOND] = create_craft_button(1, [{ f: create_diamond, x: -5, y: -5, a: 1, r: 0, c: ["#232828", "#3fc9c9", "#74ede6"] }], .33, ["#2b5c48", "#2b5c48", "#2b5c48"], .7);
-        sprite[SPRITE.INV_WOOD] = create_craft_button(1, [{ f: create_wood_fire, x: 0, y: -5, a: 1, r: Math.PI / 2.5, c: ["#4d2d14", "#432516"] }], .3, ["#2b5c48", "#2b5c48", "#2b5c48"], .7);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_big_fire_wood,
+            x: -1,
+            y: 0,
+            a: 1,
+            r: -Math.PI / 7,
+            c: ["#4d2d14", "#432516", "#58645F", "#75827D", "#485548"]
+        }, {
+            f: create_fire,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: -Math.PI / 7,
+            c: ["#efd435", "#ec8d35", "#e96132"]
+        }], .3, ["#756e52", "#898064", "#685b40"], .8);
+        sprite[SPRITE.INV_BIG_FIRE] = create_craft_button(1, [{
+            f: create_big_fire_wood,
+            x: -2,
+            y: -1,
+            a: 1,
+            r: -Math.PI / 7,
+            c: ["#4d2d14", "#432516", "#58645F", "#75827D", "#0c2c2e"]
+        }, {
+            f: create_fire,
+            x: -2,
+            y: -1,
+            a: 1,
+            r: -Math.PI / 7,
+            c: ["#efd435", "#ec8d35", "#e96132"]
+        }], .3, ["#3ba578", "#4eb687", "#3da34d"], .8);
+        sprite[SPRITE.INV_SWORD] = create_craft_button(1, [{
+            f: create_sword,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#493d36", "#332b28", "#939393", "#5f6061"]
+        }], .3, ["#3ba578", "#4eb687", "#3da34d"], 1);
+        sprite[SPRITE.INV_SWORD_GOLD] = create_craft_button(1, [{
+            f: create_sword,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#493e26", "#382e19", "#c4bc51", "#b29c32"]
+        }], .3, ["#3ba578", "#4eb687", "#3da34d"], 1);
+        sprite[SPRITE.INV_SWORD_DIAMOND] = create_craft_button(1, [{
+            f: create_sword,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#262114", "#211108", "#63c9d6", "#29aaa1"]
+        }], .3, ["#3ba578", "#4eb687", "#3da34d"], 1);
+        sprite[SPRITE.INV_SWORD_AMETHYST] = create_craft_button(1, [{
+            f: create_sword,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#262114", "#211108", "#b864d6", "#8c29aa"]
+        }], .3, ["#3ba578", "#4eb687", "#3da34d"], 1);
+        sprite[SPRITE.INV_PICK_WOOD] = create_craft_button(1, [{
+            f: create_pickaxe,
+            x: -2,
+            y: 5,
+            a: 1,
+            r: -Math.PI / 5,
+            c: "#0d1b1c #000000 #0d1b1c #4d2d14 #432516 #4d2d14 #432516".split(" ")
+        }], .45, ["#3ba578", "#4eb687", "#3da34d"], 1);
+        sprite[SPRITE.INV_PICK] = create_craft_button(1, [{
+            f: create_pickaxe,
+            x: -2,
+            y: 5,
+            a: 1,
+            r: -Math.PI / 5,
+            c: "#0d1b1c #000000 #0d1b1c #4d2d14 #432516 #939393 #5f6061".split(" ")
+        }], .45, ["#3ba578", "#4eb687", "#3da34d"], 1);
+        sprite[SPRITE.INV_PICK_GOLD] = create_craft_button(1, [{
+            f: create_pickaxe,
+            x: -2,
+            y: 5,
+            a: 1,
+            r: -Math.PI / 5,
+            c: "#0d1b1c #000000 #0d1b1c #493e26 #382e19 #c4bc51 #b29c32".split(" ")
+        }], .45, ["#3ba578", "#4eb687", "#3da34d"], 1);
+        sprite[SPRITE.INV_PICK_DIAMOND] = create_craft_button(1, [{
+            f: create_pickaxe,
+            x: -2,
+            y: 5,
+            a: 1,
+            r: -Math.PI / 5,
+            c: "#0d1b1c #000000 #0d1b1c #262114 #211108 #63c9d6 #29aaa1".split(" ")
+        }], .45, ["#3ba578", "#4eb687", "#3da34d"], 1);
+        sprite[SPRITE.INV_PICK_AMETHYST] = create_craft_button(1, [{
+            f: create_pickaxe,
+            x: -2,
+            y: 5,
+            a: 1,
+            r: -Math.PI / 5,
+            c: "#0d1b1c #000000 #0d1b1c #262114 #211108 #b864d6 #8c29aa".split(" ")
+        }], .45, ["#3ba578", "#4eb687", "#3da34d"], 1);
+        sprite[SPRITE.INV_STONE] = create_craft_button(1, [{
+            f: create_stone,
+            x: -5,
+            y: -5,
+            a: 1,
+            r: 0,
+            c: ["#252B28", "#58645F", "#75827D"]
+        }], .23, ["#2b5c48", "#2b5c48", "#2b5c48"], .7);
+        sprite[SPRITE.INV_GOLD] = create_craft_button(1, [{
+            f: create_gold,
+            x: -5,
+            y: -5,
+            a: 1,
+            r: 0,
+            c: ["#282823", "#877c2d", "#c4bc51"]
+        }], .43, ["#2b5c48", "#2b5c48", "#2b5c48"], .7);
+        sprite[SPRITE.INV_DIAMOND] = create_craft_button(1, [{
+            f: create_diamond,
+            x: -5,
+            y: -5,
+            a: 1,
+            r: 0,
+            c: ["#232828", "#3fc9c9", "#74ede6"]
+        }], .33, ["#2b5c48", "#2b5c48", "#2b5c48"], .7);
+        sprite[SPRITE.INV_WOOD] = create_craft_button(1, [{
+            f: create_wood_fire,
+            x: 0,
+            y: -5,
+            a: 1,
+            r: Math.PI / 2.5,
+            c: ["#4d2d14", "#432516"]
+        }], .3, ["#2b5c48", "#2b5c48", "#2b5c48"], .7);
         sprite[SPRITE.EMPTY_SLOT] = create_craft_button(1, [], .3, ["#2b5c48", "#2b5c48", "#2b5c48"], .7);
-        sprite[SPRITE.INV_PLANT] = create_craft_button(1, [{ f: create_food_plant, x: 0, y: 0, a: 1, r: 0 }], .4, ["#3ba578", "#4eb687", "#3da34d"], 1);
+        sprite[SPRITE.INV_PLANT] = create_craft_button(1, [{
+            f: create_food_plant,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0
+        }], .4, ["#3ba578", "#4eb687", "#3da34d"], 1);
         sprite[SPRITE.PLANT_SEED] = [];
         sprite[SPRITE.PLANT_SEED][SPRITE.DAY] = CTI(create_plant_seed(.9, false, ["#7d613e", "#9e7e5a"]));
         sprite[SPRITE.PLANT_SEED][SPRITE.NIGHT] = CTI(create_plant_seed(.9, false, ["#084442", "#125e5a"]));
@@ -5309,108 +6009,324 @@ export function start(ModdedStarving) {
         sprite[SPRITE.CRAFT_WORK] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(5.5 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_workbench, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #4d2d14 #432516 #756e52 #663f22 #9e9577".split(" ") }], .45, ["#756e52", "#898064", "#685b40"], .8);
-        sprite[SPRITE.INV_WORK] = create_craft_button(1, [{ f: create_workbench, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #4d2d14 #432516 #756e52 #663f22 #9e9577".split(" ") }], .45, ["#3ba578", "#4eb687", "#3da34d"], .7);
-        sprite[SPRITE.INV_STONE_WALL] = create_craft_button(1, [{ f: create_wall_stone, x: -2, y: -2, a: 1, r: 0, c: "#0d1b1c #6a7570 #939995 #9baaa3 #adbcb5 #8a938e".split(" ") }], .4, ["#3ba578", "#4eb687", "#3da34d"], .7);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_workbench,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #4d2d14 #432516 #756e52 #663f22 #9e9577".split(" ")
+        }], .45, ["#756e52", "#898064", "#685b40"], .8);
+        sprite[SPRITE.INV_WORK] = create_craft_button(1, [{
+            f: create_workbench,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #4d2d14 #432516 #756e52 #663f22 #9e9577".split(" ")
+        }], .45, ["#3ba578", "#4eb687", "#3da34d"], .7);
+        sprite[SPRITE.INV_STONE_WALL] = create_craft_button(1, [{
+            f: create_wall_stone,
+            x: -2,
+            y: -2,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #6a7570 #939995 #9baaa3 #adbcb5 #8a938e".split(" ")
+        }], .4, ["#3ba578", "#4eb687", "#3da34d"], .7);
         sprite[SPRITE.CRAFT_STONE_WALL] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(5.5 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_wall_stone, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #6a7570 #939995 #9baaa3 #adbcb5 #8a938e".split(" ") }], .4, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_wall_stone,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #6a7570 #939995 #9baaa3 #adbcb5 #8a938e".split(" ")
+        }], .4, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.WALL] = [];
         sprite[SPRITE.WALL][SPRITE.DAY] = CTI(create_wall(1, true, "#0d1b1c #4c3a15 #634828 #564021 #634828 #4c3a15".split(" ")));
         sprite[SPRITE.WALL][SPRITE.NIGHT] = CTI(create_wall(1, true, "#030d14 #0d2e33 #184747 #123b3f #0d2e33 #174444".split(" ")));
         sprite[SPRITE.DIAMOND_WALL] = [];
         sprite[SPRITE.DIAMOND_WALL][SPRITE.DAY] = CTI(create_wall_diamond(1, true, "#0d1b1c #5cc5ce #89d1d4 #86d0d1 #95d5d8 #e0f2f6 #b3e0e3".split(" ")));
         sprite[SPRITE.DIAMOND_WALL][SPRITE.NIGHT] = CTI(create_wall_diamond(1, true, "#030d14 #2b9390 #43b5af #43b5af #4bbcb4 #83ddd4 #59c9c0".split(" ")));
-        sprite[SPRITE.INV_DIAMOND_WALL] = create_craft_button(1, [{ f: create_wall_diamond, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #5cc5ce #89d1d4 #86d0d1 #95d5d8 #e0f2f6 #b3e0e3".split(" ") }], .4, ["#3ba578", "#4eb687", "#3da34d"], .7);
+        sprite[SPRITE.INV_DIAMOND_WALL] = create_craft_button(1, [{
+            f: create_wall_diamond,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #5cc5ce #89d1d4 #86d0d1 #95d5d8 #e0f2f6 #b3e0e3".split(" ")
+        }], .4, ["#3ba578", "#4eb687", "#3da34d"], .7);
         sprite[SPRITE.CRAFT_DIAMOND_WALL] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(5.5 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_wall_diamond, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #5cc5ce #89d1d4 #86d0d1 #95d5d8 #e0f2f6 #b3e0e3".split(" ") }], .4, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_wall_diamond,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #5cc5ce #89d1d4 #86d0d1 #95d5d8 #e0f2f6 #b3e0e3".split(" ")
+        }], .4, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.AMETHYST_WALL] = [];
         sprite[SPRITE.AMETHYST_WALL][SPRITE.DAY] = CTI(create_wall_stone(1, true, "#0d1b1c #b15ecf #8c29aa #c26de0 #af59cd #d588f1".split(" ")));
         sprite[SPRITE.AMETHYST_WALL][SPRITE.NIGHT] = CTI(create_wall_stone(1, true, "#030d14 #8359d3 #764eb5 #8f65de #7f55cc #9d77e6".split(" ")));
-        sprite[SPRITE.INV_AMETHYST_WALL] = create_craft_button(1, [{ f: create_wall_stone, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #b15ecf #8c29aa #c26de0 #af59cd #d588f1".split(" ") }], .4, ["#3ba578", "#4eb687", "#3da34d"], .7);
+        sprite[SPRITE.INV_AMETHYST_WALL] = create_craft_button(1, [{
+            f: create_wall_stone,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #b15ecf #8c29aa #c26de0 #af59cd #d588f1".split(" ")
+        }], .4, ["#3ba578", "#4eb687", "#3da34d"], .7);
         sprite[SPRITE.CRAFT_AMETHYST_WALL] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(4.5 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_wall_stone, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #b15ecf #8c29aa #c26de0 #af59cd #d588f1".split(" ") }], .4, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_wall_stone,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #b15ecf #8c29aa #c26de0 #af59cd #d588f1".split(" ")
+        }], .4, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.STONE_WALL] = [];
         sprite[SPRITE.STONE_WALL][SPRITE.DAY] = CTI(create_wall_stone(1, true, "#0d1b1c #6a7570 #939995 #9baaa3 #adbcb5 #8a938e".split(" ")));
         sprite[SPRITE.STONE_WALL][SPRITE.NIGHT] = CTI(create_wall_stone(1, true, "#030d14 #163a3a #214c4b #1f4948 #295957 #1f5955".split(" ")));
         sprite[SPRITE.GOLD_WALL] = [];
         sprite[SPRITE.GOLD_WALL][SPRITE.DAY] = CTI(create_wall_gold(1, true, "#0d1b1c #877d36 #a08f47 #a7983c #b29e4d #c1b06b".split(" ")));
         sprite[SPRITE.GOLD_WALL][SPRITE.NIGHT] = CTI(create_wall_gold(1, true, "#030d14 #1f4948 #215e55 #1f6058 #2a7773 #2c7a70".split(" ")));
-        sprite[SPRITE.INV_GOLD_WALL] = create_craft_button(1, [{ f: create_wall_gold, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #877d36 #a08f47 #a7983c #b29e4d #c1b06b".split(" ") }], .4, ["#3ba578", "#4eb687", "#3da34d"], .7);
+        sprite[SPRITE.INV_GOLD_WALL] = create_craft_button(1, [{
+            f: create_wall_gold,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #877d36 #a08f47 #a7983c #b29e4d #c1b06b".split(" ")
+        }], .4, ["#3ba578", "#4eb687", "#3da34d"], .7);
         sprite[SPRITE.CRAFT_GOLD_WALL] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(5.5 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_wall_gold, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #877d36 #a08f47 #a7983c #b29e4d #c1b06b".split(" ") }], .4, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_wall_gold,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #877d36 #a08f47 #a7983c #b29e4d #c1b06b".split(" ")
+        }], .4, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.CRAFT_WALL] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(5.5 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_wall, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #4c3a15 #634828 #564021 #634828 #4c3a15".split(" ") }], .45, ["#756e52", "#898064", "#685b40"], .8);
-        sprite[SPRITE.INV_WALL] = create_craft_button(1, [{ f: create_wall, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #4c3a15 #634828 #564021 #634828 #4c3a15".split(" ") }], .45, ["#3ba578", "#4eb687", "#3da34d"], .7);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_wall,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #4c3a15 #634828 #564021 #634828 #4c3a15".split(" ")
+        }], .45, ["#756e52", "#898064", "#685b40"], .8);
+        sprite[SPRITE.INV_WALL] = create_craft_button(1, [{
+            f: create_wall,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #4c3a15 #634828 #564021 #634828 #4c3a15".split(" ")
+        }], .45, ["#3ba578", "#4eb687", "#3da34d"], .7);
         sprite[SPRITE.SPIKE] = [];
         sprite[SPRITE.SPIKE][SPRITE.DAY] = CTI(create_spike(1, true, "#0d1b1c #5f6061 #939393 #4c3a15 #634828 #564021 #634828 #4c3a15".split(" ")));
         sprite[SPRITE.SPIKE][SPRITE.NIGHT] = CTI(create_spike(1, true, "#030d14 #1f343f #485e66 #0d2e33 #184747 #123b3f #0d2e33 #174444".split(" ")));
         sprite[SPRITE.CRAFT_SPIKE] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(5.5 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_spike, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #5f6061 #939393 #4c3a15 #634828 #564021 #634828 #4c3a15".split(" ") }], .35, ["#756e52", "#898064", "#685b40"], .8);
-        sprite[SPRITE.INV_SPIKE] = create_craft_button(1, [{ f: create_spike, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #5f6061 #939393 #4c3a15 #634828 #564021 #634828 #4c3a15".split(" ") }], .35, ["#3ba578", "#4eb687", "#3da34d"], .7);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_spike,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #5f6061 #939393 #4c3a15 #634828 #564021 #634828 #4c3a15".split(" ")
+        }], .35, ["#756e52", "#898064", "#685b40"], .8);
+        sprite[SPRITE.INV_SPIKE] = create_craft_button(1, [{
+            f: create_spike,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #5f6061 #939393 #4c3a15 #634828 #564021 #634828 #4c3a15".split(" ")
+        }], .35, ["#3ba578", "#4eb687", "#3da34d"], .7);
         sprite[SPRITE.GOLD_SPIKE] = [];
         sprite[SPRITE.GOLD_SPIKE][SPRITE.DAY] = CTI(create_spike_gold(1, true, "#0d1b1c #69685a #9c9683 #877d36 #a08f47 #a7983c #b29e4d #c1b06b".split(" ")));
         sprite[SPRITE.GOLD_SPIKE][SPRITE.NIGHT] = CTI(create_spike_gold(1, true, "#030d14 #1a3732 #1e544c #1f4948 #215e55 #1f6058 #2a7773 #2c7a70".split(" ")));
         sprite[SPRITE.CRAFT_GOLD_SPIKE] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(5.5 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_spike_gold, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #5f6061 #939393 #877d36 #a08f47 #a7983c #b29e4d #c1b06b".split(" ") }], .35, ["#756e52", "#898064", "#685b40"], .8);
-        sprite[SPRITE.INV_GOLD_SPIKE] = create_craft_button(1, [{ f: create_spike_gold, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #5f6061 #939393 #877d36 #a08f47 #a7983c #b29e4d #c1b06b".split(" ") }], .35, ["#3ba578", "#4eb687", "#3da34d"], .7);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_spike_gold,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #5f6061 #939393 #877d36 #a08f47 #a7983c #b29e4d #c1b06b".split(" ")
+        }], .35, ["#756e52", "#898064", "#685b40"], .8);
+        sprite[SPRITE.INV_GOLD_SPIKE] = create_craft_button(1, [{
+            f: create_spike_gold,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #5f6061 #939393 #877d36 #a08f47 #a7983c #b29e4d #c1b06b".split(" ")
+        }], .35, ["#3ba578", "#4eb687", "#3da34d"], .7);
         sprite[SPRITE.DIAMOND_SPIKE] = [];
         sprite[SPRITE.DIAMOND_SPIKE][SPRITE.DAY] = CTI(create_spike_diamond(1, true, "#0d1b1c #7d8b90 #9facaa #5cc5ce #89d1d4 #86d0d1 #95d5d8 #e0f2f6 #b3e0e3".split(" ")));
         sprite[SPRITE.DIAMOND_SPIKE][SPRITE.NIGHT] = CTI(create_spike_diamond(1, true, "#030d14 #2c4b55 #546d77 #2b9390 #43b5af #43b5af #4bbcb4 #83ddd4 #59c9c0".split(" ")));
         sprite[SPRITE.CRAFT_DIAMOND_SPIKE] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(5.5 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_spike_diamond, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #7d8b90 #9facaa #5cc5ce #89d1d4 #86d0d1 #95d5d8 #e0f2f6 #b3e0e3".split(" ") }], .35, ["#756e52", "#898064", "#685b40"], .8);
-        sprite[SPRITE.INV_DIAMOND_SPIKE] = create_craft_button(1, [{ f: create_spike_gold, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #7d8b90 #9facaa #5cc5ce #89d1d4 #86d0d1 #95d5d8 #e0f2f6 #b3e0e3".split(" ") }], .35, ["#3ba578", "#4eb687", "#3da34d"], .7);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_spike_diamond,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #7d8b90 #9facaa #5cc5ce #89d1d4 #86d0d1 #95d5d8 #e0f2f6 #b3e0e3".split(" ")
+        }], .35, ["#756e52", "#898064", "#685b40"], .8);
+        sprite[SPRITE.INV_DIAMOND_SPIKE] = create_craft_button(1, [{
+            f: create_spike_gold,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #7d8b90 #9facaa #5cc5ce #89d1d4 #86d0d1 #95d5d8 #e0f2f6 #b3e0e3".split(" ")
+        }], .35, ["#3ba578", "#4eb687", "#3da34d"], .7);
         sprite[SPRITE.STONE_SPIKE] = [];
         sprite[SPRITE.STONE_SPIKE][SPRITE.DAY] = CTI(create_spike_stone(1, true, "#0d1b1c #6a7570 #939393 #6a7570 #939995 #9baaa3 #adbcb5 #8a938e".split(" ")));
         sprite[SPRITE.STONE_SPIKE][SPRITE.NIGHT] = CTI(create_spike_stone(1, true, "#030d14 #1f343f #485e66 #163a3a #214c4b #1f4948 #295957 #1f5955".split(" ")));
         sprite[SPRITE.CRAFT_STONE_SPIKE] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(5.5 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_spike_stone, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #5f6061 #939393 #6a7570 #939995 #9baaa3 #adbcb5 #8a938e".split(" ") }], .35, ["#756e52", "#898064", "#685b40"], .8);
-        sprite[SPRITE.INV_STONE_SPIKE] = create_craft_button(1, [{ f: create_spike_stone, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #5f6061 #939393 #6a7570 #939995 #9baaa3 #adbcb5 #8a938e".split(" ") }], .35, ["#3ba578", "#4eb687", "#3da34d"], .7);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_spike_stone,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #5f6061 #939393 #6a7570 #939995 #9baaa3 #adbcb5 #8a938e".split(" ")
+        }], .35, ["#756e52", "#898064", "#685b40"], .8);
+        sprite[SPRITE.INV_STONE_SPIKE] = create_craft_button(1, [{
+            f: create_spike_stone,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #5f6061 #939393 #6a7570 #939995 #9baaa3 #adbcb5 #8a938e".split(" ")
+        }], .35, ["#3ba578", "#4eb687", "#3da34d"], .7);
         sprite[SPRITE.AMETHYST_SPIKE] = [];
         sprite[SPRITE.AMETHYST_SPIKE][SPRITE.DAY] = CTI(create_spike_stone(1, true, "#0d1b1c #6a7570 #939393 #b15ecf #8c29aa #c26de0 #af59cd #d588f1".split(" ")));
         sprite[SPRITE.AMETHYST_SPIKE][SPRITE.NIGHT] = CTI(create_spike_stone(1, true, "#030d14 #1f343f #485e66 #8359d3 #764eb5 #8f65de #7f55cc #9d77e6".split(" ")));
         sprite[SPRITE.CRAFT_AMETHYST_SPIKE] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(5.5 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_spike_stone, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #5f6061 #939393 #b15ecf #8c29aa #c26de0 #af59cd #d588f1".split(" ") }], .35, ["#756e52", "#898064", "#685b40"], .8);
-        sprite[SPRITE.INV_AMETHYST_SPIKE] = create_craft_button(1, [{ f: create_spike_stone, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #5f6061 #939393 #b15ecf #8c29aa #c26de0 #af59cd #d588f1".split(" ") }], .35, ["#3ba578", "#4eb687", "#3da34d"], .7);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_spike_stone,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #5f6061 #939393 #b15ecf #8c29aa #c26de0 #af59cd #d588f1".split(" ")
+        }], .35, ["#756e52", "#898064", "#685b40"], .8);
+        sprite[SPRITE.INV_AMETHYST_SPIKE] = create_craft_button(1, [{
+            f: create_spike_stone,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #5f6061 #939393 #b15ecf #8c29aa #c26de0 #af59cd #d588f1".split(" ")
+        }], .35, ["#3ba578", "#4eb687", "#3da34d"], .7);
         sprite[SPRITE.DOOR_WOOD_CLOSE] = [];
         sprite[SPRITE.DOOR_WOOD_CLOSE][SPRITE.DAY] = CTI(create_door_wood(1.5, true, "#0d1b1c #4c3b19 #574122 #644928 #574122 #735534".split(" ")));
         sprite[SPRITE.DOOR_WOOD_CLOSE][SPRITE.NIGHT] = CTI(create_door_wood(1.5, true, "#030d14 #0d2e33 #184747 #123b3f #0d2e33 #174444".split(" ")));
         sprite[SPRITE.CRAFT_DOOR_WOOD_CLOSE] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(4 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_door_wood, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #4c3b19 #574122 #644928 #574122 #735534".split(" ") }], .6, ["#756e52", "#898064", "#685b40"], .8);
-        sprite[SPRITE.INV_DOOR_WOOD_CLOSE] = create_craft_button(1, [{ f: create_door_wood, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #4c3b19 #574122 #644928 #574122 #735534".split(" ") }], .6, ["#3ba578", "#4eb687", "#3da34d"], .7);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_door_wood,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #4c3b19 #574122 #644928 #574122 #735534".split(" ")
+        }], .6, ["#756e52", "#898064", "#685b40"], .8);
+        sprite[SPRITE.INV_DOOR_WOOD_CLOSE] = create_craft_button(1, [{
+            f: create_door_wood,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #4c3b19 #574122 #644928 #574122 #735534".split(" ")
+        }], .6, ["#3ba578", "#4eb687", "#3da34d"], .7);
         sprite[SPRITE.DOOR_WOOD_OPEN] = [];
         sprite[SPRITE.DOOR_WOOD_OPEN][SPRITE.DAY] = CTI(create_door_wood(1, false, "#133a2b #133a2b #1a4935 #1a4935 #133a2b #1a4935".split(" ")));
         sprite[SPRITE.DOOR_WOOD_OPEN][SPRITE.NIGHT] = CTI(create_door_wood(1, false, "#032428 #032428 #07393d #07393d #032428 #07393d".split(" ")));
@@ -5420,9 +6336,27 @@ export function start(ModdedStarving) {
         sprite[SPRITE.CRAFT_DOOR_STONE_CLOSE] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(4 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_door_stone, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #6a7570 #939995 #9baaa3 #8a938e #adbcb5".split(" ") }], .6, ["#756e52", "#898064", "#685b40"], .8);
-        sprite[SPRITE.INV_DOOR_STONE_CLOSE] = create_craft_button(1, [{ f: create_door_stone, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #6a7570 #939995 #9baaa3 #8a938e #adbcb5".split(" ") }], .6, ["#3ba578", "#4eb687", "#3da34d"], .7);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_door_stone,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #6a7570 #939995 #9baaa3 #8a938e #adbcb5".split(" ")
+        }], .6, ["#756e52", "#898064", "#685b40"], .8);
+        sprite[SPRITE.INV_DOOR_STONE_CLOSE] = create_craft_button(1, [{
+            f: create_door_stone,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #6a7570 #939995 #9baaa3 #8a938e #adbcb5".split(" ")
+        }], .6, ["#3ba578", "#4eb687", "#3da34d"], .7);
         sprite[SPRITE.DOOR_STONE_OPEN] = [];
         sprite[SPRITE.DOOR_STONE_OPEN][SPRITE.DAY] = CTI(create_door_stone(1, false, "#133a2b #133a2b #1a4935 #1a4935 #133a2b #1a4935".split(" ")));
         sprite[SPRITE.DOOR_STONE_OPEN][SPRITE.NIGHT] = CTI(create_door_stone(1, false, "#032428 #032428 #07393d #07393d #032428 #07393d".split(" ")));
@@ -5432,9 +6366,27 @@ export function start(ModdedStarving) {
         sprite[SPRITE.CRAFT_DOOR_AMETHYST_CLOSE] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(4 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_door_stone, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #b15ecf #8c29aa #c26de0 #af59cd #d588f1".split(" ") }], .6, ["#756e52", "#898064", "#685b40"], .8);
-        sprite[SPRITE.INV_DOOR_AMETHYST_CLOSE] = create_craft_button(1, [{ f: create_door_stone, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #b15ecf #8c29aa #c26de0 #af59cd #d588f1".split(" ") }], .6, ["#3ba578", "#4eb687", "#3da34d"], .7);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_door_stone,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #b15ecf #8c29aa #c26de0 #af59cd #d588f1".split(" ")
+        }], .6, ["#756e52", "#898064", "#685b40"], .8);
+        sprite[SPRITE.INV_DOOR_AMETHYST_CLOSE] = create_craft_button(1, [{
+            f: create_door_stone,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #b15ecf #8c29aa #c26de0 #af59cd #d588f1".split(" ")
+        }], .6, ["#3ba578", "#4eb687", "#3da34d"], .7);
         sprite[SPRITE.DOOR_AMETHYST_OPEN] = [];
         sprite[SPRITE.DOOR_AMETHYST_OPEN][SPRITE.DAY] = CTI(create_door_stone(1, false, "#133a2b #133a2b #1a4935 #1a4935 #133a2b #1a4935".split(" ")));
         sprite[SPRITE.DOOR_AMETHYST_OPEN][SPRITE.NIGHT] = CTI(create_door_stone(1, false, "#032428 #032428 #07393d #07393d #032428 #07393d".split(" ")));
@@ -5444,9 +6396,27 @@ export function start(ModdedStarving) {
         sprite[SPRITE.CRAFT_DOOR_GOLD_CLOSE] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(4 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_door_gold, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #877d36 #a08f47 #a7983c #9a8636 #c1b06b".split(" ") }], .6, ["#756e52", "#898064", "#685b40"], .8);
-        sprite[SPRITE.INV_DOOR_GOLD_CLOSE] = create_craft_button(1, [{ f: create_door_gold, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #877d36 #a08f47 #a7983c #9a8636 #c1b06b".split(" ") }], .6, ["#3ba578", "#4eb687", "#3da34d"], .7);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_door_gold,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #877d36 #a08f47 #a7983c #9a8636 #c1b06b".split(" ")
+        }], .6, ["#756e52", "#898064", "#685b40"], .8);
+        sprite[SPRITE.INV_DOOR_GOLD_CLOSE] = create_craft_button(1, [{
+            f: create_door_gold,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #877d36 #a08f47 #a7983c #9a8636 #c1b06b".split(" ")
+        }], .6, ["#3ba578", "#4eb687", "#3da34d"], .7);
         sprite[SPRITE.DOOR_GOLD_OPEN] = [];
         sprite[SPRITE.DOOR_GOLD_OPEN][SPRITE.DAY] = CTI(create_door_gold(1, false, "#133a2b #133a2b #1a4935 #1a4935 #133a2b #1a4935".split(" ")));
         sprite[SPRITE.DOOR_GOLD_OPEN][SPRITE.NIGHT] = CTI(create_door_gold(1, false, "#032428 #032428 #07393d #07393d #032428 #07393d".split(" ")));
@@ -5456,9 +6426,27 @@ export function start(ModdedStarving) {
         sprite[SPRITE.CRAFT_DOOR_DIAMOND_CLOSE] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(4 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_door_diamond, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #5cc5ce #89d1d4 #86d0d1 #95d5d8 #e0f2f6 #b3e0e3".split(" ") }], .6, ["#756e52", "#898064", "#685b40"], .8);
-        sprite[SPRITE.INV_DOOR_DIAMOND_CLOSE] = create_craft_button(1, [{ f: create_door_diamond, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #5cc5ce #89d1d4 #86d0d1 #95d5d8 #e0f2f6 #b3e0e3".split(" ") }], .6, ["#3ba578", "#4eb687", "#3da34d"], .7);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_door_diamond,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #5cc5ce #89d1d4 #86d0d1 #95d5d8 #e0f2f6 #b3e0e3".split(" ")
+        }], .6, ["#756e52", "#898064", "#685b40"], .8);
+        sprite[SPRITE.INV_DOOR_DIAMOND_CLOSE] = create_craft_button(1, [{
+            f: create_door_diamond,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #5cc5ce #89d1d4 #86d0d1 #95d5d8 #e0f2f6 #b3e0e3".split(" ")
+        }], .6, ["#3ba578", "#4eb687", "#3da34d"], .7);
         sprite[SPRITE.DOOR_DIAMOND_OPEN] = [];
         sprite[SPRITE.DOOR_DIAMOND_OPEN][SPRITE.DAY] = CTI(create_door_diamond(1, false, "#133a2b #133a2b #1a4935 #1a4935 #133a2b #1a4935".split(" ")));
         sprite[SPRITE.DOOR_DIAMOND_OPEN][SPRITE.NIGHT] = CTI(create_door_diamond(1, false, "#032428 #032428 #07393d #07393d #032428 #07393d".split(" ")));
@@ -5468,9 +6456,27 @@ export function start(ModdedStarving) {
         sprite[SPRITE.CRAFT_CHEST] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(6 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_chest, x: 0, y: 2, a: 1, r: 0, c: "#133a2b #9e8838 #c4a23a #4c3b19 #614627 #614627 #614627 #c4a23a #c4a23a #c4a23a".split(" ") }], .35, ["#756e52", "#898064", "#685b40"], .8);
-        sprite[SPRITE.INV_CHEST] = create_craft_button(1, [{ f: create_chest, x: 0, y: 2, a: 1, r: 0, c: "#133a2b #9e8838 #c4a23a #4c3b19 #614627 #614627 #614627 #c4a23a #c4a23a #c4a23a".split(" ") }], .35, ["#3ba578", "#4eb687", "#3da34d"], .7);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_chest,
+            x: 0,
+            y: 2,
+            a: 1,
+            r: 0,
+            c: "#133a2b #9e8838 #c4a23a #4c3b19 #614627 #614627 #614627 #c4a23a #c4a23a #c4a23a".split(" ")
+        }], .35, ["#756e52", "#898064", "#685b40"], .8);
+        sprite[SPRITE.INV_CHEST] = create_craft_button(1, [{
+            f: create_chest,
+            x: 0,
+            y: 2,
+            a: 1,
+            r: 0,
+            c: "#133a2b #9e8838 #c4a23a #4c3b19 #614627 #614627 #614627 #c4a23a #c4a23a #c4a23a".split(" ")
+        }], .35, ["#3ba578", "#4eb687", "#3da34d"], .7);
         sprite[SPRITE.RABBIT] = [];
         sprite[SPRITE.RABBIT][SPRITE.DAY] = CTI(create_rabbit(.9, ["#0e3022", "#ee97bf", "#FFFFFF", "#000000", "#ffffff"]));
         sprite[SPRITE.RABBIT][SPRITE.NIGHT] = CTI(create_rabbit(.9, ["#030d14", "#4d1b59", "#5d3f77", "#220e26", "#ffffff"]));
@@ -5482,276 +6488,1168 @@ export function start(ModdedStarving) {
         sprite[SPRITE.WOLF][SPRITE.DAY] = CTI(create_wolf(1.4, ["#0e3022", "#231f20", "#b7252c", "#b6222a", "#ffffff"]));
         sprite[SPRITE.WOLF][SPRITE.NIGHT] = CTI(create_wolf(1.4, ["#030d14", "#1e181c", "#462966", "#462966", "#ffffff"]));
         sprite[SPRITE.MEAT] = CTI(create_meat(1, true, ["#dd5d57", "#ffffff", "#5e5d5e", "#ffffff"]));
-        sprite[SPRITE.INV_MEAT] = create_craft_button(1, [{ f: create_meat, x: 0, y: -3, a: 1, r: 0, c: ["#dd5d57", "#ffffff", "#5e5d5e", "#ffffff"] }], 1.4, ["#3ba578", "#4eb687", "#3da34d"], .7);
+        sprite[SPRITE.INV_MEAT] = create_craft_button(1, [{
+            f: create_meat,
+            x: 0,
+            y: -3,
+            a: 1,
+            r: 0,
+            c: ["#dd5d57", "#ffffff", "#5e5d5e", "#ffffff"]
+        }], 1.4, ["#3ba578", "#4eb687", "#3da34d"], .7);
         sprite[SPRITE.COOKED_MEAT] = CTI(create_meat(1, true, ["#602920", "#844f49", "#5e5d5e", "#d3ccc7"]));
-        sprite[SPRITE.INV_COOKED_MEAT] = create_craft_button(1, [{ f: create_meat, x: 0, y: -3, a: 1, r: 0, c: ["#602920", "#844f49", "#5e5d5e", "#d3ccc7"] }], 1.4, ["#3ba578", "#4eb687", "#3da34d"], .7);
+        sprite[SPRITE.INV_COOKED_MEAT] = create_craft_button(1, [{
+            f: create_meat,
+            x: 0,
+            y: -3,
+            a: 1,
+            r: 0,
+            c: ["#602920", "#844f49", "#5e5d5e", "#d3ccc7"]
+        }], 1.4, ["#3ba578", "#4eb687", "#3da34d"], .7);
         sprite[SPRITE.CRAFT_COOKED_MEAT] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(1.5 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_meat, x: 0, y: -5, a: 1, r: 0, c: ["#602920", "#844f49", "#5e5d5e", "#d3ccc7"] }], 1.4, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_meat,
+            x: 0,
+            y: -5,
+            a: 1,
+            r: 0,
+            c: ["#602920", "#844f49", "#5e5d5e", "#d3ccc7"]
+        }], 1.4, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.CORD] = CTI(create_cord(1, true, ["#cec0c4", "#ffffff", "#6d6768"]));
-        sprite[SPRITE.INV_CORD] = create_craft_button(1, [{ f: create_cord, x: -3, y: -3, a: 1, r: 0, c: ["#cec0c4", "#ffffff", "#6d6768"] }], .9, ["#3ba578", "#4eb687", "#3da34d"], .7);
+        sprite[SPRITE.INV_CORD] = create_craft_button(1, [{
+            f: create_cord,
+            x: -3,
+            y: -3,
+            a: 1,
+            r: 0,
+            c: ["#cec0c4", "#ffffff", "#6d6768"]
+        }], .9, ["#3ba578", "#4eb687", "#3da34d"], .7);
         sprite[SPRITE.BLUE_CORD] = CTI(create_cord(1, true, ["#d4e9ec", "#37b1d7", "#506c71"]));
-        sprite[SPRITE.INV_BLUE_CORD] = create_craft_button(1, [{ f: create_cord, x: -3, y: -3, a: 1, r: 0, c: ["#d4e9ec", "#37b1d7", "#506c71"] }], .9, ["#3ba578", "#4eb687", "#3da34d"], .7);
+        sprite[SPRITE.INV_BLUE_CORD] = create_craft_button(1, [{
+            f: create_cord,
+            x: -3,
+            y: -3,
+            a: 1,
+            r: 0,
+            c: ["#d4e9ec", "#37b1d7", "#506c71"]
+        }], .9, ["#3ba578", "#4eb687", "#3da34d"], .7);
         sprite[SPRITE.CRAFT_BLUE_CORD] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(2.5 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_cord, x: 0, y: -5, a: 1, r: 0, c: ["#d4e9ec", "#37b1d7", "#506c71"] }], .9, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_cord,
+            x: 0,
+            y: -5,
+            a: 1,
+            r: 0,
+            c: ["#d4e9ec", "#37b1d7", "#506c71"]
+        }], .9, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.FUR] = CTI(create_fur(1, true, ["#ef96be", "#ffffff"]));
-        sprite[SPRITE.INV_FUR] = create_craft_button(1, [{ f: create_fur, x: -3, y: -3, a: 1, r: 0, c: ["#ef96be", "#ffffff"] }], .5, ["#2b5c48", "#2b5c48", "#2b5c48"], .7);
+        sprite[SPRITE.INV_FUR] = create_craft_button(1, [{
+            f: create_fur,
+            x: -3,
+            y: -3,
+            a: 1,
+            r: 0,
+            c: ["#ef96be", "#ffffff"]
+        }], .5, ["#2b5c48", "#2b5c48", "#2b5c48"], .7);
         sprite[SPRITE.FUR_WOLF] = CTI(create_fur(1, true, ["#231f20", "#b6222a"]));
-        sprite[SPRITE.INV_FUR_WOLF] = create_craft_button(1, [{ f: create_fur, x: -3, y: -3, a: 1, r: 0, c: ["#231f20", "#b6222a"] }], .5, ["#2b5c48", "#2b5c48", "#2b5c48"], .7);
+        sprite[SPRITE.INV_FUR_WOLF] = create_craft_button(1, [{
+            f: create_fur,
+            x: -3,
+            y: -3,
+            a: 1,
+            r: 0,
+            c: ["#231f20", "#b6222a"]
+        }], .5, ["#2b5c48", "#2b5c48", "#2b5c48"], .7);
         sprite[SPRITE.FUR_WINTER] = CTI(create_fur(1, true, ["#ffffff", "#b6222a"]));
-        sprite[SPRITE.INV_FUR_WINTER] = create_craft_button(1, [{ f: create_fur, x: -3, y: -3, a: 1, r: 0, c: ["#ffffff", "#b6222a"] }], .5, ["#2b5c48", "#2b5c48", "#2b5c48"], .7);
+        sprite[SPRITE.INV_FUR_WINTER] = create_craft_button(1, [{
+            f: create_fur,
+            x: -3,
+            y: -3,
+            a: 1,
+            r: 0,
+            c: ["#ffffff", "#b6222a"]
+        }], .5, ["#2b5c48", "#2b5c48", "#2b5c48"], .7);
         sprite[SPRITE.EARMUFFS] = [];
         sprite[SPRITE.EARMUFFS][SPRITE.DAY] = CTI(create_earmuff(.6, true, ["#f9efeb", "#dfd1cb", "#3e3c25", "#4d4a2e"]));
         sprite[SPRITE.EARMUFFS][SPRITE.NIGHT] = CTI(create_earmuff(.6, true, ["#478e8b", "#327e73", "#073030", "#08403f"]));
-        sprite[SPRITE.INV_EARMUFFS] = create_craft_button(1, [{ f: create_earmuff, x: 0, y: 0, a: 1, r: 0, c: ["#f9efeb", "#dfd1cb", "#3e3c25", "#4d4a2e"] }], .4, ["#3ba1a4", "#4eb0b6", "#3da39a"], .7);
+        sprite[SPRITE.INV_EARMUFFS] = create_craft_button(1, [{
+            f: create_earmuff,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: ["#f9efeb", "#dfd1cb", "#3e3c25", "#4d4a2e"]
+        }], .4, ["#3ba1a4", "#4eb0b6", "#3da39a"], .7);
         sprite[SPRITE.CRAFT_EARMUFFS] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(5 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_earmuff, x: 0, y: 0, a: 1, r: 0, c: ["#f9efeb", "#dfd1cb", "#3e3c25", "#4d4a2e"] }], .4, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_earmuff,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: ["#f9efeb", "#dfd1cb", "#3e3c25", "#4d4a2e"]
+        }], .4, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.COAT] = [];
         sprite[SPRITE.COAT][SPRITE.DAY] = CTI(create_coat(.6, true, ["#3e3c25", "#4d4a2e", "#f9efeb", "#dfd1cb"]));
         sprite[SPRITE.COAT][SPRITE.NIGHT] = CTI(create_coat(.6, true, ["#073030", "#08403f", "#478e8b", "#327e73"]));
-        sprite[SPRITE.INV_COAT] = create_craft_button(1, [{ f: create_coat, x: 0, y: 0, a: 1, r: 0, c: ["#3e3c25", "#4d4a2e", "#f9efeb", "#dfd1cb"] }], .4, ["#3ba1a4", "#4eb0b6", "#3da39a"], .7);
+        sprite[SPRITE.INV_COAT] = create_craft_button(1, [{
+            f: create_coat,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: ["#3e3c25", "#4d4a2e", "#f9efeb", "#dfd1cb"]
+        }], .4, ["#3ba1a4", "#4eb0b6", "#3da39a"], .7);
         sprite[SPRITE.CRAFT_COAT] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(5 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_coat, x: 0, y: 0, a: 1, r: 0, c: ["#3e3c25", "#4d4a2e", "#f9efeb", "#dfd1cb"] }], .4, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_coat,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: ["#3e3c25", "#4d4a2e", "#f9efeb", "#dfd1cb"]
+        }], .4, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.CAP_SCARF] = [];
         sprite[SPRITE.CAP_SCARF][SPRITE.DAY] = CTI(create_cap_scarf(.6, true, ["#171a19", "#dee7e7", "#b8cccb", "#ffffff", "#e3e8e8"]));
         sprite[SPRITE.CAP_SCARF][SPRITE.NIGHT] = CTI(create_cap_scarf(.6, true, ["#073030", "#368981", "#1c635e", "#7bbab4", "#469e95"]));
-        sprite[SPRITE.INV_CAP_SCARF] = create_craft_button(1, [{ f: create_cap_scarf, x: 0, y: 0, a: 1, r: 0, c: ["#171a19", "#dee7e7", "#b8cccb", "#ffffff", "#e3e8e8"] }], .4, ["#3ba1a4", "#4eb0b6", "#3da39a"], .7);
+        sprite[SPRITE.INV_CAP_SCARF] = create_craft_button(1, [{
+            f: create_cap_scarf,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: ["#171a19", "#dee7e7", "#b8cccb", "#ffffff", "#e3e8e8"]
+        }], .4, ["#3ba1a4", "#4eb0b6", "#3da39a"], .7);
         sprite[SPRITE.CRAFT_CAP_SCARF] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(5.8 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_cap_scarf, x: 0, y: 0, a: 1, r: 0, c: ["#171a19", "#dee7e7", "#b8cccb", "#ffffff", "#e3e8e8"] }], .4, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_cap_scarf,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: ["#171a19", "#dee7e7", "#b8cccb", "#ffffff", "#e3e8e8"]
+        }], .4, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.BANDAGE] = CTI(create_bandage(1, false, ["#ffffff", "#cec0c4"]));
         sprite[SPRITE.CRAFT_BANDAGE] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(5.5 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_bandage, x: 0, y: 0, a: 1, r: 0, c: ["#ffffff", "#cec0c4"] }], .35, ["#756e52", "#898064", "#685b40"], .8);
-        sprite[SPRITE.INV_BANDAGE] = create_craft_button(1, [{ f: create_bandage, x: -2, y: -2, a: 1, r: 0, c: ["#ffffff", "#cec0c4"] }], .35, ["#3ba578", "#4eb687", "#3da34d"], .7);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_bandage,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: ["#ffffff", "#cec0c4"]
+        }], .35, ["#756e52", "#898064", "#685b40"], .8);
+        sprite[SPRITE.INV_BANDAGE] = create_craft_button(1, [{
+            f: create_bandage,
+            x: -2,
+            y: -2,
+            a: 1,
+            r: 0,
+            c: ["#ffffff", "#cec0c4"]
+        }], .35, ["#3ba578", "#4eb687", "#3da34d"], .7);
         sprite[SPRITE.BAG] = [];
         sprite[SPRITE.BAG][SPRITE.DAY] = CTI(create_bag(.6, false, ["#872f13", "#471e12"]));
         sprite[SPRITE.BAG][SPRITE.NIGHT] = CTI(create_bag(.6, false, ["#0e3336", "#092626"]));
         sprite[SPRITE.CRAFT_BAG] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(3 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_bag, x: 0, y: 0, a: 1, r: 0, c: ["#872f13", "#471e12"] }], .7, ["#756e52", "#898064", "#685b40"], .8);
-        sprite[SPRITE.INV_BAG] = create_craft_button(1, [{ f: create_bag, x: -2, y: -2, a: 1, r: 0, c: ["#872f13", "#471e12"] }], .7, ["#3ba1a4", "#4eb0b6", "#3da39a"], .7);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_bag,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: ["#872f13", "#471e12"]
+        }], .7, ["#756e52", "#898064", "#685b40"], .8);
+        sprite[SPRITE.INV_BAG] = create_craft_button(1, [{
+            f: create_bag,
+            x: -2,
+            y: -2,
+            a: 1,
+            r: 0,
+            c: ["#872f13", "#471e12"]
+        }], .7, ["#3ba1a4", "#4eb0b6", "#3da39a"], .7);
         sprite[SPRITE.FURNACE_ON] = [];
         sprite[SPRITE.FURNACE_ON][SPRITE.DAY] = CTI(create_furnace_on(.5, true, "#0d1b1c #939393 #5f6061 #c0c0c0 #ffad22 #fffdd5 #fee764".split(" ")));
         sprite[SPRITE.FURNACE_ON][SPRITE.NIGHT] = CTI(create_furnace_on(.5, true, "#0d1b1c #485e66 #1f343f #60757d #ffdc73 #fffce2 #fef259".split(" ")));
-        sprite[SPRITE.INV_FURNACE] = create_craft_button(1, [{ f: create_furnace_on, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #939393 #5f6061 #c0c0c0 #ffad22 #fffdd5 #fee764".split(" ") }], .18, ["#3ba578", "#4eb687", "#3da34d"], 1);
+        sprite[SPRITE.INV_FURNACE] = create_craft_button(1, [{
+            f: create_furnace_on,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #939393 #5f6061 #c0c0c0 #ffad22 #fffdd5 #fee764".split(" ")
+        }], .18, ["#3ba578", "#4eb687", "#3da34d"], 1);
         sprite[SPRITE.CRAFT_FURNACE] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(12 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_furnace_on, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #939393 #5f6061 #c0c0c0 #ffad22 #fffdd5 #fee764".split(" ") }], .18, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_furnace_on,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #939393 #5f6061 #c0c0c0 #ffad22 #fffdd5 #fee764".split(" ")
+        }], .18, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.FURNACE_OFF] = [];
         sprite[SPRITE.FURNACE_OFF][SPRITE.DAY] = CTI(create_furnace_off(.5, true, "#0d1b1c #939393 #5f6061 #c0c0c0 #4f4f4f #6c6c6c #454545".split(" ")));
         sprite[SPRITE.FURNACE_OFF][SPRITE.NIGHT] = CTI(create_furnace_off(.5, true, "#0d1b1c #485e66 #1f343f #60757d #152229 #0c1113 #0c1113".split(" ")));
         sprite[SPRITE.FURNACE_SLOT] = CTI(create_furnace_slot(.8, true, ["#5f6061", "#939393"]));
-        sprite[SPRITE.FURNACE_BUTTON] = create_craft_button(1, [{ f: create_wood_fire, x: 0, y: 0, a: 1, r: Math.PI / 2.5, c: ["#4d2d14", "#432516"] }], .3, ["#494949", "#5b5858", "#3d3b3b"], 1);
+        sprite[SPRITE.FURNACE_BUTTON] = create_craft_button(1, [{
+            f: create_wood_fire,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: Math.PI / 2.5,
+            c: ["#4d2d14", "#432516"]
+        }], .3, ["#494949", "#5b5858", "#3d3b3b"], 1);
         sprite[SPRITE.SPEAR] = [];
         sprite[SPRITE.SPEAR][SPRITE.DAY] = CTI(create_rotated_img(3, create_spear(.6, true, ["#0d1b1c", "#4d2d14", "#432516", "#939393", "#5f6061"])));
         sprite[SPRITE.SPEAR][SPRITE.NIGHT] = CTI(create_rotated_img(3, create_spear(.6, true, ["#0d1b1c", "#0d2e33", "#0b2326", "#485e66", "#1f343f"])));
-        sprite[SPRITE.INV_SPEAR] = create_craft_button(1, [{ f: create_spear, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#4d2d14", "#432516", "#939393", "#5f6061"] }], .27, ["#3ba578", "#4eb687", "#3da34d"], 1);
+        sprite[SPRITE.INV_SPEAR] = create_craft_button(1, [{
+            f: create_spear,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#4d2d14", "#432516", "#939393", "#5f6061"]
+        }], .27, ["#3ba578", "#4eb687", "#3da34d"], 1);
         sprite[SPRITE.CRAFT_SPEAR] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(8 * c, "#918770");
-            }, x: 2, y: 0, a: .3, r: 0
-        }, { f: create_spear, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#4d2d14", "#432516", "#939393", "#5f6061"] }], .27, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 2,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_spear,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#4d2d14", "#432516", "#939393", "#5f6061"]
+        }], .27, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.GOLD_SPEAR] = [];
         sprite[SPRITE.GOLD_SPEAR][SPRITE.DAY] = CTI(create_rotated_img(3, create_spear(.6, true, ["#0d1b1c", "#493e26", "#382e19", "#c4bc51", "#b29c32"])));
         sprite[SPRITE.GOLD_SPEAR][SPRITE.NIGHT] = CTI(create_rotated_img(3, create_spear(.6, true, ["#030d14", "#263947", "#182935", "#43aa82", "#29997c"])));
-        sprite[SPRITE.INV_GOLD_SPEAR] = create_craft_button(1, [{ f: create_spear, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#493e26", "#382e19", "#c4bc51", "#b29c32"] }], .27, ["#3ba578", "#4eb687", "#3da34d"], 1);
+        sprite[SPRITE.INV_GOLD_SPEAR] = create_craft_button(1, [{
+            f: create_spear,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#493e26", "#382e19", "#c4bc51", "#b29c32"]
+        }], .27, ["#3ba578", "#4eb687", "#3da34d"], 1);
         sprite[SPRITE.CRAFT_GOLD_SPEAR] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(8 * c, "#918770");
-            }, x: 2, y: 0, a: .3, r: 0
-        }, { f: create_spear, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#493e26", "#382e19", "#c4bc51", "#b29c32"] }], .27, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 2,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_spear,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#493e26", "#382e19", "#c4bc51", "#b29c32"]
+        }], .27, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.DIAMOND_SPEAR] = [];
         sprite[SPRITE.DIAMOND_SPEAR][SPRITE.DAY] = CTI(create_rotated_img(3, create_spear(.6, true, ["#0d1b1c", "#262114", "#211108", "#63c9d6", "#29aaa1"])));
         sprite[SPRITE.DIAMOND_SPEAR][SPRITE.NIGHT] = CTI(create_rotated_img(3, create_spear(.6, true, ["#0d1b1c", "#111316", "#0a0b0c", "#73dde5", "#3dc4c0"])));
-        sprite[SPRITE.INV_DIAMOND_SPEAR] = create_craft_button(1, [{ f: create_spear, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#262114", "#211108", "#63c9d6", "#29aaa1"] }], .27, ["#3ba578", "#4eb687", "#3da34d"], 1);
+        sprite[SPRITE.INV_DIAMOND_SPEAR] = create_craft_button(1, [{
+            f: create_spear,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#262114", "#211108", "#63c9d6", "#29aaa1"]
+        }], .27, ["#3ba578", "#4eb687", "#3da34d"], 1);
         sprite[SPRITE.CRAFT_DIAMOND_SPEAR] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(8 * c, "#918770");
-            }, x: 2, y: 0, a: .3, r: 0
-        }, { f: create_spear, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#262114", "#211108", "#63c9d6", "#29aaa1"] }], .27, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 2,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_spear,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#262114", "#211108", "#63c9d6", "#29aaa1"]
+        }], .27, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.AMETHYST_SPEAR] = [];
         sprite[SPRITE.AMETHYST_SPEAR][SPRITE.DAY] = CTI(create_rotated_img(3, create_spear(.6, true, ["#0d1b1c", "#262114", "#211108", "#b864d6", "#8c29aa"])));
         sprite[SPRITE.AMETHYST_SPEAR][SPRITE.NIGHT] = CTI(create_rotated_img(3, create_spear(.6, true, ["#0d1b1c", "#111316", "#0a0b0c", "#8359d3", "#764eb5"])));
-        sprite[SPRITE.INV_AMETHYST_SPEAR] = create_craft_button(1, [{ f: create_spear, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#262114", "#211108", "#b864d6", "#8c29aa"] }], .27, ["#3ba578", "#4eb687", "#3da34d"], 1);
+        sprite[SPRITE.INV_AMETHYST_SPEAR] = create_craft_button(1, [{
+            f: create_spear,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#262114", "#211108", "#b864d6", "#8c29aa"]
+        }], .27, ["#3ba578", "#4eb687", "#3da34d"], 1);
         sprite[SPRITE.CRAFT_AMETHYST_SPEAR] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(8 * c, "#918770");
-            }, x: 2, y: 0, a: .3, r: 0
-        }, { f: create_spear, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#262114", "#211108", "#b864d6", "#8c29aa"] }], .27, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 2,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_spear,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#262114", "#211108", "#b864d6", "#8c29aa"]
+        }], .27, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.HAMMER] = [];
         sprite[SPRITE.HAMMER][SPRITE.DAY] = CTI(create_rotated_img(3, create_hammer(1, true, ["#0d1b1c", "#4d2d14", "#432516", "#939393", "#5f6061"])));
         sprite[SPRITE.HAMMER][SPRITE.NIGHT] = CTI(create_rotated_img(3, create_hammer(1, true, ["#030d14", "#263947", "#182935", "#485e66", "#1f343f"])));
-        sprite[SPRITE.INV_HAMMER] = create_craft_button(1, [{ f: create_hammer, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#4d2d14", "#432516", "#939393", "#5f6061"] }], .52, ["#3ba578", "#4eb687", "#3da34d"], 1);
+        sprite[SPRITE.INV_HAMMER] = create_craft_button(1, [{
+            f: create_hammer,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#4d2d14", "#432516", "#939393", "#5f6061"]
+        }], .52, ["#3ba578", "#4eb687", "#3da34d"], 1);
         sprite[SPRITE.CRAFT_HAMMER] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(4.2 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_hammer, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#4d2d14", "#432516", "#939393", "#5f6061"] }], .52, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_hammer,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#4d2d14", "#432516", "#939393", "#5f6061"]
+        }], .52, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.HAMMER_GOLD] = [];
         sprite[SPRITE.HAMMER_GOLD][SPRITE.DAY] = CTI(create_rotated_img(3, create_hammer(1, true, ["#0d1b1c", "#493e26", "#382e19", "#c4bc51", "#b29c32"])));
         sprite[SPRITE.HAMMER_GOLD][SPRITE.NIGHT] = CTI(create_rotated_img(3, create_hammer(1, true, ["#0d1b1c", "#0d2e33", "#0b2326", "#43aa82", "#29997c"])));
-        sprite[SPRITE.INV_HAMMER_GOLD] = create_craft_button(1, [{ f: create_hammer, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#493e26", "#382e19", "#c4bc51", "#b29c32"] }], .52, ["#3ba578", "#4eb687", "#3da34d"], 1);
+        sprite[SPRITE.INV_HAMMER_GOLD] = create_craft_button(1, [{
+            f: create_hammer,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#493e26", "#382e19", "#c4bc51", "#b29c32"]
+        }], .52, ["#3ba578", "#4eb687", "#3da34d"], 1);
         sprite[SPRITE.CRAFT_HAMMER_GOLD] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(4.2 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_hammer, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#493e26", "#382e19", "#c4bc51", "#b29c32"] }], .52, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_hammer,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#493e26", "#382e19", "#c4bc51", "#b29c32"]
+        }], .52, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.HAMMER_DIAMOND] = [];
         sprite[SPRITE.HAMMER_DIAMOND][SPRITE.DAY] = CTI(create_rotated_img(3, create_hammer(1, true, ["#0d1b1c", "#262114", "#211108", "#63c9d6", "#29aaa1"])));
         sprite[SPRITE.HAMMER_DIAMOND][SPRITE.NIGHT] = CTI(create_rotated_img(3, create_hammer(1, true, ["#0d1b1c", "#111316", "#0a0b0c", "#73dde5", "#3dc4c0"])));
-        sprite[SPRITE.INV_HAMMER_DIAMOND] = create_craft_button(1, [{ f: create_hammer, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#262114", "#211108", "#63c9d6", "#29aaa1"] }], .52, ["#3ba578", "#4eb687", "#3da34d"], 1);
+        sprite[SPRITE.INV_HAMMER_DIAMOND] = create_craft_button(1, [{
+            f: create_hammer,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#262114", "#211108", "#63c9d6", "#29aaa1"]
+        }], .52, ["#3ba578", "#4eb687", "#3da34d"], 1);
         sprite[SPRITE.CRAFT_HAMMER_DIAMOND] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(4.2 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_hammer, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#262114", "#211108", "#63c9d6", "#29aaa1"] }], .52, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_hammer,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#262114", "#211108", "#63c9d6", "#29aaa1"]
+        }], .52, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.HAMMER_AMETHYST] = [];
         sprite[SPRITE.HAMMER_AMETHYST][SPRITE.DAY] = CTI(create_rotated_img(3, create_hammer(1, true, ["#0d1b1c", "#262114", "#211108", "#b864d6", "#8c29aa"])));
         sprite[SPRITE.HAMMER_AMETHYST][SPRITE.NIGHT] = CTI(create_rotated_img(3, create_hammer(1, true, ["#0d1b1c", "#111316", "#0a0b0c", "#8359d3", "#764eb5"])));
-        sprite[SPRITE.INV_HAMMER_AMETHYST] = create_craft_button(1, [{ f: create_hammer, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#262114", "#211108", "#b864d6", "#8c29aa"] }], .52, ["#3ba578", "#4eb687", "#3da34d"], 1);
+        sprite[SPRITE.INV_HAMMER_AMETHYST] = create_craft_button(1, [{
+            f: create_hammer,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#262114", "#211108", "#b864d6", "#8c29aa"]
+        }], .52, ["#3ba578", "#4eb687", "#3da34d"], 1);
         sprite[SPRITE.CRAFT_HAMMER_AMETHYST] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(4.2 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_hammer, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#262114", "#211108", "#b864d6", "#8c29aa"] }], .52, ["#756e52", "#898064", "#685b40"], .8);
-        sprite[SPRITE.CHEST_SEED] = create_craft_button(1, [{ f: create_seed, x: 0, y: 0, a: 1, r: 0, c: ["#756e52", "#898064", "#685b40"] }], .7, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_FIRE] = create_craft_button(1, [{ f: create_wood_fire, x: -2, y: -2, a: 1, r: -Math.PI / 7, c: ["#4d2d14", "#432516"] }, { f: create_fire, x: -2, y: -2, a: 1, r: -Math.PI / 7, c: ["#efd435", "#ec8d35", "#e96132"] }], .3, ["#968e55", "#b1a868", "#888046"], .8);
-        sprite[SPRITE.CHEST_BIG_FIRE] = create_craft_button(1, [{ f: create_big_fire_wood, x: -2, y: -1, a: 1, r: -Math.PI / 7, c: ["#4d2d14", "#432516", "#58645F", "#75827D", "#0c2c2e"] }, { f: create_fire, x: -2, y: -1, a: 1, r: -Math.PI / 7, c: ["#efd435", "#ec8d35", "#e96132"] }], .3, ["#968e55", "#b1a868", "#888046"], .8);
-        sprite[SPRITE.CHEST_SWORD] = create_craft_button(1, [{ f: create_sword, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#493d36", "#332b28", "#939393", "#5f6061"] }], .3, ["#968e55", "#b1a868", "#888046"], 1);
-        sprite[SPRITE.CHEST_SWORD_GOLD] = create_craft_button(1, [{ f: create_sword, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#493e26", "#382e19", "#c4bc51", "#b29c32"] }], .3, ["#968e55", "#b1a868", "#888046"], 1);
-        sprite[SPRITE.CHEST_SWORD_DIAMOND] = create_craft_button(1, [{ f: create_sword, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#262114", "#211108", "#63c9d6", "#29aaa1"] }], .3, ["#968e55", "#b1a868", "#888046"], 1);
-        sprite[SPRITE.CHEST_SWORD_AMETHYST] = create_craft_button(1, [{ f: create_sword, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#262114", "#211108", "#b864d6", "#8c29aa"] }], .3, ["#968e55", "#b1a868", "#888046"], 1);
-        sprite[SPRITE.CHEST_PICK_WOOD] = create_craft_button(1, [{ f: create_pickaxe, x: -2, y: 5, a: 1, r: -Math.PI / 5, c: "#0d1b1c #000000 #0d1b1c #4d2d14 #432516 #4d2d14 #432516".split(" ") }], .45, ["#968e55", "#b1a868", "#888046"], 1);
-        sprite[SPRITE.CHEST_PICK] = create_craft_button(1, [{ f: create_pickaxe, x: -2, y: 5, a: 1, r: -Math.PI / 5, c: "#0d1b1c #000000 #0d1b1c #4d2d14 #432516 #939393 #5f6061".split(" ") }], .45, ["#968e55", "#b1a868", "#888046"], 1);
-        sprite[SPRITE.CHEST_PICK_GOLD] = create_craft_button(1, [{ f: create_pickaxe, x: -2, y: 5, a: 1, r: -Math.PI / 5, c: "#0d1b1c #000000 #0d1b1c #493e26 #382e19 #c4bc51 #b29c32".split(" ") }], .45, ["#968e55", "#b1a868", "#888046"], 1);
-        sprite[SPRITE.CHEST_PICK_DIAMOND] = create_craft_button(1, [{ f: create_pickaxe, x: -2, y: 5, a: 1, r: -Math.PI / 5, c: "#0d1b1c #000000 #0d1b1c #262114 #211108 #63c9d6 #29aaa1".split(" ") }], .45, ["#968e55", "#b1a868", "#888046"], 1);
-        sprite[SPRITE.CHEST_PICK_AMETHYST] = create_craft_button(1, [{ f: create_pickaxe, x: -2, y: 5, a: 1, r: -Math.PI / 5, c: "#0d1b1c #000000 #0d1b1c #262114 #211108 #b864d6 #8c29aa".split(" ") }], .45, ["#968e55", "#b1a868", "#888046"], 1);
-        sprite[SPRITE.CHEST_STONE] = create_craft_button(1, [{ f: create_stone, x: -5, y: -5, a: 1, r: 0, c: ["#252B28", "#58645F", "#75827D"] }], .23, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_GOLD] = create_craft_button(1, [{ f: create_gold, x: -5, y: -5, a: 1, r: 0, c: ["#282823", "#877c2d", "#c4bc51"] }], .43, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_DIAMOND] = create_craft_button(1, [{ f: create_diamond, x: -5, y: -5, a: 1, r: 0, c: ["#232828", "#3fc9c9", "#74ede6"] }], .33, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_WOOD] = create_craft_button(1, [{ f: create_wood_fire, x: 0, y: -5, a: 1, r: Math.PI / 2.5, c: ["#4d2d14", "#432516"] }], .3, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_PLANT] = create_craft_button(1, [{ f: create_food_plant, x: 0, y: -2, a: 1, r: 0 }], .4, ["#968e55", "#b1a868", "#888046"], 1);
-        sprite[SPRITE.CHEST_WORKBENCH] = create_craft_button(1, [{ f: create_workbench, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #4d2d14 #432516 #756e52 #663f22 #9e9577".split(" ") }], .45, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_STONE_WALL] = create_craft_button(1, [{ f: create_wall_stone, x: -2, y: -2, a: 1, r: 0, c: "#0d1b1c #6a7570 #939995 #9baaa3 #adbcb5 #8a938e".split(" ") }], .4, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_DIAMOND_WALL] = create_craft_button(1, [{ f: create_wall_diamond, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #5cc5ce #89d1d4 #86d0d1 #95d5d8 #e0f2f6 #b3e0e3".split(" ") }], .4, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_GOLD_WALL] = create_craft_button(1, [{ f: create_wall_gold, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #877d36 #a08f47 #a7983c #b29e4d #c1b06b".split(" ") }], .4, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_AMETHYST_WALL] = create_craft_button(1, [{ f: create_wall_stone, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #b15ecf #8c29aa #c26de0 #af59cd #d588f1".split(" ") }], .4, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_WALL] = create_craft_button(1, [{ f: create_wall, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #4c3a15 #634828 #564021 #634828 #4c3a15".split(" ") }], .45, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_SPIKE] = create_craft_button(1, [{ f: create_spike, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #5f6061 #939393 #4c3a15 #634828 #564021 #634828 #4c3a15".split(" ") }], .35, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_MEAT] = create_craft_button(1, [{ f: create_meat, x: 0, y: -3, a: 1, r: 0, c: ["#dd5d57", "#ffffff", "#5e5d5e", "#ffffff"] }], 1.4, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_COOKED_MEAT] = create_craft_button(1, [{ f: create_meat, x: 0, y: -3, a: 1, r: 0, c: ["#602920", "#844f49", "#5e5d5e", "#d3ccc7"] }], 1.4, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_CORD] = create_craft_button(1, [{ f: create_cord, x: -3, y: -3, a: 1, r: 0, c: ["#cec0c4", "#ffffff", "#6d6768"] }], .9, ["#9e8838", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_BLUE_CORD] = create_craft_button(1, [{ f: create_cord, x: -3, y: -3, a: 1, r: 0, c: ["#d4e9ec", "#37b1d7", "#506c71"] }], .9, ["#9e8838", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_BANDAGE] = create_craft_button(1, [{ f: create_bandage, x: 0, y: 0, a: 1, r: 0, c: ["#ffffff", "#cec0c4"] }], .35, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_DOOR_WOOD_CLOSE] = create_craft_button(1, [{ f: create_door_wood, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #4c3b19 #574122 #644928 #574122 #735534".split(" ") }], .6, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_CHEST] = create_craft_button(1, [{ f: create_chest, x: 0, y: 2, a: 1, r: 0, c: "#133a2b #9e8838 #c4a23a #4c3b19 #614627 #614627 #614627 #c4a23a #c4a23a #c4a23a".split(" ") }], .35, ["#968e55", "#b1a868", "#888046"], .7);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_hammer,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#262114", "#211108", "#b864d6", "#8c29aa"]
+        }], .52, ["#756e52", "#898064", "#685b40"], .8);
+        sprite[SPRITE.CHEST_SEED] = create_craft_button(1, [{
+            f: create_seed,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: ["#756e52", "#898064", "#685b40"]
+        }], .7, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_FIRE] = create_craft_button(1, [{
+            f: create_wood_fire,
+            x: -2,
+            y: -2,
+            a: 1,
+            r: -Math.PI / 7,
+            c: ["#4d2d14", "#432516"]
+        }, {
+            f: create_fire,
+            x: -2,
+            y: -2,
+            a: 1,
+            r: -Math.PI / 7,
+            c: ["#efd435", "#ec8d35", "#e96132"]
+        }], .3, ["#968e55", "#b1a868", "#888046"], .8);
+        sprite[SPRITE.CHEST_BIG_FIRE] = create_craft_button(1, [{
+            f: create_big_fire_wood,
+            x: -2,
+            y: -1,
+            a: 1,
+            r: -Math.PI / 7,
+            c: ["#4d2d14", "#432516", "#58645F", "#75827D", "#0c2c2e"]
+        }, {
+            f: create_fire,
+            x: -2,
+            y: -1,
+            a: 1,
+            r: -Math.PI / 7,
+            c: ["#efd435", "#ec8d35", "#e96132"]
+        }], .3, ["#968e55", "#b1a868", "#888046"], .8);
+        sprite[SPRITE.CHEST_SWORD] = create_craft_button(1, [{
+            f: create_sword,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#493d36", "#332b28", "#939393", "#5f6061"]
+        }], .3, ["#968e55", "#b1a868", "#888046"], 1);
+        sprite[SPRITE.CHEST_SWORD_GOLD] = create_craft_button(1, [{
+            f: create_sword,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#493e26", "#382e19", "#c4bc51", "#b29c32"]
+        }], .3, ["#968e55", "#b1a868", "#888046"], 1);
+        sprite[SPRITE.CHEST_SWORD_DIAMOND] = create_craft_button(1, [{
+            f: create_sword,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#262114", "#211108", "#63c9d6", "#29aaa1"]
+        }], .3, ["#968e55", "#b1a868", "#888046"], 1);
+        sprite[SPRITE.CHEST_SWORD_AMETHYST] = create_craft_button(1, [{
+            f: create_sword,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#262114", "#211108", "#b864d6", "#8c29aa"]
+        }], .3, ["#968e55", "#b1a868", "#888046"], 1);
+        sprite[SPRITE.CHEST_PICK_WOOD] = create_craft_button(1, [{
+            f: create_pickaxe,
+            x: -2,
+            y: 5,
+            a: 1,
+            r: -Math.PI / 5,
+            c: "#0d1b1c #000000 #0d1b1c #4d2d14 #432516 #4d2d14 #432516".split(" ")
+        }], .45, ["#968e55", "#b1a868", "#888046"], 1);
+        sprite[SPRITE.CHEST_PICK] = create_craft_button(1, [{
+            f: create_pickaxe,
+            x: -2,
+            y: 5,
+            a: 1,
+            r: -Math.PI / 5,
+            c: "#0d1b1c #000000 #0d1b1c #4d2d14 #432516 #939393 #5f6061".split(" ")
+        }], .45, ["#968e55", "#b1a868", "#888046"], 1);
+        sprite[SPRITE.CHEST_PICK_GOLD] = create_craft_button(1, [{
+            f: create_pickaxe,
+            x: -2,
+            y: 5,
+            a: 1,
+            r: -Math.PI / 5,
+            c: "#0d1b1c #000000 #0d1b1c #493e26 #382e19 #c4bc51 #b29c32".split(" ")
+        }], .45, ["#968e55", "#b1a868", "#888046"], 1);
+        sprite[SPRITE.CHEST_PICK_DIAMOND] = create_craft_button(1, [{
+            f: create_pickaxe,
+            x: -2,
+            y: 5,
+            a: 1,
+            r: -Math.PI / 5,
+            c: "#0d1b1c #000000 #0d1b1c #262114 #211108 #63c9d6 #29aaa1".split(" ")
+        }], .45, ["#968e55", "#b1a868", "#888046"], 1);
+        sprite[SPRITE.CHEST_PICK_AMETHYST] = create_craft_button(1, [{
+            f: create_pickaxe,
+            x: -2,
+            y: 5,
+            a: 1,
+            r: -Math.PI / 5,
+            c: "#0d1b1c #000000 #0d1b1c #262114 #211108 #b864d6 #8c29aa".split(" ")
+        }], .45, ["#968e55", "#b1a868", "#888046"], 1);
+        sprite[SPRITE.CHEST_STONE] = create_craft_button(1, [{
+            f: create_stone,
+            x: -5,
+            y: -5,
+            a: 1,
+            r: 0,
+            c: ["#252B28", "#58645F", "#75827D"]
+        }], .23, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_GOLD] = create_craft_button(1, [{
+            f: create_gold,
+            x: -5,
+            y: -5,
+            a: 1,
+            r: 0,
+            c: ["#282823", "#877c2d", "#c4bc51"]
+        }], .43, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_DIAMOND] = create_craft_button(1, [{
+            f: create_diamond,
+            x: -5,
+            y: -5,
+            a: 1,
+            r: 0,
+            c: ["#232828", "#3fc9c9", "#74ede6"]
+        }], .33, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_WOOD] = create_craft_button(1, [{
+            f: create_wood_fire,
+            x: 0,
+            y: -5,
+            a: 1,
+            r: Math.PI / 2.5,
+            c: ["#4d2d14", "#432516"]
+        }], .3, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_PLANT] = create_craft_button(1, [{
+            f: create_food_plant,
+            x: 0,
+            y: -2,
+            a: 1,
+            r: 0
+        }], .4, ["#968e55", "#b1a868", "#888046"], 1);
+        sprite[SPRITE.CHEST_WORKBENCH] = create_craft_button(1, [{
+            f: create_workbench,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #4d2d14 #432516 #756e52 #663f22 #9e9577".split(" ")
+        }], .45, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_STONE_WALL] = create_craft_button(1, [{
+            f: create_wall_stone,
+            x: -2,
+            y: -2,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #6a7570 #939995 #9baaa3 #adbcb5 #8a938e".split(" ")
+        }], .4, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_DIAMOND_WALL] = create_craft_button(1, [{
+            f: create_wall_diamond,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #5cc5ce #89d1d4 #86d0d1 #95d5d8 #e0f2f6 #b3e0e3".split(" ")
+        }], .4, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_GOLD_WALL] = create_craft_button(1, [{
+            f: create_wall_gold,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #877d36 #a08f47 #a7983c #b29e4d #c1b06b".split(" ")
+        }], .4, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_AMETHYST_WALL] = create_craft_button(1, [{
+            f: create_wall_stone,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #b15ecf #8c29aa #c26de0 #af59cd #d588f1".split(" ")
+        }], .4, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_WALL] = create_craft_button(1, [{
+            f: create_wall,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #4c3a15 #634828 #564021 #634828 #4c3a15".split(" ")
+        }], .45, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_SPIKE] = create_craft_button(1, [{
+            f: create_spike,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #5f6061 #939393 #4c3a15 #634828 #564021 #634828 #4c3a15".split(" ")
+        }], .35, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_MEAT] = create_craft_button(1, [{
+            f: create_meat,
+            x: 0,
+            y: -3,
+            a: 1,
+            r: 0,
+            c: ["#dd5d57", "#ffffff", "#5e5d5e", "#ffffff"]
+        }], 1.4, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_COOKED_MEAT] = create_craft_button(1, [{
+            f: create_meat,
+            x: 0,
+            y: -3,
+            a: 1,
+            r: 0,
+            c: ["#602920", "#844f49", "#5e5d5e", "#d3ccc7"]
+        }], 1.4, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_CORD] = create_craft_button(1, [{
+            f: create_cord,
+            x: -3,
+            y: -3,
+            a: 1,
+            r: 0,
+            c: ["#cec0c4", "#ffffff", "#6d6768"]
+        }], .9, ["#9e8838", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_BLUE_CORD] = create_craft_button(1, [{
+            f: create_cord,
+            x: -3,
+            y: -3,
+            a: 1,
+            r: 0,
+            c: ["#d4e9ec", "#37b1d7", "#506c71"]
+        }], .9, ["#9e8838", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_BANDAGE] = create_craft_button(1, [{
+            f: create_bandage,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: ["#ffffff", "#cec0c4"]
+        }], .35, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_DOOR_WOOD_CLOSE] = create_craft_button(1, [{
+            f: create_door_wood,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #4c3b19 #574122 #644928 #574122 #735534".split(" ")
+        }], .6, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_CHEST] = create_craft_button(1, [{
+            f: create_chest,
+            x: 0,
+            y: 2,
+            a: 1,
+            r: 0,
+            c: "#133a2b #9e8838 #c4a23a #4c3b19 #614627 #614627 #614627 #c4a23a #c4a23a #c4a23a".split(" ")
+        }], .35, ["#968e55", "#b1a868", "#888046"], .7);
         sprite[SPRITE.CHEST_SLOT] = CTI(create_chest_slot(.8, true, ["#4c3b19", "#c4a23a", "#c4a23a", "#c4a23a"]));
-        sprite[SPRITE.CHEST_PLUS] = create_craft_button(.5, [{ f: create_plus_chest, x: 0, y: 2, a: 1, r: 0, c: ["#ffffff"] }], .16, ["#c4a23a", "#d0ad41", "#b89733"], .9);
-        sprite[SPRITE.CHEST_STONE_SPIKE] = create_craft_button(1, [{ f: create_spike_stone, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #5f6061 #939393 #6a7570 #939995 #9baaa3 #adbcb5 #8a938e".split(" ") }], .35, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_GOLD_SPIKE] = create_craft_button(1, [{ f: create_spike_gold, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #5f6061 #939393 #877d36 #a08f47 #a7983c #b29e4d #c1b06b".split(" ") }], .35, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_DIAMOND_SPIKE] = create_craft_button(1, [{ f: create_spike_gold, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #7d8b90 #9facaa #5cc5ce #89d1d4 #86d0d1 #95d5d8 #e0f2f6 #b3e0e3".split(" ") }], .35, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_AMETHYST_SPIKE] = create_craft_button(1, [{ f: create_spike_stone, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #5f6061 #939393 #b15ecf #8c29aa #c26de0 #af59cd #d588f1".split(" ") }], .35, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_BAG] = create_craft_button(1, [{ f: create_bag, x: 0, y: 0, a: 1, r: 0, c: ["#872f13", "#471e12"] }], .7, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_FUR] = create_craft_button(1, [{ f: create_fur, x: 0, y: 0, a: 1, r: 0, c: ["#ef96be", "#ffffff"] }], .5, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_FUR_WOLF] = create_craft_button(1, [{ f: create_fur, x: 0, y: 0, a: 1, r: 0, c: ["#231f20", "#b6222a"] }], .5, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_FUR_WINTER] = create_craft_button(1, [{ f: create_fur, x: 0, y: 0, a: 1, r: 0, c: ["#ffffff", "#b6222a"] }], .5, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_EARMUFFS] = create_craft_button(1, [{ f: create_earmuff, x: 0, y: 0, a: 1, r: 0, c: ["#f9efeb", "#dfd1cb", "#3e3c25", "#4d4a2e"] }], .4, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_CAP_SCARF] = create_craft_button(1, [{ f: create_cap_scarf, x: 0, y: 0, a: 1, r: 0, c: ["#171a19", "#dee7e7", "#b8cccb", "#ffffff", "#e3e8e8"] }], .4, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_DOOR_STONE_CLOSE] = create_craft_button(1, [{ f: create_door_stone, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #6a7570 #939995 #9baaa3 #8a938e #adbcb5".split(" ") }], .6, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_DOOR_GOLD_CLOSE] = create_craft_button(1, [{ f: create_door_gold, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #877d36 #a08f47 #a7983c #9a8636 #c1b06b".split(" ") }], .6, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_DOOR_DIAMOND_CLOSE] = create_craft_button(1, [{ f: create_door_diamond, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #5cc5ce #89d1d4 #86d0d1 #95d5d8 #e0f2f6 #b3e0e3".split(" ") }], .6, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_DOOR_AMETHYST_CLOSE] = create_craft_button(1, [{ f: create_door_stone, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #b15ecf #8c29aa #c26de0 #af59cd #d588f1".split(" ") }], .6, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_COAT] = create_craft_button(1, [{ f: create_coat, x: 0, y: 0, a: 1, r: 0, c: ["#3e3c25", "#4d4a2e", "#f9efeb", "#dfd1cb"] }], .4, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_SPEAR] = create_craft_button(1, [{ f: create_spear, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#4d2d14", "#432516", "#939393", "#5f6061"] }], .27, ["#968e55", "#b1a868", "#888046"], 1);
-        sprite[SPRITE.CHEST_GOLD_SPEAR] = create_craft_button(1, [{ f: create_spear, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#493e26", "#382e19", "#c4bc51", "#b29c32"] }], .27, ["#968e55", "#b1a868", "#888046"], 1);
-        sprite[SPRITE.CHEST_DIAMOND_SPEAR] = create_craft_button(1, [{ f: create_spear, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#262114", "#211108", "#63c9d6", "#29aaa1"] }], .27, ["#968e55", "#b1a868", "#888046"], 1);
-        sprite[SPRITE.CHEST_AMETHYST_SPEAR] = create_craft_button(1, [{ f: create_spear, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#262114", "#211108", "#b864d6", "#8c29aa"] }], .27, ["#968e55", "#b1a868", "#888046"], 1);
-        sprite[SPRITE.CHEST_HAMMER] = create_craft_button(1, [{ f: create_hammer, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#4d2d14", "#432516", "#939393", "#5f6061"] }], .52, ["#968e55", "#b1a868", "#888046"], 1);
-        sprite[SPRITE.CHEST_HAMMER_GOLD] = create_craft_button(1, [{ f: create_hammer, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#493e26", "#382e19", "#c4bc51", "#b29c32"] }], .52, ["#968e55", "#b1a868", "#888046"], 1);
-        sprite[SPRITE.CHEST_HAMMER_DIAMOND] = create_craft_button(1, [{ f: create_hammer, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#262114", "#211108", "#63c9d6", "#29aaa1"] }], .52, ["#968e55", "#b1a868", "#888046"], 1);
-        sprite[SPRITE.CHEST_HAMMER_AMETHYST] = create_craft_button(1, [{ f: create_hammer, x: 2, y: 0, a: 1, r: Math.PI / 5, c: ["#0d1b1c", "#262114", "#211108", "#b864d6", "#8c29aa"] }], .52, ["#968e55", "#b1a868", "#888046"], 1);
-        sprite[SPRITE.CHEST_FURNACE] = create_craft_button(1, [{ f: create_furnace_on, x: 0, y: 0, a: 1, r: 0, c: "#0d1b1c #939393 #5f6061 #c0c0c0 #ffad22 #fffdd5 #fee764".split(" ") }], .18, ["#968e55", "#b1a868", "#888046"], 1);
-        sprite[SPRITE.CHEST_EXPLORER_HAT] = create_craft_button(1, [{ f: create_explorer_hat, x: 0, y: 0, a: 1, r: 0, c: "#c9a65f #ae863f #655530 #4a391c #ebdd79 #4a421c".split(" ") }], .35, ["#968e55", "#b1a868", "#888046"], 1);
-        sprite[SPRITE.CHEST_STONE_HELMET] = create_craft_button(1, [{ f: create_viking_hat, x: 0, y: 0, a: 1, r: 0, c: "#252525 #9b8251 #5e4a2d #737373 #4f4f4f #8c7542".split(" ") }], .35, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_GOLD_HELMET] = create_craft_button(1, [{ f: create_gold_helmet, x: 0, y: 0, a: 1, r: 0, c: ["#dbce71", "#b29c32", "#c4bc51"] }], .35, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_DIAMOND_HELMET] = create_craft_button(1, [{ f: create_diamond_helmet, x: 0, y: 0, a: 1, r: 0, c: "#717171 #485252 #555555 #65c7cd #4aadad #358d8b #c1e6ea #a6dce4".split(" ") }], .45, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_BOOK] = create_craft_button(1, [{ f: create_book, x: 0, y: 0, a: 1, r: 0, c: "#511f00 #2f1300 #ffffff #d4d4d4 #5b2400 #984e21".split(" ") }], .15, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_PAPER] = create_craft_button(1, [{ f: create_paper, x: 0, y: 0, a: 1, r: 0, c: ["#221e1b", "#ffffff", "#f6f0e7"] }], .3, ["#968e55", "#b1a868", "#888046"], .7);
-        sprite[SPRITE.CHEST_AMETHYST] = create_craft_button(1, [{ f: create_amethyst, x: 0, y: 0, a: 1, r: 0, c: ["#1d051e", "#c27add", "#cd98e5"] }], .3, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_PLUS] = create_craft_button(.5, [{
+            f: create_plus_chest,
+            x: 0,
+            y: 2,
+            a: 1,
+            r: 0,
+            c: ["#ffffff"]
+        }], .16, ["#c4a23a", "#d0ad41", "#b89733"], .9);
+        sprite[SPRITE.CHEST_STONE_SPIKE] = create_craft_button(1, [{
+            f: create_spike_stone,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #5f6061 #939393 #6a7570 #939995 #9baaa3 #adbcb5 #8a938e".split(" ")
+        }], .35, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_GOLD_SPIKE] = create_craft_button(1, [{
+            f: create_spike_gold,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #5f6061 #939393 #877d36 #a08f47 #a7983c #b29e4d #c1b06b".split(" ")
+        }], .35, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_DIAMOND_SPIKE] = create_craft_button(1, [{
+            f: create_spike_gold,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #7d8b90 #9facaa #5cc5ce #89d1d4 #86d0d1 #95d5d8 #e0f2f6 #b3e0e3".split(" ")
+        }], .35, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_AMETHYST_SPIKE] = create_craft_button(1, [{
+            f: create_spike_stone,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #5f6061 #939393 #b15ecf #8c29aa #c26de0 #af59cd #d588f1".split(" ")
+        }], .35, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_BAG] = create_craft_button(1, [{
+            f: create_bag,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: ["#872f13", "#471e12"]
+        }], .7, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_FUR] = create_craft_button(1, [{
+            f: create_fur,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: ["#ef96be", "#ffffff"]
+        }], .5, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_FUR_WOLF] = create_craft_button(1, [{
+            f: create_fur,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: ["#231f20", "#b6222a"]
+        }], .5, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_FUR_WINTER] = create_craft_button(1, [{
+            f: create_fur,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: ["#ffffff", "#b6222a"]
+        }], .5, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_EARMUFFS] = create_craft_button(1, [{
+            f: create_earmuff,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: ["#f9efeb", "#dfd1cb", "#3e3c25", "#4d4a2e"]
+        }], .4, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_CAP_SCARF] = create_craft_button(1, [{
+            f: create_cap_scarf,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: ["#171a19", "#dee7e7", "#b8cccb", "#ffffff", "#e3e8e8"]
+        }], .4, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_DOOR_STONE_CLOSE] = create_craft_button(1, [{
+            f: create_door_stone,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #6a7570 #939995 #9baaa3 #8a938e #adbcb5".split(" ")
+        }], .6, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_DOOR_GOLD_CLOSE] = create_craft_button(1, [{
+            f: create_door_gold,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #877d36 #a08f47 #a7983c #9a8636 #c1b06b".split(" ")
+        }], .6, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_DOOR_DIAMOND_CLOSE] = create_craft_button(1, [{
+            f: create_door_diamond,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #5cc5ce #89d1d4 #86d0d1 #95d5d8 #e0f2f6 #b3e0e3".split(" ")
+        }], .6, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_DOOR_AMETHYST_CLOSE] = create_craft_button(1, [{
+            f: create_door_stone,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #b15ecf #8c29aa #c26de0 #af59cd #d588f1".split(" ")
+        }], .6, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_COAT] = create_craft_button(1, [{
+            f: create_coat,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: ["#3e3c25", "#4d4a2e", "#f9efeb", "#dfd1cb"]
+        }], .4, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_SPEAR] = create_craft_button(1, [{
+            f: create_spear,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#4d2d14", "#432516", "#939393", "#5f6061"]
+        }], .27, ["#968e55", "#b1a868", "#888046"], 1);
+        sprite[SPRITE.CHEST_GOLD_SPEAR] = create_craft_button(1, [{
+            f: create_spear,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#493e26", "#382e19", "#c4bc51", "#b29c32"]
+        }], .27, ["#968e55", "#b1a868", "#888046"], 1);
+        sprite[SPRITE.CHEST_DIAMOND_SPEAR] = create_craft_button(1, [{
+            f: create_spear,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#262114", "#211108", "#63c9d6", "#29aaa1"]
+        }], .27, ["#968e55", "#b1a868", "#888046"], 1);
+        sprite[SPRITE.CHEST_AMETHYST_SPEAR] = create_craft_button(1, [{
+            f: create_spear,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#262114", "#211108", "#b864d6", "#8c29aa"]
+        }], .27, ["#968e55", "#b1a868", "#888046"], 1);
+        sprite[SPRITE.CHEST_HAMMER] = create_craft_button(1, [{
+            f: create_hammer,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#4d2d14", "#432516", "#939393", "#5f6061"]
+        }], .52, ["#968e55", "#b1a868", "#888046"], 1);
+        sprite[SPRITE.CHEST_HAMMER_GOLD] = create_craft_button(1, [{
+            f: create_hammer,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#493e26", "#382e19", "#c4bc51", "#b29c32"]
+        }], .52, ["#968e55", "#b1a868", "#888046"], 1);
+        sprite[SPRITE.CHEST_HAMMER_DIAMOND] = create_craft_button(1, [{
+            f: create_hammer,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#262114", "#211108", "#63c9d6", "#29aaa1"]
+        }], .52, ["#968e55", "#b1a868", "#888046"], 1);
+        sprite[SPRITE.CHEST_HAMMER_AMETHYST] = create_craft_button(1, [{
+            f: create_hammer,
+            x: 2,
+            y: 0,
+            a: 1,
+            r: Math.PI / 5,
+            c: ["#0d1b1c", "#262114", "#211108", "#b864d6", "#8c29aa"]
+        }], .52, ["#968e55", "#b1a868", "#888046"], 1);
+        sprite[SPRITE.CHEST_FURNACE] = create_craft_button(1, [{
+            f: create_furnace_on,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#0d1b1c #939393 #5f6061 #c0c0c0 #ffad22 #fffdd5 #fee764".split(" ")
+        }], .18, ["#968e55", "#b1a868", "#888046"], 1);
+        sprite[SPRITE.CHEST_EXPLORER_HAT] = create_craft_button(1, [{
+            f: create_explorer_hat,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#c9a65f #ae863f #655530 #4a391c #ebdd79 #4a421c".split(" ")
+        }], .35, ["#968e55", "#b1a868", "#888046"], 1);
+        sprite[SPRITE.CHEST_STONE_HELMET] = create_craft_button(1, [{
+            f: create_viking_hat,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#252525 #9b8251 #5e4a2d #737373 #4f4f4f #8c7542".split(" ")
+        }], .35, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_GOLD_HELMET] = create_craft_button(1, [{
+            f: create_gold_helmet,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: ["#dbce71", "#b29c32", "#c4bc51"]
+        }], .35, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_DIAMOND_HELMET] = create_craft_button(1, [{
+            f: create_diamond_helmet,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#717171 #485252 #555555 #65c7cd #4aadad #358d8b #c1e6ea #a6dce4".split(" ")
+        }], .45, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_BOOK] = create_craft_button(1, [{
+            f: create_book,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#511f00 #2f1300 #ffffff #d4d4d4 #5b2400 #984e21".split(" ")
+        }], .15, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_PAPER] = create_craft_button(1, [{
+            f: create_paper,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: ["#221e1b", "#ffffff", "#f6f0e7"]
+        }], .3, ["#968e55", "#b1a868", "#888046"], .7);
+        sprite[SPRITE.CHEST_AMETHYST] = create_craft_button(1, [{
+            f: create_amethyst,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: ["#1d051e", "#c27add", "#cd98e5"]
+        }], .3, ["#968e55", "#b1a868", "#888046"], .7);
         sprite[SPRITE.HURT_WOLF] = CTI(create_hurt_wolf(1.4, "#BB0000"));
         sprite[SPRITE.HURT_SPIDER] = CTI(create_rotated_img(Math.PI, create_hurt_spider(.9, "#BB0000")));
         sprite[SPRITE.EXPLORER_HAT] = [];
         sprite[SPRITE.EXPLORER_HAT][SPRITE.DAY] = CTI(create_explorer_hat(.55, true, "#c9a65f #ae863f #655530 #4a391c #ebdd79 #4a421c".split(" ")));
         sprite[SPRITE.EXPLORER_HAT][SPRITE.NIGHT] = CTI(create_explorer_hat(.55, true, "#15514f #0f3f3d #123335 #0d2d2b #2b6664 #070d16".split(" ")));
-        sprite[SPRITE.INV_EXPLORER_HAT] = create_craft_button(1, [{ f: create_explorer_hat, x: 0, y: 0, a: 1, r: 0, c: "#c9a65f #ae863f #655530 #4a391c #ebdd79 #4a421c".split(" ") }], .35, ["#3ba1a4", "#4eb0b6", "#3da39a"], .7);
+        sprite[SPRITE.INV_EXPLORER_HAT] = create_craft_button(1, [{
+            f: create_explorer_hat,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#c9a65f #ae863f #655530 #4a391c #ebdd79 #4a421c".split(" ")
+        }], .35, ["#3ba1a4", "#4eb0b6", "#3da39a"], .7);
         sprite[SPRITE.CRAFT_EXPLORER_HAT] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(6 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_explorer_hat, x: 0, y: 0, a: 1, r: 0, c: "#c9a65f #ae863f #655530 #4a391c #ebdd79 #4a421c".split(" ") }], .35, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_explorer_hat,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#c9a65f #ae863f #655530 #4a391c #ebdd79 #4a421c".split(" ")
+        }], .35, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.STONE_HELMET] = [];
         sprite[SPRITE.STONE_HELMET][SPRITE.DAY] = CTI(create_viking_hat(.58, true, "#252525 #9b8251 #5e4a2d #737373 #4f4f4f #8c7542".split(" ")));
         sprite[SPRITE.STONE_HELMET][SPRITE.NIGHT] = CTI(create_viking_hat(.58, true, "#15514f #216661 #0f3f3d #295957 #0f3f3d #1c5e5b".split(" ")));
-        sprite[SPRITE.INV_STONE_HELMET] = create_craft_button(1, [{ f: create_viking_hat, x: 0, y: 0, a: 1, r: 0, c: "#252525 #9b8251 #5e4a2d #737373 #4f4f4f #8c7542".split(" ") }], .35, ["#3ba1a4", "#4eb0b6", "#3da39a"], .7);
+        sprite[SPRITE.INV_STONE_HELMET] = create_craft_button(1, [{
+            f: create_viking_hat,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#252525 #9b8251 #5e4a2d #737373 #4f4f4f #8c7542".split(" ")
+        }], .35, ["#3ba1a4", "#4eb0b6", "#3da39a"], .7);
         sprite[SPRITE.CRAFT_STONE_HELMET] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(6 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_viking_hat, x: 0, y: 0, a: 1, r: 0, c: "#252525 #9b8251 #5e4a2d #737373 #4f4f4f #8c7542".split(" ") }], .35, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_viking_hat,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#252525 #9b8251 #5e4a2d #737373 #4f4f4f #8c7542".split(" ")
+        }], .35, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.GOLD_HELMET] = [];
         sprite[SPRITE.GOLD_HELMET][SPRITE.DAY] = CTI(create_gold_helmet(.58, true, ["#dbce71", "#b29c32", "#c4bc51"]));
         sprite[SPRITE.GOLD_HELMET][SPRITE.NIGHT] = CTI(create_gold_helmet(.58, true, ["#2b7c57", "#15543c", "#1a7961"]));
-        sprite[SPRITE.INV_GOLD_HELMET] = create_craft_button(1, [{ f: create_gold_helmet, x: 0, y: 0, a: 1, r: 0, c: ["#dbce71", "#b29c32", "#c4bc51"] }], .35, ["#3ba1a4", "#4eb0b6", "#3da39a"], .7);
+        sprite[SPRITE.INV_GOLD_HELMET] = create_craft_button(1, [{
+            f: create_gold_helmet,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: ["#dbce71", "#b29c32", "#c4bc51"]
+        }], .35, ["#3ba1a4", "#4eb0b6", "#3da39a"], .7);
         sprite[SPRITE.CRAFT_GOLD_HELMET] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(6 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_gold_helmet, x: 0, y: 0, a: 1, r: 0, c: ["#dbce71", "#b29c32", "#c4bc51"] }], .35, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_gold_helmet,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: ["#dbce71", "#b29c32", "#c4bc51"]
+        }], .35, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.DIAMOND_HELMET] = [];
         sprite[SPRITE.DIAMOND_HELMET][SPRITE.DAY] = CTI(create_diamond_helmet(.69, true, "#717171 #485252 #555555 #65c7cd #4aadad #358d8b #c1e6ea #a6dce4".split(" ")));
         sprite[SPRITE.DIAMOND_HELMET][SPRITE.NIGHT] = CTI(create_diamond_helmet(.69, true, "#183f3f #092121 #123335 #2b9390 #277a74 #1f665f #83ddd4 #59c9c0".split(" ")));
-        sprite[SPRITE.INV_DIAMOND_HELMET] = create_craft_button(1, [{ f: create_diamond_helmet, x: 0, y: 0, a: 1, r: 0, c: "#717171 #485252 #555555 #65c7cd #4aadad #358d8b #c1e6ea #a6dce4".split(" ") }], .45, ["#3ba578", "#4eb687", "#3da34d"], .7);
+        sprite[SPRITE.INV_DIAMOND_HELMET] = create_craft_button(1, [{
+            f: create_diamond_helmet,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#717171 #485252 #555555 #65c7cd #4aadad #358d8b #c1e6ea #a6dce4".split(" ")
+        }], .45, ["#3ba578", "#4eb687", "#3da34d"], .7);
         sprite[SPRITE.CRAFT_DIAMOND_HELMET] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(5 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_diamond_helmet, x: 0, y: 0, a: 1, r: 0, c: "#717171 #485252 #555555 #65c7cd #4aadad #358d8b #c1e6ea #a6dce4".split(" ") }], .45, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_diamond_helmet,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#717171 #485252 #555555 #65c7cd #4aadad #358d8b #c1e6ea #a6dce4".split(" ")
+        }], .45, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.BOOK] = [];
         sprite[SPRITE.BOOK][SPRITE.DAY] = CTI(create_rotated_img(2.2, create_book(.2, true, "#511f00 #2f1300 #ffffff #d4d4d4 #5b2400 #984e21".split(" "))));
         sprite[SPRITE.BOOK][SPRITE.NIGHT] = CTI(create_rotated_img(2.2, create_book(.2, true, "#183f3f #092121 #63bec4 #0e3c37 #1e4f52 #2e6c70".split(" "))));
-        sprite[SPRITE.INV_BOOK] = create_craft_button(1, [{ f: create_book, x: 0, y: 0, a: 1, r: 0, c: "#511f00 #2f1300 #ffffff #d4d4d4 #5b2400 #984e21".split(" ") }], .15, ["#3ba578", "#4eb687", "#3da34d"], .7);
+        sprite[SPRITE.INV_BOOK] = create_craft_button(1, [{
+            f: create_book,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#511f00 #2f1300 #ffffff #d4d4d4 #5b2400 #984e21".split(" ")
+        }], .15, ["#3ba578", "#4eb687", "#3da34d"], .7);
         sprite[SPRITE.CRAFT_BOOK] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(15 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_book, x: 0, y: 0, a: 1, r: 0, c: "#511f00 #2f1300 #ffffff #d4d4d4 #5b2400 #984e21".split(" ") }], .15, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_book,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: "#511f00 #2f1300 #ffffff #d4d4d4 #5b2400 #984e21".split(" ")
+        }], .15, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.PAPER] = CTI(create_paper(.5, true, ["#221e1b", "#ffffff", "#f6f0e7"]));
-        sprite[SPRITE.INV_PAPER] = create_craft_button(1, [{ f: create_paper, x: 0, y: 0, a: 1, r: 0, c: ["#221e1b", "#ffffff", "#f6f0e7"] }], .3, ["#2b5c48", "#2b5c48", "#2b5c48"], .7);
+        sprite[SPRITE.INV_PAPER] = create_craft_button(1, [{
+            f: create_paper,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: ["#221e1b", "#ffffff", "#f6f0e7"]
+        }], .3, ["#2b5c48", "#2b5c48", "#2b5c48"], .7);
         sprite[SPRITE.CRAFT_PAPER] = create_craft_button(1, [{
             f: function (c) {
                 return create_gear(7 * c, "#918770");
-            }, x: 0, y: 0, a: .3, r: 0
-        }, { f: create_paper, x: 0, y: 0, a: 1, r: 0, c: ["#221e1b", "#ffffff", "#f6f0e7"] }], .3, ["#756e52", "#898064", "#685b40"], .8);
+            },
+            x: 0,
+            y: 0,
+            a: .3,
+            r: 0
+        }, {
+            f: create_paper,
+            x: 0,
+            y: 0,
+            a: 1,
+            r: 0,
+            c: ["#221e1b", "#ffffff", "#f6f0e7"]
+        }], .3, ["#756e52", "#898064", "#685b40"], .8);
         sprite[SPRITE.FIR] = [];
         sprite[SPRITE.FIR][SPRITE.DAY] = [];
         sprite[SPRITE.FIR][SPRITE.NIGHT] = [];
@@ -5849,7 +7747,14 @@ export function start(ModdedStarving) {
         sprite[SPRITE.DRAGON_GROUND][SPRITE.NIGHT].push(CTI(create_snow_four(1, ["#083534"])));
         sprite[SPRITE.DRAGON_GROUND][SPRITE.NIGHT].push(CTI(create_snow_five(1, ["#083534"])));
         sprite[SPRITE.DRAGON_GROUND][SPRITE.NIGHT].push(CTI(create_snow_six(1, ["#083534"])));
-        sprite[SPRITE.INV_AMETHYST] = create_craft_button(1, [{ f: create_amethyst, x: -5, y: -5, a: 1, r: 0, c: ["#1d051e", "#c27add", "#cd98e5"] }], .31, ["#2b5c48", "#2b5c48", "#2b5c48"], .7);
+        sprite[SPRITE.INV_AMETHYST] = create_craft_button(1, [{
+            f: create_amethyst,
+            x: -5,
+            y: -5,
+            a: 1,
+            r: 0,
+            c: ["#1d051e", "#c27add", "#cd98e5"]
+        }], .31, ["#2b5c48", "#2b5c48", "#2b5c48"], .7);
         sprite[SPRITE.GROUND_FIRE_WINTER] = [];
         sprite[SPRITE.GROUND_FIRE_WINTER][SPRITE.DAY] = CTI(create_ground_fire(.9, false, ["#a3c9bd"]));
         sprite[SPRITE.GROUND_FIRE_WINTER][SPRITE.NIGHT] = CTI(create_ground_fire(.9, false, ["#1b6d6d"]));
@@ -5900,9 +7805,45 @@ export function start(ModdedStarving) {
         for (c = 0; 11 > c; c++) {
             sprite[SPRITE.SLOT_NUMBER][c] = create_text(1, "" + (c + 1), 12, "#FFF");
         }
-        sprite[SPRITE.PLAY] = create_button([{ text: "PLAY", size: 20, font: "Baloo Paaji", w: 100, h: 40, lw: 4, r: 10, bg: "#096D41", fg: "#096D41", color: "#FFF" }, { text: "PLAY", size: 20, font: "Baloo Paaji", w: 100, h: 40, lw: 4, r: 10, bg: "#002211", fg: "#002211", color: "#FFF" }, { text: "PLAY", size: 20, font: "Baloo Paaji", w: 100, h: 40, lw: 4, r: 10, bg: "#000000", fg: "#000000", color: "#FFF" }]);
+        sprite[SPRITE.PLAY] = create_button([{
+            text: "PLAY",
+            size: 20,
+            font: "Baloo Paaji",
+            w: 100,
+            h: 40,
+            lw: 4,
+            r: 10,
+            bg: "#096D41",
+            fg: "#096D41",
+            color: "#FFF"
+        }, {
+            text: "PLAY",
+            size: 20,
+            font: "Baloo Paaji",
+            w: 100,
+            h: 40,
+            lw: 4,
+            r: 10,
+            bg: "#002211",
+            fg: "#002211",
+            color: "#FFF"
+        }, {
+            text: "PLAY",
+            size: 20,
+            font: "Baloo Paaji",
+            w: 100,
+            h: 40,
+            lw: 4,
+            r: 10,
+            bg: "#000000",
+            fg: "#000000",
+            color: "#FFF"
+        }]);
         sprite[SPRITE.AUTO_FEED] = create_text(1, "Auto-Feed", 25, "#FFF", void 0, void 0, "#000", 5, 140);
-        ModdedStarving.on("sprite", { SPRITE, sprite });
+        ModdedStarving.on("sprite", {
+            SPRITE,
+            sprite
+        });
     }
     function init_fake_world() {
         document.getElementById("game_body").style.backgroundColor = SPRITE.GROUND[fake_world.time];
@@ -6249,7 +8190,8 @@ export function start(ModdedStarving) {
             g = sprite[SPRITE.EMPTY_SLOT][2];
             x = d.info.translate.x;
             y = d.info.translate.y;
-            for (j = 1; f < c.max; f++, j++) {
+            for (j = 1; f < c.max; f++,
+                j++) {
                 ctx.drawImage(g, x + j * (g.width + 5), y);
             }
         }
@@ -6525,7 +8467,8 @@ export function start(ModdedStarving) {
     function draw_player_right_stuff(c, g, f) {
         if (0 <= c) {
             let img;
-            switch (img = sprite[c][world.time], c) {
+            switch (img = sprite[c][world.time],
+            c) {
                 case SPRITE.PICK:
                 case SPRITE.PICK_GOLD:
                 case SPRITE.PICK_DIAMOND:
@@ -6581,7 +8524,10 @@ export function start(ModdedStarving) {
                 case SPRITE.CAP_SCARF:
                     draw_image_transition(g, -g.width / 2, -g.height / 2 - 2 * scale);
             }
-            ModdedStarving.on("draw_clothe", { id: c, sprite: g });
+            ModdedStarving.on("draw_clothe", {
+                id: c,
+                sprite: g
+            });
         }
     };
     function draw_player() {
@@ -6685,7 +8631,7 @@ export function start(ModdedStarving) {
         draw_player_clothe(this.clothe);
         ctx.restore();
         if (this.x > SPRITE.WINTER_BIOME_Y) {
-            if (!this.player.label_winter|| this.player.label_winter.text !== this.player.displayName) {
+            if (!this.player.label_winter || this.player.label_winter.text !== this.player.displayName) {
                 this.player.label_winter = create_text(scale, this.player.displayName, 20, "#187484", "#000", 2);
             }
             f = this.player.label_winter;
@@ -7204,15 +9150,28 @@ export function start(ModdedStarving) {
     }
     function get_mouse_pos(c, g) {
         var f = c.getBoundingClientRect();
-        return { x: g.clientX - f.left, y: g.clientY - f.top };
+        return {
+            x: g.clientX - f.left,
+            y: g.clientY - f.top
+        };
     }
     function gui_create_button(c, g, f, d) {
         if (d) {
             var e = d;
         }
-        var m = { width: c, height: g, img: e, state: BUTTON_OUT, translate: { x: 0, y: 0 } };
+        var m = {
+            width: c,
+            height: g,
+            img: e,
+            state: BUTTON_OUT,
+            translate: {
+                x: 0,
+                y: 0
+            }
+        };
         return {
-            info: m, trigger: function (c, d, e) {
+            info: m,
+            trigger: function (c, d, e) {
                 c = m.translate;
                 if (d.x > c.x && d.x < c.x + m.img[m.state].width && d.y > c.y && d.y < c.y + m.img[m.state].height) {
                     if (e == MOUSE_DOWN) {
@@ -7226,22 +9185,31 @@ export function start(ModdedStarving) {
                 }
                 m.state = BUTTON_OUT;
                 return false;
-            }, draw: function (c) {
+            },
+            draw: function (c) {
                 c.drawImage(m.img[m.state], m.translate.x, m.translate.y);
             }
         };
     }
     function gui_create_image(c) {
-        var g = { x: 0, y: 0 };
+        var g = {
+            x: 0,
+            y: 0
+        };
         return {
-            img: c, translate: g, draw: function (f) {
+            img: c,
+            translate: g,
+            draw: function (f) {
                 f.drawImage(c, g.x, g.y);
             }
         };
     }
     function gui_create_animation(c, g) {
         g = g === void 0 ? .033 : g;
-        var f = { x: 0, y: 0 };
+        var f = {
+            x: 0,
+            y: 0
+        };
         var d = 0;
         var e = 0;
         var m = function () {
@@ -7253,7 +9221,9 @@ export function start(ModdedStarving) {
             return c[d];
         };
         return {
-            img: c, translate: f, draw: function (c) {
+            img: c,
+            translate: f,
+            draw: function (c) {
                 c.drawImage(m(), f.x, f.y);
             }
         };
@@ -7279,8 +9249,33 @@ export function start(ModdedStarving) {
             c.breath = true;
         }
     }
-    var STATE = { DELETE: 1, HURT: 2, COLD: 4, HUNGER: 8, ATTACK: 16, WALK: 32, IDLE: 64, HEAL: 128, WEB: 256 };
-    var CLIENT = { VERSION_NUMBER: 5, TIMEOUT_TIME: 2e3, TIMEOUT_NUMBER: 3, PING: "[13]", PING_DELAY: 6e4, ROTATE: .2, ATTACK: .2, CAM_DELAY: 50, MUTE_DELAY: 125e3, TIMEOUT_SERVER: 6e5, WAITING_FOR_SERVER: 8e3, DELAY_CONNECTION_UPDATE: 5, LAG_DISTANCE: 200, LOOSE_FOCUS: 15 };
+    var STATE = {
+        DELETE: 1,
+        HURT: 2,
+        COLD: 4,
+        HUNGER: 8,
+        ATTACK: 16,
+        WALK: 32,
+        IDLE: 64,
+        HEAL: 128,
+        WEB: 256
+    };
+    var CLIENT = {
+        VERSION_NUMBER: 5,
+        TIMEOUT_TIME: 2e3,
+        TIMEOUT_NUMBER: 3,
+        PING: "[13]",
+        PING_DELAY: 6e4,
+        ROTATE: .2,
+        ATTACK: .2,
+        CAM_DELAY: 50,
+        MUTE_DELAY: 125e3,
+        TIMEOUT_SERVER: 6e5,
+        WAITING_FOR_SERVER: 8e3,
+        DELAY_CONNECTION_UPDATE: 5,
+        LAG_DISTANCE: 200,
+        LOOSE_FOCUS: 15
+    };
     function Client() {
         var c = this;
         this.socket = null;
@@ -7375,13 +9370,15 @@ export function start(ModdedStarving) {
         this.new_player = function (c) {
             var f = c[1];
             var d = world.players;
-            d[f].nickname = c[2];
-            d[f].displayName = c[3];
-            d[f].score = d[f].score || 0;
-            d[f].ldb_label = null;
-            d[f].label = null;
-            d[f].label_winter = null;
-            d[f].alive = true;
+            if (d[f]) {
+                d[f].nickname = c[2];
+                d[f].displayName = c[3];
+                d[f].score = d[f].score || 0;
+                d[f].ldb_label = null;
+                d[f].label = null;
+                d[f].label_winter = null;
+                d[f].alive = true;
+            }
         };
         this.empty_res = function () {
             user.alert.text = "Resource is empty";
@@ -7792,7 +9789,10 @@ export function start(ModdedStarving) {
             if (f.length != 0) {
                 var d = [2];
                 var e = [];
-                Utils.sub_vector(c, { x: player.cam.rx, y: player.cam.ry });
+                Utils.sub_vector(c, {
+                    x: player.cam.rx,
+                    y: player.cam.ry
+                });
                 d.push(c.x);
                 d.push(c.y);
                 for (c = 0; c < f.length; c++) {
@@ -7803,7 +9803,10 @@ export function start(ModdedStarving) {
             }
         };
         this.cam_delay = 0;
-        this.last_cam = { i: 0, j: 0 };
+        this.last_cam = {
+            i: 0,
+            j: 0
+        };
         this.update_cam = function () {
             if (old_timestamp - this.cam_delay > CLIENT.CAM_DELAY) {
                 this.cam_delay = old_timestamp;
@@ -7945,7 +9948,8 @@ export function start(ModdedStarving) {
             this.socket.onmessage = function (f) {
                 if (this._current_id == c._current_id) {
                     if (typeof f.data == "string") {
-                        switch (f = JSON.parse(f.data), f[0]) {
+                        switch (f = JSON.parse(f.data),
+                        f[0]) {
                             case 0:
                                 c.chat(f);
                                 break;
@@ -8041,18 +10045,67 @@ export function start(ModdedStarving) {
                         }
                     }
                 }
-            };
+            }
+                ;
             this.socket.onopen = function () {
                 clearTimeout(c.timeout_handler);
                 c.socket.send(JSON.stringify([ui.nickname.input.value, CLIENT.VERSION_NUMBER, session.token, session.id]));
                 c.timeout_handler = setTimeout(c.timeout, CLIENT.TIMEOUT_TIME);
-            };
+            }
+                ;
             this.timeout_handler = setTimeout(c.timeout, CLIENT.TIMEOUT_TIME);
         };
     }
     var MAP = JSON.parse('{"w":30000,"h":10000,"tiles":[[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[{"x":0,"y":21}],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[{"x":418.5,"y":3}],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":535.5,"y":21}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":859.5,"y":3}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":949.5,"y":18}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[{"x":1201.5,"y":30}]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[{"x":1339.5,"y":30}],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[{"x":1678.5,"y":12}]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":1786.5,"y":27}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":2047.5,"y":12}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":2200.5,"y":30}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":2545.5,"y":12}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":2644.5,"y":9}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":2938.5,"y":36}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[{"x":3055.5,"y":27}],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":3429,"y":9}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":3558,"y":21}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[{"x":3900,"y":30}],[],[{"x":3990,"y":21}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[{"x":4080,"y":84}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":4332,"y":21}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":4467,"y":30}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":4845,"y":30}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[{"x":5007,"y":27}],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":5349,"y":18}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":5436,"y":30}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":5778,"y":30}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[{"x":6181.5,"y":9}],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[{"x":6313.5,"y":21}]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[{"x":6600,"y":36}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[{"x":6649.5,"y":12}],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":6709.5,"y":27}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":6979.5,"y":21}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":7090.5,"y":30}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":7483.5,"y":21}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":7780.5,"y":12}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":7906.5,"y":21}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":8179.5,"y":9}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[{"x":8278.5,"y":21}]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[{"x":8566.5,"y":12}],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":8671.5,"y":12}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":8962.5,"y":3}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":9031.5,"y":18}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":9348,"y":0}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[{"x":9456,"y":36}],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":9696,"y":12}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":9840,"y":36}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":10583.000244140625,"y":3}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":10904.000244140625,"y":12}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":11495.000244140625,"y":24},{"x":11495.000244140625,"y":24}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":12020.000244140625,"y":12}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":12311.000244140625,"y":18}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":12938.000244140625,"y":15}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":13484.000244140625,"y":39}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":13799.000244140625,"y":27}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":14372.000244140625,"y":30}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":14686.00048828125,"y":42}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":15100.00048828125,"y":24}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":15216,"y":72}]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":15568.00048828125,"y":18}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":15875.000244140625,"y":6}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":16364.000244140625,"y":18}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":16848,"y":36}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":17172,"y":12}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":17508,"y":12}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":17712,"y":96}]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":17982,"y":18}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":18324,"y":48}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":18750,"y":30}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":19116,"y":30}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":19542,"y":18}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":19812,"y":24}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":20298,"y":24}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":20868,"y":12}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":21162,"y":18}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":21774,"y":36}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":22044,"y":30}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":22530,"y":30}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":22854,"y":18}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":23112,"y":30}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":23622,"y":36}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":23946,"y":36}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[{"x":24036,"y":72}],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":24408,"y":36}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":24666,"y":36}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":25140,"y":54}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":25506,"y":30}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":26028,"y":54}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":26376,"y":48}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":26658,"y":30}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":27078,"y":30}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[{"x":27000,"y":96}],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":27360,"y":18}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":27798,"y":24}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":28128,"y":30}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":28602,"y":42}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":28896,"y":12}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":29334,"y":12}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":29964,"y":36}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]}],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[{"x":0,"y":111}]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[{"x":120,"y":132}],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":3192,"y":144}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[{"x":10300,"y":100}],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[{"x":20748,"y":168}],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[{"x":25872,"y":120}],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":768,"y":276}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":7788,"y":372}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":0,"y":498}],[],[],[{"x":0,"y":423}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":368,"y":464}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":5400,"y":420}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":6108,"y":456}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[{"x":1296,"y":560}],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[{"x":1992,"y":588}],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":2100,"y":516}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":2700,"y":528}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[{"x":3084,"y":576}],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":4740,"y":588}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":6008,"y":576}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":6732,"y":588}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,{"h":[[],[],[{"x":7500,"y":564}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":7608,"y":516}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":8520,"y":564}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":9736,"y":528}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[{"x":10300,"y":500}],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":16416,"y":592}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[{"x":720,"y":648}],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":1368,"y":648}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":2220,"y":660}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":3876,"y":684}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":4860,"y":684}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[{"x":6864,"y":696}],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":8664,"y":696}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":11880,"y":688}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":13128,"y":612}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":21040,"y":600}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":24456,"y":600}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[{"x":29304,"y":672}],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0],[0,0,0,0,0,0,0,{"h":[[],[],[{"x":792,"y":744}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":3976,"y":752}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":5472,"y":776}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":6504,"y":756}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[{"x":6768,"y":792}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":8508,"y":780}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":10896,"y":720}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":14568,"y":704}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":15448,"y":760}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":19080,"y":728}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":25044,"y":768}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":0,"y":804}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":696,"y":852}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":8520,"y":876}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":9048,"y":840}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":10792,"y":800}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":15576,"y":816}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":26040,"y":816}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":0,"y":903}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":2376,"y":924}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[{"x":7952,"y":968}],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[{"x":8724,"y":984}],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[{"x":9648,"y":960}],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[{"x":10300,"y":900}],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[{"x":18444,"y":996}],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":22176,"y":912}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[{"x":22404,"y":936}],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":22536,"y":936}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[{"x":27276,"y":996}],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[{"x":1716,"y":1092}],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[{"x":2744,"y":1096}],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":3312,"y":1092}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":3420,"y":1008}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[{"x":5892,"y":1068}],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":9600,"y":1068}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":17112,"y":1044}]]},0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":18372,"y":1080}]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":19928,"y":1088}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":20112,"y":1056}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":28596,"y":1020}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[{"x":28584,"y":1008}],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":0,"y":1164}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[{"x":924,"y":1104}],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":1032,"y":1188}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":2088,"y":1160}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[{"x":4524,"y":1104}],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":5700,"y":1128}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[{"x":7176,"y":1164}],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":12744,"y":1144}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":13824,"y":1176}]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":14016,"y":1116}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":17088,"y":1128}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":18512,"y":1128}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[{"x":24888,"y":1116}]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":29952,"y":1116}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]}],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[{"x":0,"y":1260}]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[{"x":1260,"y":1248}],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[{"x":4272,"y":1284}],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":4980,"y":1296}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[{"x":10300,"y":1200}],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":13936,"y":1280}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[{"x":16008,"y":1296}]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[{"x":20064,"y":1200}],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[{"x":23712,"y":1236}],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":27996,"y":1236}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":4120,"y":1328}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":7512,"y":1368}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":10640,"y":1392}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":12156,"y":1332}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":15888,"y":1328}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":23652,"y":1368}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":432,"y":1476}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":7496,"y":1480}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[{"x":7656,"y":1416}],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":8280,"y":1488}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[{"x":9912,"y":1440}],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":11328,"y":1464}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":12496,"y":1480}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[{"x":26076,"y":1416}],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":26184,"y":1476}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":0,"y":1539}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":520,"y":1568}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":2508,"y":1584}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":3552,"y":1584}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[{"x":6096,"y":1560}],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":6708,"y":1572}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":9252,"y":1560}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[{"x":10300,"y":1500}],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":21240,"y":1512}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":0,"y":1611}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":1488,"y":1680}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":6184,"y":1624}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":6624,"y":1656}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":9144,"y":1668}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":9588,"y":1656}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":11240,"y":1616}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":18584,"y":1656}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":21392,"y":1648}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":29448,"y":1668}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":29958,"y":1602}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]}],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[{"x":2376,"y":1740}]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[{"x":2592,"y":1728}],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[{"x":5160,"y":1712}],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[{"x":5388,"y":1752}],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[{"x":8076,"y":1704}],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":9312,"y":1776}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":9948,"y":1716}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":25488,"y":1788}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[{"x":1704,"y":1872}],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[{"x":3324,"y":1884}],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[{"x":4464,"y":1848}],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":5484,"y":1860}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":8016,"y":1812}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[{"x":10300,"y":1800}],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":14808,"y":1860}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":15008,"y":1824}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":27444,"y":1800}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":0,"y":1953}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":360,"y":1932}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[{"x":1860,"y":1920}],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":3180,"y":1980}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[{"x":4320,"y":1968}],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[{"x":7188,"y":1992}],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[{"x":8256,"y":1956}],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":10776,"y":1944}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":17680,"y":1920}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":29940,"y":1914}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]}],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[{"x":0,"y":2037}]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[{"x":684,"y":2052}],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[{"x":3684,"y":2052}],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,{"h":[[],[],[{"x":4452,"y":2016}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[{"x":13296,"y":2028}],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":14136,"y":2048}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[{"x":23076,"y":2028}],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":26676,"y":2004}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[{"x":28932,"y":2004}],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[{"x":84,"y":2184}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,{"h":[[],[],[{"x":828,"y":2196}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":6960,"y":2124}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":7080,"y":2124}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[{"x":10300,"y":2100}],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":11928,"y":2104}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":13080,"y":2172}]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":17760,"y":2136}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[{"x":20760,"y":2124}],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":22572,"y":2112}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":24240,"y":2184}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":27216,"y":2124}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[{"x":28884,"y":2184}],[]]},0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":948,"y":2244}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[{"x":6060,"y":2268}]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[{"x":9664,"y":2224}],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[{"x":12960,"y":2244}],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":13272,"y":2224}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":16488,"y":2292}]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":19380,"y":2256}]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":19520,"y":2216}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":20832,"y":2256}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":22392,"y":2224}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[{"x":22644,"y":2268}],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":29968,"y":2264}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]}],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":2628,"y":2364}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":6408,"y":2304}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":16416,"y":2388}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[{"x":16752,"y":2316}],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[{"x":19392,"y":2316}]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[{"x":24120,"y":2316}],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[{"x":0,"y":2424}],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":3000,"y":2460}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":4992,"y":2412}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,{"h":[[],[],[]],"p":[{"x":5676,"y":2448}],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":6520,"y":2408}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[{"x":8520,"y":2400}],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[{"x":10300,"y":2400}],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":0,"y":2547}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[{"x":7500,"y":2544}]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[{"x":8844,"y":2592}],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[{"x":9072,"y":2544}],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":9312,"y":2592}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":15084,"y":2508}]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":15204,"y":2544}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":18720,"y":2556}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":324,"y":2652}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":1752,"y":2628}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":4072,"y":2616}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":4140,"y":2688}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[{"x":5412,"y":2604}],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[{"x":8208,"y":2664}],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":9944,"y":2656}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":10920,"y":2652}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[{"x":10966.5,"y":2626.5}]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":14992,"y":2688}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":18708,"y":2676}]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":27984,"y":2604}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":0,"y":2790}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":1640,"y":2760}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[{"x":2160,"y":2796}],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":2248,"y":2736}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":3108,"y":2712}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":7308,"y":2772}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[{"x":7560,"y":2772}],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":8256,"y":2720}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":8388,"y":2784}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[{"x":10300,"y":2700}],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":11820,"y":2748}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":21848,"y":2768}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[{"x":26196,"y":2796}]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":28656,"y":2772}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":0,"y":2880}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[{"x":720,"y":2844}]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":3060,"y":2808}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":5172,"y":2844}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":9396,"y":2856}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":11916,"y":2820}]]},0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":12800,"y":2848}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":18920,"y":2840}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":25288,"y":2824}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[{"x":26472,"y":2892}],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":888,"y":2904}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":1032,"y":2940}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[{"x":3744,"y":2940}],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":4920,"y":2904}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[{"x":7624,"y":2912}],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":11808,"y":2952}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":15816,"y":2936}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[{"x":816,"y":3048}],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":4328,"y":3088}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[{"x":5856,"y":3056}],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":6492,"y":3036}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[{"x":10300,"y":3000}],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":13836,"y":3072}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":16928,"y":3000}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[{"x":0,"y":3198}],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[{"x":1992,"y":3132}],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":11184,"y":3136}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":12180,"y":3144}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[{"x":21180,"y":3144}],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":22848,"y":3112}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":23856,"y":3192}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":27492,"y":3132}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":29520,"y":3192}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":29968,"y":3112}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]}],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":0,"y":3297}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":8584,"y":3288}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":8904,"y":3228}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":9720,"y":3240}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":12216,"y":3288}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":27180,"y":3216}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":2304,"y":3300}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":5056,"y":3376}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":6348,"y":3336}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":6684,"y":3360}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":8652,"y":3360}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[{"x":10300,"y":3300}],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":11416,"y":3352}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":20184,"y":3344}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":22368,"y":3396}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":24876,"y":3300}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[{"x":25008,"y":3360}],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":468,"y":3432}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":4044,"y":3444}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":5196,"y":3492}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[{"x":17688,"y":3480}]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":17604,"y":3444}]]},0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":18504,"y":3480}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":20340,"y":3480}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":0,"y":3573}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[{"x":3432,"y":3504}],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[{"x":5724,"y":3564}],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[{"x":9156,"y":3552}],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[{"x":15120,"y":3588}],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":20208,"y":3564}]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":22644,"y":3528}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":25020,"y":3552}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[{"x":0,"y":3648}],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[{"x":1164,"y":3648}],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[{"x":2568,"y":3600}],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[{"x":2736,"y":3600}],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":4320,"y":3636}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[{"x":7812,"y":3612}],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[{"x":9396,"y":3660}],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[{"x":10300,"y":3600}],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":15132,"y":3600}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":16332,"y":3684}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":17536,"y":3624}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[{"x":25980,"y":3672}],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[{"x":28092,"y":3636}]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[{"x":1284,"y":3720}],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":1920,"y":3780}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":2028,"y":3708}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[{"x":2628,"y":3708}],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":3516,"y":3744}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":7080,"y":3708}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[{"x":7176,"y":3768}],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[{"x":7932,"y":3780}]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":10800,"y":3780}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":13344,"y":3708}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":13524,"y":3792}]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":13656,"y":3720}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":21152,"y":3744}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":22080,"y":3708}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":26088,"y":3708}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":28872,"y":3792}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":0,"y":3882}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":312,"y":3888}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":3624,"y":3888}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[{"x":5796,"y":3816}],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":7068,"y":3864}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[{"x":9372,"y":3804}],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[{"x":10756.80029296875,"y":3854.3999633789062}]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":12704,"y":3872}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":13312,"y":3872}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":22048,"y":3888}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[{"x":22140,"y":3864}],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":0,"y":3963}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":5676,"y":3972}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":8148,"y":3936}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":8864,"y":3944}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":10016,"y":3960}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[{"x":10300,"y":3900}],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[{"x":11808,"y":3984}],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":11952,"y":3912}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":18852,"y":3972}]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[{"x":19056,"y":3936}],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":26984,"y":3928}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":28038,"y":3948},{"x":28038,"y":3948}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":3564,"y":4044}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[{"x":4848,"y":4020}],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":5760,"y":4080}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[{"x":6420,"y":4092}],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":8988,"y":4044}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[{"x":11856,"y":4008}],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":15852,"y":4044}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":18944,"y":4080}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,{"h":[[],[],[{"x":132,"y":4128}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":15732,"y":4140}]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":24456,"y":4168}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[{"x":29808,"y":4112}],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[{"x":29944,"y":4144}],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]}],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":0,"y":4248}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":708,"y":4236}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[{"x":1284,"y":4296}],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":2616,"y":4236}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":4776,"y":4284}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":9504,"y":4248}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[{"x":10300,"y":4200}],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":14504,"y":4224}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":17604,"y":4260}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":25452,"y":4272}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":28432,"y":4288}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[{"x":29168,"y":4208}],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":29280,"y":4208}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":29432,"y":4296}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":29720,"y":4232}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":0,"y":4323}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":1836,"y":4308}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":1936,"y":4392}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[{"x":2820,"y":4368}],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[{"x":7512,"y":4320}],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":9372,"y":4380}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[{"x":9576,"y":4392}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[{"x":14616,"y":4320},{"x":14616,"y":4320}],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":20868,"y":4392}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[{"x":23700,"y":4356}]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[{"x":23736,"y":4392}],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[{"x":28544,"y":4336}],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":28656,"y":4328}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":28840,"y":4312}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[{"x":28936,"y":4360}],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":29096,"y":4344}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":29264,"y":4352}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[{"x":29600,"y":4344}],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[{"x":29736,"y":4344}],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":29864,"y":4320}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":29976,"y":4328}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]}],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":4168,"y":4432}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":6480,"y":4404}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":6576,"y":4452}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[{"x":7848,"y":4428}],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":16856,"y":4440}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":21048,"y":4440}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":23576,"y":4480}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":26096,"y":4424}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":29016,"y":4432}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[{"x":29120,"y":4472}],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":4740,"y":4596}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[{"x":10300,"y":4500}],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":10808,"y":4512}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":12328,"y":4592}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":17280,"y":4536}]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":27320,"y":4584}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[{"x":28700,"y":4500}],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":29088,"y":4568}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[{"x":29000,"y":4500}],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[{"x":29300,"y":4500}],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[{"x":29600,"y":4500}],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[{"x":29900,"y":4500}],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]}],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[{"x":0,"y":4602}],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":2664,"y":4632}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":4908,"y":4656}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":5488,"y":4648}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":8748,"y":4656}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":11384,"y":4632}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":12464,"y":4632},{"x":12464,"y":4632}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":19096,"y":4648}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":0,"y":4701}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":4464,"y":4704}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":8640,"y":4728}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":15688,"y":4792}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[{"x":15804,"y":4728}]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":20100,"y":4740}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":26808,"y":4776}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[{"x":28520,"y":4736}],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[{"x":29048,"y":4712}],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":696,"y":4860}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[{"x":1716,"y":4872}]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,{"h":[[],[{"x":2604,"y":4812}],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[{"x":2772,"y":4800}],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[{"x":3144,"y":4872}],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":3684,"y":4884}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":5592,"y":4848}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":7056,"y":4848}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":8712,"y":4836}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[{"x":10300,"y":4800}],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[{"x":14352,"y":4884}],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":18120,"y":4848}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":20196,"y":4896}]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":22524,"y":4824}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[{"x":26688,"y":4872}],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":28464,"y":4888}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[{"x":28700,"y":4800}],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":29096,"y":4848}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[{"x":29000,"y":4800}],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[{"x":29300,"y":4800}],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":29520,"y":4816}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[{"x":29600,"y":4800}],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[{"x":29900,"y":4800}],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]}],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":0,"y":4959}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[{"x":588,"y":4956}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":5844,"y":4908}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":6416,"y":4984}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[{"x":7008,"y":4980}],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":7188,"y":4944}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":13152,"y":4968}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":13200,"y":4968}]]},0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":14436,"y":4920}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":15576,"y":4952}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":20376,"y":4932}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[{"x":22368,"y":4932}],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[{"x":24804,"y":4980}],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[{"x":29064,"y":4936}],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[{"x":29520,"y":4920}],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[{"x":0,"y":5052}]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":2664,"y":5028}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":8336,"y":5032}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":9608,"y":5056}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":17632,"y":5048}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[{"x":17820,"y":5040}],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":28392,"y":5040}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":28520,"y":5056}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[{"x":29056,"y":5056}],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":29512,"y":5024}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[{"x":1248,"y":5148}],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":3600,"y":5104}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[{"x":4428,"y":5136}],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":5080,"y":5144}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[{"x":9924,"y":5148}],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":9984,"y":5160}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[{"x":10300,"y":5100}],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":24732,"y":5124}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":25920,"y":5124}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":28528,"y":5192}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[{"x":28700,"y":5100}],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[{"x":29000,"y":5100}],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[{"x":29300,"y":5100}],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[{"x":29504,"y":5144}],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[{"x":29600,"y":5100}],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[{"x":29900,"y":5100}],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]}],[0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":300,"y":5292}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":1128,"y":5264}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[{"x":4128,"y":5280}],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[{"x":7176,"y":5244}],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[{"x":8280,"y":5280}]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":10896,"y":5288}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":11040,"y":5200}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":23896,"y":5272}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[{"x":29072,"y":5216}],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":2100,"y":5376}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":7704,"y":5364}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":9192,"y":5376}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":12624,"y":5336}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[{"x":19572,"y":5328}]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":19512,"y":5304}]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":23776,"y":5376}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":26048,"y":5352}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[{"x":28520,"y":5352}],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":29072,"y":5320}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[{"x":29520,"y":5304}],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[{"x":29968,"y":5304}],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]}],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":0,"y":5472}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":1992,"y":5448}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":4212,"y":5472}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":5604,"y":5484}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[{"x":8520,"y":5484}],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[{"x":10300,"y":5400}],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":11892,"y":5472}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":13912,"y":5496}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":15216,"y":5456}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":16572,"y":5424}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[{"x":28528,"y":5472}],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[{"x":28700,"y":5400}],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[{"x":29024,"y":5424}],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[{"x":29000,"y":5400}],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[{"x":29300,"y":5400}],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[{"x":29520,"y":5448}],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[{"x":29600,"y":5400}],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[{"x":29992,"y":5488}],[],[]],"dg":[[{"x":29900,"y":5400}],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]}],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":0,"y":5589}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":1704,"y":5592}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[{"x":2148,"y":5520}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":2832,"y":5536}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":6696,"y":5520}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":14080,"y":5528}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":19480,"y":5504}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":20960,"y":5552}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":27672,"y":5528}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":28368,"y":5512}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":28520,"y":5552}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":29512,"y":5560}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0],[0,0,0,0,0,0,0,0,0,{"h":[[],[{"x":948,"y":5604}],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[{"x":4404,"y":5616}],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":4848,"y":5616}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,{"h":[[],[],[{"x":5508,"y":5640}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[{"x":5988,"y":5604}],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":10032,"y":5628}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":16272,"y":5628}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[{"x":16296,"y":5652}],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":18516,"y":5640}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[{"x":21576,"y":5688}],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":21504,"y":5628}]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":27112,"y":5640}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":28512,"y":5688}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[{"x":29520,"y":5696}],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[{"x":5412,"y":5772}]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":6540,"y":5748}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":9972,"y":5712}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[{"x":10300,"y":5700}],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":25642,"y":5704}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[{"x":28700,"y":5700}],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[{"x":29000,"y":5700}],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[{"x":29300,"y":5700}],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[{"x":29600,"y":5700}],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[{"x":29900,"y":5700}],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]}],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":3,"y":5877}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":900,"y":5880}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":3204,"y":5892}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":7472,"y":5856}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":22504,"y":5848}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":28440,"y":5840}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[{"x":28552,"y":5848}],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":28680,"y":5888}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[{"x":29000,"y":5848}],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[{"x":29136,"y":5848}],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":29256,"y":5880}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":29416,"y":5872}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[{"x":29512,"y":5848}],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":29688,"y":5872}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":29800,"y":5864}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":29928,"y":5856}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]}],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":0,"y":5958}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[{"x":804,"y":5988}],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[{"x":2604,"y":5988}],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":3468,"y":5988}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":9360,"y":5916}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[{"x":9492,"y":5964}],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":28098,"y":5964}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":28600,"y":5960}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":28848,"y":5904}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":29856,"y":5968}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[{"x":29960,"y":5992}],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]}],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":4272,"y":6096}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[{"x":4896,"y":6096}],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":5328,"y":6000}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[{"x":6744,"y":6060}],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[{"x":10300,"y":6000}],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":11888,"y":6016}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":12696,"y":6060}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":12864,"y":6084}]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":15144,"y":6072}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":17784,"y":6032}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":23316,"y":6012}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[{"x":23460,"y":6072}],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":25068,"y":6072}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":28956,"y":6096}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":29384,"y":6032}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[{"x":29736,"y":6000}],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[{"x":4152,"y":6176}],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[{"x":7860,"y":6132}],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":8616,"y":6120}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[{"x":11052,"y":6180}],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":13308,"y":6192}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[{"x":15288,"y":6180}],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":17872,"y":6168}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":21672,"y":6168}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[{"x":23544,"y":6192}],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":2040,"y":6264}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":5928,"y":6264}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":6528,"y":6264}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[{"x":6840,"y":6200}]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[{"x":8220,"y":6204}],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[{"x":10840.80029296875,"y":6262.7999267578125}]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":10932,"y":6252}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":14208,"y":6276}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":27120,"y":6204}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":0,"y":6384}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[{"x":0,"y":6303}]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":456,"y":6384}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":1668,"y":6324}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":7860,"y":6384}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":8016,"y":6312}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":8400,"y":6300}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[{"x":10300,"y":6300}],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":19296,"y":6384}]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":24440,"y":6384}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":26168,"y":6352}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[{"x":27132,"y":6348}],[],[]]},0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[{"x":28176,"y":6300}]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":1788,"y":6432}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":6468,"y":6432}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[{"x":14256,"y":6420}],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":17112,"y":6456}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":20340,"y":6456}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[{"x":20556,"y":6492}],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":20652,"y":6444}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":26304,"y":6420}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":1260,"y":6588}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[{"x":3600,"y":6576}],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[{"x":9648,"y":6512}],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[{"x":13176,"y":6516}],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":16464,"y":6552}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":17880,"y":6552}]]},0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":19164,"y":6516}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":20224,"y":6552}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":28740,"y":6564}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":29976,"y":6568}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]}],[0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":876,"y":6684}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[{"x":972,"y":6672}],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":2700,"y":6600}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[{"x":8856,"y":6648}],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[{"x":10300,"y":6600}],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":11816,"y":6696}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":15512,"y":6688}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[{"x":17976,"y":6684}]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":28392,"y":6696}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":29472,"y":6648}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[{"x":0,"y":6798}],[{"x":0,"y":6714}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":3192,"y":6768}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":4536,"y":6708}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[{"x":4620,"y":6768}],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":6132,"y":6720}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":8076,"y":6720}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":9024,"y":6732}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":21832,"y":6720}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":21972,"y":6756}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":22608,"y":6768}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":27558,"y":6792}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":744,"y":6800}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[{"x":3336,"y":6888}],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":3564,"y":6804}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":4764,"y":6816}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":5472,"y":6828}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":9120,"y":6852}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":16848,"y":6828}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,{"h":[[],[],[{"x":120,"y":6912}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[{"x":2112,"y":6960}],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":5592,"y":6936}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[{"x":6876,"y":6936}],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":7416,"y":6960}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[{"x":10300,"y":6900}],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[{"x":10648.80029296875,"y":6986.400146484375}]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[{"x":19008,"y":6972}],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[{"x":0,"y":7056}],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":2340,"y":7068}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":3420,"y":7020}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[{"x":5532,"y":7080}],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":10584,"y":7032}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":19092,"y":7068}]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":23648,"y":7088}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":24564,"y":7080}]]},0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":25644,"y":7056}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":29976,"y":7088}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]}],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[{"x":0,"y":7176}]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[{"x":1296,"y":7116}],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":1512,"y":7164}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":3504,"y":7176}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":7332,"y":7152}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":19160,"y":7120}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":24336,"y":7140}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":28002,"y":7188}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[{"x":368,"y":7248}]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":696,"y":7236}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":4952,"y":7248}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[{"x":9496,"y":7232}],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[{"x":10300,"y":7200}],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":12552,"y":7284}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":16380,"y":7284}]]},0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":17760,"y":7264}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":20352,"y":7224}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":4128,"y":7336}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[{"x":6204,"y":7392}],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":6360,"y":7368}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[{"x":8748,"y":7344}],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":9864,"y":7320}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":12264,"y":7332}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":13448,"y":7320}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":15024,"y":7380}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":21384,"y":7344}]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[{"x":28992,"y":7320}],[]]},0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":2100,"y":7440}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[{"x":2952,"y":7452}],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":6588,"y":7464}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":8004,"y":7416}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":8592,"y":7404}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":14688,"y":7428}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[{"x":14724,"y":7464}],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[{"x":27360,"y":7404}]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":28116,"y":7440}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":29100,"y":7440}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":1960,"y":7544}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[{"x":3156,"y":7560}],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":4044,"y":7500}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":5808,"y":7584}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":7680,"y":7536}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":8424,"y":7536}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[{"x":10300,"y":7500}],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":10908,"y":7572}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":14600,"y":7584}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":16384,"y":7512}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":21192,"y":7520}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":26416,"y":7552}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[{"x":27948,"y":7524}],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":29984,"y":7552}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]}],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[{"x":0,"y":7623}]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":4536,"y":7692}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[{"x":4704,"y":7656}],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[{"x":9228,"y":7644}],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":13192,"y":7680}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[{"x":21348,"y":7632}],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":22248,"y":7688}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":26316,"y":7680}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":26484,"y":7632}]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[{"x":9,"y":7707}],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":900,"y":7740}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":1080,"y":7776}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[{"x":6084,"y":7728}],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":9784,"y":7776}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":11696,"y":7784}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":19952,"y":7720}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":23136,"y":7792}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":28200,"y":7788}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[{"x":912,"y":7860}],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":1500,"y":7836}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,{"h":[[],[{"x":2352,"y":7884}],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":4620,"y":7884}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[{"x":10300,"y":7800}],[],[],[{"x":10348.80029296875,"y":7881.599853515625}]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":20040,"y":7872}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":23304,"y":7800}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":25008,"y":7840}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":29952,"y":7878}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]}],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":0,"y":7992}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":2328,"y":7968}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[{"x":2544,"y":7968}],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":7332,"y":7920}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[{"x":23364,"y":7980}],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[{"x":25188,"y":7980}],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[{"x":25308,"y":7956}]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":28764,"y":7932}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":0,"y":8073}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":3864,"y":8004}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":4884,"y":8004}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":6768,"y":8088}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[{"x":15384,"y":8076}]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":17232,"y":8032}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":17448,"y":8004}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":18552,"y":8088}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":3456,"y":8184}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":5568,"y":8172}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":7260,"y":8148}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":8076,"y":8124}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":8696,"y":8144}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[{"x":10300,"y":8100}],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":11328,"y":8148}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":15288,"y":8184}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[{"x":17496,"y":8148}],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[{"x":23268,"y":8184}],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":26844,"y":8148}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":29946,"y":8190}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]}],[0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[{"x":440,"y":8248}],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[{"x":6600,"y":8256}],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[{"x":8152,"y":8200}],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,{"h":[[],[],[{"x":8940,"y":8256}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":10944,"y":8208}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":12328,"y":8208}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[{"x":19164,"y":8220}]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":19152,"y":8232}]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[{"x":29136,"y":8280}],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[{"x":0,"y":8343}],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":348,"y":8340}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":1632,"y":8340}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":5208,"y":8304}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":5688,"y":8384}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":19512,"y":8340}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":0,"y":8445}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":2388,"y":8448}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[{"x":3108,"y":8448}]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":3384,"y":8424}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,{"h":[[],[{"x":4176,"y":8484}],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":9708,"y":8448}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[{"x":10300,"y":8400}],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[{"x":13716,"y":8436}],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":13872,"y":8432}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":16192,"y":8456}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":19336,"y":8416}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[{"x":22008,"y":8484}],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":22128,"y":8424}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":27876,"y":8460}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":1728,"y":8556}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":4140,"y":8592}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":4224,"y":8512}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":9612,"y":8544}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[{"x":16320,"y":8544}],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[{"x":19908,"y":8592}],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[{"x":1016,"y":8600}],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[{"x":1140,"y":8628}],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":9456,"y":8632}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[{"x":16272,"y":8640}],[],[]]},0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":17472,"y":8628}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[{"x":0,"y":8784}],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":3,"y":8712}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[{"x":10300,"y":8700}],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":21348,"y":8748}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":24252,"y":8724}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":28356,"y":8772}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":5028,"y":8844}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":6924,"y":8844}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":7712,"y":8840}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[{"x":8976,"y":8856}],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":10624,"y":8800}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[{"x":11760,"y":8892}],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":11700,"y":8820}]]},0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[{"x":13164,"y":8892}],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":24376,"y":8864}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":25476,"y":8892}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":26336,"y":8896}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[{"x":28248,"y":8832}],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":29970,"y":8874}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]}],[0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":468,"y":8988}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":1368,"y":8928}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":3720,"y":8988}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[{"x":6732,"y":8964}],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[{"x":7800,"y":8928}],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[{"x":8340,"y":8964}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":8484,"y":8928}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":13080,"y":8976}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":14696,"y":8968}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":15568,"y":8944}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[{"x":24228,"y":8904}],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":0,"y":9063}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[{"x":2460,"y":9084}],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":2696,"y":9016}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[{"x":3504,"y":9084}],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":4356,"y":9000}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":5448,"y":9072}]],"p":[],"s":[[],[{"x":5496,"y":9024}],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":6192,"y":9024}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":6744,"y":9084}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":7056,"y":9012}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[{"x":10300,"y":9000}],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":13192,"y":9088}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":14532,"y":9048}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":3,"y":9138}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[{"x":2592,"y":9104}],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":3780,"y":9192}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[{"x":5772,"y":9168}],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":20128,"y":9128}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":26364,"y":9180}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[{"x":27588,"y":9120}],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,{"h":[[],[{"x":108,"y":9252}],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,{"h":[[],[],[]],"p":[{"x":828,"y":9216}],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":1872,"y":9224}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":6012,"y":9252}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":8052,"y":9216}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":9900,"y":9288}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[{"x":10992,"y":9240}]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":16704,"y":9288}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":18492,"y":9216}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[{"x":20148,"y":9288}]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":20208,"y":9276}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":22992,"y":9216}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":29958,"y":9288}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]}],[0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[{"x":1152,"y":9300}],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[{"x":2460,"y":9384}],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[{"x":9808,"y":9392}]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[{"x":10300,"y":9300}],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":12368,"y":9384}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":22016,"y":9336}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[{"x":29388,"y":9336}],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":0,"y":9417}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":8896,"y":9424}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[{"x":9712,"y":9408}],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":11544,"y":9440}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":13848,"y":9472}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":28696,"y":9488}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":3,"y":9535.5}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":1596,"y":9576}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":2580,"y":9504}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":4320,"y":9528}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[{"x":4912,"y":9512}],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[{"x":6808,"y":9536}],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":7608,"y":9540}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":17656,"y":9520}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":29982,"y":9558}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]}],[0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":432,"y":9636}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":2424,"y":9624}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":4056,"y":9672}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":4812,"y":9600}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":6360,"y":9660}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[{"x":8376,"y":9660}]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[{"x":10300,"y":9600}],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":15696,"y":9672}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[{"x":0,"y":9742.5}]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[{"x":7524,"y":9732}],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":0,"y":9832.5}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,{"h":[[],[],[{"x":732,"y":9876}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":3036,"y":9876}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":4740,"y":9876}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":6048,"y":9864},{"x":6048,"y":9864}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[{"x":9420,"y":9876}]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[{"x":10810.80029296875,"y":9863.400146484375}]],"hw":[[],[],[]]},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[{"x":427.5,"y":9981}],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[{"x":772.5,"y":9972}]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":868.5,"y":9981}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":1138.5,"y":9990}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":1258.5,"y":9981}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":1510.5,"y":9990}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[{"x":1606.5,"y":9963}],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":1933.5,"y":9972}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":2056.5,"y":9993}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[{"x":2365.5,"y":9972}],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[{"x":2473.5,"y":9990}],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[{"x":2767.5,"y":9990}]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":2869.5,"y":9990}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[{"x":3199.5,"y":9981}],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[{"x":3325.5,"y":9966}],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":3706.5,"y":9975}],[{"x":3793.5,"y":9981}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":4183.5,"y":9954}],[],[{"x":4111.5,"y":9972}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[{"x":4498.5,"y":9972}],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":4822.5,"y":9945}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":4918.5,"y":9975}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":5182.5,"y":9957}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":5268,"y":9966}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[{"x":5553,"y":9963}]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[{"x":5724,"y":9981}],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":6105,"y":9988.5}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":6231,"y":9979.5}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":6492,"y":9967.5}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":6564,"y":9970.5}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[{"x":6876,"y":9961.5}],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":6996,"y":9994.5}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":7338,"y":9976.5}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":7461,"y":9994.5}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[{"x":7803,"y":9961.5}],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":7932,"y":9934.5}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[{"x":8289,"y":9970.5}],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[{"x":8373,"y":9961.5}],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[{"x":8661,"y":9943.5}]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":8778,"y":9952.5}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[{"x":9075,"y":9970.5}],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":9198,"y":9985.5}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[{"x":9540,"y":9972}],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[{"x":9870,"y":9978}],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[{"x":9987,"y":9987}],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[{"x":10300,"y":9900}],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[{"x":10585.80029296875,"y":9986.400146484375}]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":10731,"y":9984}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":11166,"y":9966}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":11775,"y":9990}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":12243,"y":9987}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":12552,"y":9975}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":12978,"y":9987}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":13299,"y":9978}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":13776,"y":9975}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":14106,"y":9990}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":14472,"y":9987}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[{"x":14472,"y":9912}],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":14772,"y":9975}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":15108,"y":9975}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":15447,"y":9984}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":15723,"y":9978}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":16256.000244140625,"y":9978}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":16714.00048828125,"y":9978}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":17044.00048828125,"y":9978}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":17548.00048828125,"y":9966}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":17988,"y":9972}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":18324,"y":9978}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":18810,"y":9972}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":19062,"y":9984}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":19578,"y":9954}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":19956,"y":9978}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":20226,"y":9978}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":20622,"y":9936}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":20988,"y":9972}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":21240,"y":9972}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":21570,"y":9978}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":22038,"y":9978}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":22350,"y":9984}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":22788,"y":9984}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":23094,"y":9990}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":23544,"y":9996}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":23802,"y":9978}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":24288,"y":9966}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":24594,"y":9978}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":25068,"y":9978}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":25302,"y":9966}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":25668,"y":9966}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":26088,"y":9966}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":26400,"y":9984}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":26910,"y":9942}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":27246,"y":9984}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":27606,"y":9996}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[{"x":27876,"y":9978}],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":28302,"y":9984}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":28608,"y":9972}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[{"x":28968,"y":9960}],[],[]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":29316,"y":9966}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]},0,0,0,0,0,{"h":[[],[],[]],"p":[],"s":[[],[],[]],"t":[[],[],[],[],[],[]],"g":[[],[],[]],"d":[[],[],[]],"b":[[],[],[],[]],"f":[[],[],[{"x":29964,"y":9960}]],"sw":[[],[],[]],"gw":[[],[],[]],"dw":[[],[],[]],"a":[[],[],[]],"dg":[[],[],[],[],[],[],[]],"so":[[],[],[],[],[],[],[]],"hw":[[],[],[]]}]],"nw":300,"nh":100,"lw":300,"lh":100}');
-    var WORLD = { SPEED: 200, SPEED_WINTER: 160, SPEED_ATTACK: 100, SPEED_COLLIDE: 100, RABBIT_SPEED: 300, WOLF_SPEED: 210, SPIDER_SPEED: 245, FOX_SPEED: 220, BEAR_SPEED: 190, DRAGON_SPEED: 200, SPIDER_SPEED: 220, ROTATE: 10, DIST_CHEST: 100, DIST_FURNACE: 100, MODE_PVP: 0, MODE_HUNGER_GAMES: 1 };
-    var ITEMS = { PLAYERS: 0, FIRE: 1, WORKBENCH: 2, SEED: 3, WALL: 4, SPIKE: 5, BIG_FIRE: 6, STONE_WALL: 7, GOLD_WALL: 8, DIAMOND_WALL: 9, WOOD_DOOR: 10, CHEST: 11, STONE_SPIKE: 12, GOLD_SPIKE: 13, DIAMOND_SPIKE: 14, STONE_DOOR: 15, GOLD_DOOR: 16, DIAMOND_DOOR: 17, FURNACE: 18, AMETHYST_WALL: 19, AMETHYST_SPIKE: 20, AMETHYST_DOOR: 21, RABBIT: 60, WOLF: 61, SPIDER: 62, FOX: 63, BEAR: 64, DRAGON: 65, FRUIT: 100 };
+    var WORLD = {
+        SPEED: 200,
+        SPEED_WINTER: 160,
+        SPEED_ATTACK: 100,
+        SPEED_COLLIDE: 100,
+        RABBIT_SPEED: 300,
+        WOLF_SPEED: 210,
+        SPIDER_SPEED: 245,
+        FOX_SPEED: 220,
+        BEAR_SPEED: 190,
+        DRAGON_SPEED: 200,
+        SPIDER_SPEED: 220,
+        ROTATE: 10,
+        DIST_CHEST: 100,
+        DIST_FURNACE: 100,
+        MODE_PVP: 0,
+        MODE_HUNGER_GAMES: 1
+    };
+    var ITEMS = {
+        PLAYERS: 0,
+        FIRE: 1,
+        WORKBENCH: 2,
+        SEED: 3,
+        WALL: 4,
+        SPIKE: 5,
+        BIG_FIRE: 6,
+        STONE_WALL: 7,
+        GOLD_WALL: 8,
+        DIAMOND_WALL: 9,
+        WOOD_DOOR: 10,
+        CHEST: 11,
+        STONE_SPIKE: 12,
+        GOLD_SPIKE: 13,
+        DIAMOND_SPIKE: 14,
+        STONE_DOOR: 15,
+        GOLD_DOOR: 16,
+        DIAMOND_DOOR: 17,
+        FURNACE: 18,
+        AMETHYST_WALL: 19,
+        AMETHYST_SPIKE: 20,
+        AMETHYST_DOOR: 21,
+        RABBIT: 60,
+        WOLF: 61,
+        SPIDER: 62,
+        FOX: 63,
+        BEAR: 64,
+        DRAGON: 65,
+        FRUIT: 100
+    };
     function Player(c) {
         this.nickname = this.displayName = c;
         this.ldb_label = this.label_winter = this.label = null;
@@ -8068,7 +10121,10 @@ export function start(ModdedStarving) {
         this.nangle = this.angle = m;
         this.action = p;
         this.info = n;
-        this.r = { x: d, y: e };
+        this.r = {
+            x: d,
+            y: e
+        };
         if (world) {
             this.uid = g * world.max_units + f;
         }
@@ -8078,7 +10134,10 @@ export function start(ModdedStarving) {
                 this.foot_enable = true;
                 this.foot = [];
                 this.id_foot = 0;
-                this.r = { x: d, y: e };
+                this.r = {
+                    x: d,
+                    y: e
+                };
                 this.draw = draw_player;
                 this.hit = new Utils.LinearAnimation(false, .6, .6, 0, 5, 3);
                 this.heal = new Utils.LinearAnimation(false, .6, .6, 0, 5, 3);
@@ -8117,7 +10176,8 @@ export function start(ModdedStarving) {
                         this.action -= STATE.COLD + STATE.HEAL;
                         this.action |= STATE.WEB;
                     }
-                };
+                }
+                    ;
                 this.update();
                 break;
             case ITEMS.FIRE:
@@ -8127,16 +10187,27 @@ export function start(ModdedStarving) {
                 this.fire = new Utils.LinearAnimation(false, 1, 1.03, .98, .3, .3);
                 this.ground = new Utils.LinearAnimation(false, 1, 1.23, 1.18, .01, .01);
                 this.halo = new Utils.LinearAnimation(false, 1, 1.23, 1.18, .01, .01);
-                this.hit = { anim: new Utils.LinearAnimation(false, 1, 1, 0, 10, 10), update: false, angle: 0 };
+                this.hit = {
+                    anim: new Utils.LinearAnimation(false, 1, 1, 0, 10, 10),
+                    update: false,
+                    angle: 0
+                };
                 break;
             case ITEMS.SEED:
                 this.draw_bg = draw_seed;
                 this.draw_fg = draw_plant;
                 this.ground = new Utils.LinearAnimation(false, .9, 1.05, .9, .2, .2);
-                this.hit = { anim: new Utils.LinearAnimation(false, 1, 1, 0, 10, 10), update: false, angle: 0 };
+                this.hit = {
+                    anim: new Utils.LinearAnimation(false, 1, 1, 0, 10, 10),
+                    update: false,
+                    angle: 0
+                };
                 this.fruits = [];
                 for (c = 0; 3 > c; c++) {
-                    this.fruits.push({ draw: draw_breath, breath: new Utils.LinearAnimation(false, .9 + .15 * Math.random(), 1.05, .9, .2, .2) });
+                    this.fruits.push({
+                        draw: draw_breath,
+                        breath: new Utils.LinearAnimation(false, .9 + .15 * Math.random(), 1.05, .9, .2, .2)
+                    });
                 }
                 this.fruits[0].x = this.x - 16.5;
                 this.fruits[0].y = this.y - 15.5;
@@ -8163,7 +10234,10 @@ export function start(ModdedStarving) {
             case ITEMS.FRUIT:
                 this.fruits = [];
                 for (c = 0; 5 > c; c++) {
-                    this.fruits.push({ draw: draw_breath, breath: new Utils.LinearAnimation(false, .9 + .15 * Math.random(), 1.05, .9, .2, .2) });
+                    this.fruits.push({
+                        draw: draw_breath,
+                        breath: new Utils.LinearAnimation(false, .9 + .15 * Math.random(), 1.05, .9, .2, .2)
+                    });
                 }
                 switch (this.id % 3) {
                     case 0:
@@ -8215,14 +10289,23 @@ export function start(ModdedStarving) {
             case ITEMS.DIAMOND_SPIKE:
             case ITEMS.AMETHYST_SPIKE:
                 this.draw = draw_simple_item;
-                this.hit = { anim: new Utils.LinearAnimation(false, 1, 1, 0, 10, 10), update: false, angle: 0 };
+                this.hit = {
+                    anim: new Utils.LinearAnimation(false, 1, 1, 0, 10, 10),
+                    update: false,
+                    angle: 0
+                };
                 break;
             case ITEMS.CHEST:
                 this.update = function (c) {
                     this.action = c;
-                };
+                }
+                    ;
                 this.draw = draw_simple_item;
-                this.hit = { anim: new Utils.LinearAnimation(false, 1, 1, 0, 10, 10), update: false, angle: 0 };
+                this.hit = {
+                    anim: new Utils.LinearAnimation(false, 1, 1, 0, 10, 10),
+                    update: false,
+                    angle: 0
+                };
                 break;
             case ITEMS.WOOD_DOOR:
             case ITEMS.STONE_DOOR:
@@ -8230,7 +10313,11 @@ export function start(ModdedStarving) {
             case ITEMS.DIAMOND_DOOR:
             case ITEMS.AMETHYST_DOOR:
                 this.draw = draw_door;
-                this.hit = { anim: new Utils.LinearAnimation(false, 1, 1, 0, 10, 10), update: false, angle: 0 };
+                this.hit = {
+                    anim: new Utils.LinearAnimation(false, 1, 1, 0, 10, 10),
+                    update: false,
+                    angle: 0
+                };
                 break;
             case ITEMS.FURNACE:
                 this.draw_bg = draw_furnace_ground;
@@ -8238,10 +10325,15 @@ export function start(ModdedStarving) {
                 this.draw_fg = draw_furnace_halo;
                 this.ground = new Utils.LinearAnimation(false, 1, 1.23, 1.18, .01, .01);
                 this.halo = new Utils.LinearAnimation(false, 1, 1.23, 1.18, .01, .01);
-                this.hit = { anim: new Utils.LinearAnimation(false, 1, 1, 0, 10, 10), update: false, angle: 0 };
+                this.hit = {
+                    anim: new Utils.LinearAnimation(false, 1, 1, 0, 10, 10),
+                    update: false,
+                    angle: 0
+                };
                 this.update = function (c) {
                     this.action = c;
-                };
+                }
+                    ;
         }
     }
     function World(c) {
@@ -8430,7 +10522,12 @@ export function start(ModdedStarving) {
                             t = 15 * -Math.sin(b.angle) * scale;
                             z = 15 * -Math.cos(b.angle) * scale;
                         }
-                        q.push({ x: b.x + t, y: b.y + z, angle: b.angle + Math.PI / 2, alpha: 1 });
+                        q.push({
+                            x: b.x + t,
+                            y: b.y + z,
+                            angle: b.angle + Math.PI / 2,
+                            alpha: 1
+                        });
                     }
                     for (t = 0; t < v; t++) {
                         q[t].alpha = Math.max(0, q[t].alpha - delta / 2.85);
@@ -8452,10 +10549,435 @@ export function start(ModdedStarving) {
         };
     }
     // var CRAFT = { FIRE: 0, WORKBENCH: 1, SWORD: 2, PICK: 3, SEED: 4, PICK_GOLD: 5, PICK_DIAMOND: 6, SWORD_GOLD: 7, SWORD_DIAMOND: 8, PICK_WOOD: 9, WALL: 10, SPIKE: 11, COOKED_MEAT: 12, BIG_FIRE: 13, BANDAGE: 14, STONE_WALL: 15, GOLD_WALL: 16, DIAMOND_WALL: 17, WOOD_DOOR: 18, CHEST: 19, STONE_SPIKE: 20, GOLD_SPIKE: 21, DIAMOND_SPIKE: 22, STONE_DOOR: 23, GOLD_DOOR: 24, DIAMOND_DOOR: 25, EARMUFFS: 26, COAT: 27, SPEAR: 28, GOLD_SPEAR: 29, DIAMOND_SPEAR: 30, FURNACE: 31, EXPLORER_HAT: 32, STONE_HELMET: 33, GOLD_HELMET: 34, DIAMOND_HELMET: 35, BOOK: 36, PAPER: 37, BAG: 38, SWORD_AMETHYST: 39, PICK_AMETHYST: 40, AMETHYST_SPEAR: 41, HAMMER: 42, HAMMER_GOLD: 43, HAMMER_DIAMOND: 44, HAMMER_AMETHYST: 45, AMETHYST_WALL: 46, AMETHYST_SPIKE: 47, AMETHYST_DOOR: 48, CAP_SCARF: 49, BLUE_CORD: 50 };
-    var INV = { SWORD: 0, PICK: 1, STONE: 2, WOOD: 3, PLANT: 4, GOLD: 5, DIAMOND: 6, PICK_GOLD: 7, PICK_DIAMOND: 8, SWORD_GOLD: 9, SWORD_DIAMOND: 10, FIRE: 11, WORKBENCH: 12, SEED: 13, HAND: 14, PICK_WOOD: 15, WALL: 16, SPIKE: 17, MEAT: 18, COOKED_MEAT: 19, BIG_FIRE: 20, BANDAGE: 21, CORD: 22, STONE_WALL: 23, GOLD_WALL: 24, DIAMOND_WALL: 25, WOOD_DOOR: 26, CHEST: 27, STONE_SPIKE: 28, GOLD_SPIKE: 29, DIAMOND_SPIKE: 30, STONE_DOOR: 31, GOLD_DOOR: 32, DIAMOND_DOOR: 33, FUR: 34, FUR_WOLF: 35, EARMUFFS: 36, COAT: 37, SPEAR: 38, GOLD_SPEAR: 39, DIAMOND_SPEAR: 40, FURNACE: 41, EXPLORER_HAT: 42, STONE_HELMET: 43, GOLD_HELMET: 44, DIAMOND_HELMET: 45, BOOK: 46, PAPER: 47, BAG: 48, AMETHYST: 49, SWORD_AMETHYST: 50, PICK_AMETHYST: 51, AMETHYST_SPEAR: 52, HAMMER: 53, HAMMER_GOLD: 54, HAMMER_DIAMOND: 55, HAMMER_AMETHYST: 56, AMETHYST_WALL: 57, AMETHYST_SPIKE: 58, AMETHYST_DOOR: 59, CAP_SCARF: 60, FUR_WINTER: 61, BLUE_CORD: 62 };
+    var INV = {
+        SWORD: 0,
+        PICK: 1,
+        STONE: 2,
+        WOOD: 3,
+        PLANT: 4,
+        GOLD: 5,
+        DIAMOND: 6,
+        PICK_GOLD: 7,
+        PICK_DIAMOND: 8,
+        SWORD_GOLD: 9,
+        SWORD_DIAMOND: 10,
+        FIRE: 11,
+        WORKBENCH: 12,
+        SEED: 13,
+        HAND: 14,
+        PICK_WOOD: 15,
+        WALL: 16,
+        SPIKE: 17,
+        MEAT: 18,
+        COOKED_MEAT: 19,
+        BIG_FIRE: 20,
+        BANDAGE: 21,
+        CORD: 22,
+        STONE_WALL: 23,
+        GOLD_WALL: 24,
+        DIAMOND_WALL: 25,
+        WOOD_DOOR: 26,
+        CHEST: 27,
+        STONE_SPIKE: 28,
+        GOLD_SPIKE: 29,
+        DIAMOND_SPIKE: 30,
+        STONE_DOOR: 31,
+        GOLD_DOOR: 32,
+        DIAMOND_DOOR: 33,
+        FUR: 34,
+        FUR_WOLF: 35,
+        EARMUFFS: 36,
+        COAT: 37,
+        SPEAR: 38,
+        GOLD_SPEAR: 39,
+        DIAMOND_SPEAR: 40,
+        FURNACE: 41,
+        EXPLORER_HAT: 42,
+        STONE_HELMET: 43,
+        GOLD_HELMET: 44,
+        DIAMOND_HELMET: 45,
+        BOOK: 46,
+        PAPER: 47,
+        BAG: 48,
+        AMETHYST: 49,
+        SWORD_AMETHYST: 50,
+        PICK_AMETHYST: 51,
+        AMETHYST_SPEAR: 52,
+        HAMMER: 53,
+        HAMMER_GOLD: 54,
+        HAMMER_DIAMOND: 55,
+        HAMMER_AMETHYST: 56,
+        AMETHYST_WALL: 57,
+        AMETHYST_SPIKE: 58,
+        AMETHYST_DOOR: 59,
+        CAP_SCARF: 60,
+        FUR_WINTER: 61,
+        BLUE_CORD: 62
+    };
     var CRAFT = INV;
-    var RECIPES = [{ r: [[3, 30], [2, 5]], w: 0, f: 0, id: CRAFT.FIRE, id2: INV.FIRE, time: .1 }, { r: [[3, 40], [2, 20]], w: 0, f: 0, id: CRAFT.WORKBENCH, id2: INV.WORKBENCH, time: 1 / 15 }, { r: [[3, 60], [2, 30]], w: 1, f: 0, id: CRAFT.SWORD, id2: INV.SWORD, time: 1 / 15 }, { r: [[15, 1], [3, 60], [2, 20]], w: 1, f: 0, id: CRAFT.PICK, id2: INV.PICK, time: 1 / 15 }, { r: [[4, 3], [3, 20]], w: 0, f: 1, id: CRAFT.SEED, id2: INV.SEED, time: .1 }, { r: [[3, 60], [5, 30], [2, 40], [1, 1]], w: 1, f: 0, id: CRAFT.PICK_GOLD, id2: INV.PICK_GOLD, time: .05 }, { r: [[6, 30], [5, 60], [2, 100], [7, 1]], w: 1, f: 0, id: CRAFT.PICK_DIAMOND, id2: INV.PICK_DIAMOND, time: 1 / 30 }, { r: [[3, 80], [5, 50], [2, 60], [0, 1]], w: 1, f: 0, id: CRAFT.SWORD_GOLD, id2: INV.SWORD_GOLD, time: .05 }, { r: [[6, 50], [5, 80], [2, 100], [9, 1]], w: 1, f: 0, id: CRAFT.SWORD_DIAMOND, id2: INV.SWORD_DIAMOND, time: 1 / 30 }, { r: [[3, 15]], w: 0, f: 0, id: CRAFT.PICK_WOOD, id2: INV.PICK_WOOD, time: .2 }, { r: [[3, 20]], w: 1, f: 0, id: CRAFT.WALL, id2: INV.WALL, time: .2 }, { r: [[16, 1], [3, 20], [2, 15]], w: 1, f: 0, id: CRAFT.SPIKE, id2: INV.SPIKE, time: .05 }, { r: [[18, 1]], w: 0, f: 1, id: CRAFT.COOKED_MEAT, id2: INV.COOKED_MEAT, time: .1 }, { r: [[11, 1], [3, 40], [2, 10]], w: 0, f: 0, id: CRAFT.BIG_FIRE, id2: INV.BIG_FIRE, time: .1 }, { r: [[22, 3]], w: 1, f: 0, id: CRAFT.BANDAGE, id2: INV.BANDAGE, time: .2 }, { r: [[16, 1], [2, 20]], w: 1, f: 0, id: CRAFT.STONE_WALL, id2: INV.STONE_WALL, time: .2 }, { r: [[23, 1], [5, 20]], w: 1, f: 0, id: CRAFT.GOLD_WALL, id2: INV.GOLD_WALL, time: .2 }, { r: [[24, 1], [6, 20]], w: 1, f: 0, id: CRAFT.DIAMOND_WALL, id2: INV.DIAMOND_WALL, time: .2 }, { r: [[3, 60]], w: 1, f: 0, id: CRAFT.WOOD_DOOR, id2: INV.WOOD_DOOR, time: .125 }, { r: [[3, 60], [2, 20], [5, 10]], w: 1, f: 0, id: CRAFT.CHEST, id2: INV.CHEST, time: .05 }, { r: [[23, 1], [2, 35]], w: 1, f: 0, id: CRAFT.STONE_SPIKE, id2: INV.STONE_SPIKE, time: .05 }, { r: [[24, 1], [5, 20], [2, 15]], w: 1, f: 0, id: CRAFT.GOLD_SPIKE, id2: INV.GOLD_SPIKE, time: .05 }, { r: [[25, 1], [6, 20], [2, 15]], w: 1, f: 0, id: CRAFT.DIAMOND_SPIKE, id2: INV.DIAMOND_SPIKE, time: .05 }, { r: [[26, 1], [2, 60]], w: 1, f: 0, id: CRAFT.STONE_DOOR, id2: INV.STONE_DOOR, time: .125 }, { r: [[31, 1], [5, 60]], w: 1, f: 0, id: CRAFT.GOLD_DOOR, id2: INV.GOLD_DOOR, time: .125 }, { r: [[32, 1], [6, 60]], w: 1, f: 0, id: CRAFT.DIAMOND_DOOR, id2: INV.DIAMOND_DOOR, time: .125 }, { r: [[34, 8], [22, 4]], w: 1, f: 0, id: CRAFT.EARMUFFS, id2: INV.EARMUFFS, time: 1 / 15 }, { r: [[36, 1], [34, 5], [35, 10], [22, 6]], w: 1, f: 0, id: CRAFT.COAT, id2: INV.COAT, time: .04 }, { r: [[3, 80], [2, 20]], w: 1, f: 0, id: CRAFT.SPEAR, id2: INV.SPEAR, time: 1 / 15 }, { r: [[3, 120], [5, 40], [2, 50], [38, 1]], w: 1, f: 0, id: CRAFT.GOLD_SPEAR, id2: INV.GOLD_SPEAR, time: .05 }, { r: [[3, 250], [6, 50], [5, 80], [39, 1]], w: 1, f: 0, id: CRAFT.DIAMOND_SPEAR, id2: INV.DIAMOND_SPEAR, time: 1 / 30 }, { r: [[3, 150], [2, 100], [5, 50]], w: 1, f: 0, id: CRAFT.FURNACE, id2: INV.FURNACE, time: .05 }, { r: [[47, 3], [34, 2]], w: 1, f: 0, id: CRAFT.EXPLORER_HAT, id2: INV.EXPLORER_HAT, time: 1 / 15 }, { r: [[2, 150], [3, 100]], w: 1, f: 0, id: CRAFT.STONE_HELMET, id2: INV.STONE_HELMET, time: .05 }, { r: [[2, 180], [3, 120], [5, 100], [43, 1]], w: 1, f: 0, id: CRAFT.GOLD_HELMET, id2: INV.GOLD_HELMET, time: .025 }, { r: [[2, 200], [5, 100], [6, 160], [44, 1]], w: 1, f: 0, id: CRAFT.DIAMOND_HELMET, id2: INV.DIAMOND_HELMET, time: 1 / 60 }, { r: [[47, 5], [22, 5], [35, 5]], w: 1, f: 0, id: CRAFT.BOOK, id2: INV.BOOK, time: 1 / 30 }, { r: [[3, 30]], w: 0, f: 1, id: CRAFT.PAPER, id2: INV.PAPER, time: 1 / 3 }, { r: [[22, 10], [35, 5]], w: 1, f: 0, id: CRAFT.BAG, id2: INV.BAG, time: .05 }, { r: [[6, 80], [5, 130], [49, 50], [10, 1]], w: 1, f: 0, id: CRAFT.SWORD_AMETHYST, id2: INV.SWORD_AMETHYST, time: .025 }, { r: [[6, 60], [5, 90], [49, 30], [8, 1]], w: 1, f: 0, id: CRAFT.PICK_AMETHYST, id2: INV.PICK_AMETHYST, time: .025 }, { r: [[49, 50], [6, 100], [5, 120], [40, 1]], w: 1, f: 0, id: CRAFT.AMETHYST_SPEAR, id2: INV.AMETHYST_SPEAR, time: .025 }, { r: [[3, 120], [2, 60]], w: 1, f: 0, id: CRAFT.HAMMER, id2: INV.HAMMER, time: 1 / 15 }, { r: [[3, 160], [2, 120], [5, 80], [53, 1]], w: 1, f: 0, id: CRAFT.HAMMER_GOLD, id2: INV.HAMMER_GOLD, time: .05 }, { r: [[6, 80], [2, 200], [5, 150], [54, 1]], w: 1, f: 0, id: CRAFT.HAMMER_DIAMOND, id2: INV.HAMMER_DIAMOND, time: 1 / 30 }, { r: [[6, 160], [49, 60], [5, 250], [55, 1]], w: 1, f: 0, id: CRAFT.HAMMER_AMETHYST, id2: INV.HAMMER_AMETHYST, time: .025 }, { r: [[25, 1], [49, 20]], w: 1, f: 0, id: CRAFT.AMETHYST_WALL, id2: INV.AMETHYST_WALL, time: .2 }, { r: [[57, 1], [49, 20], [2, 15]], w: 1, f: 0, id: CRAFT.AMETHYST_SPIKE, id2: INV.AMETHYST_SPIKE, time: .05 }, { r: [[33, 1], [49, 60]], w: 1, f: 0, id: CRAFT.AMETHYST_DOOR, id2: INV.AMETHYST_DOOR, time: .125 }, { r: [[37, 1], [61, 20], [62, 10]], w: 1, f: 0, id: CRAFT.CAP_SCARF, id2: INV.CAP_SCARF, time: 1 / 60 }, { r: [[6, 1], [22, 1]], w: 1, f: 0, id: CRAFT.BLUE_CORD, id2: INV.BLUE_CORD, time: 1 / 3 }];
-    ModdedStarving.on("registry_init", { CRAFT, INV, RECIPES });
+    var RECIPES = [{
+        r: [[3, 30], [2, 5]],
+        w: 0,
+        f: 0,
+        id: CRAFT.FIRE,
+        id2: INV.FIRE,
+        time: .1
+    }, {
+        r: [[3, 40], [2, 20]],
+        w: 0,
+        f: 0,
+        id: CRAFT.WORKBENCH,
+        id2: INV.WORKBENCH,
+        time: 1 / 15
+    }, {
+        r: [[3, 60], [2, 30]],
+        w: 1,
+        f: 0,
+        id: CRAFT.SWORD,
+        id2: INV.SWORD,
+        time: 1 / 15
+    }, {
+        r: [[15, 1], [3, 60], [2, 20]],
+        w: 1,
+        f: 0,
+        id: CRAFT.PICK,
+        id2: INV.PICK,
+        time: 1 / 15
+    }, {
+        r: [[4, 3], [3, 20]],
+        w: 0,
+        f: 1,
+        id: CRAFT.SEED,
+        id2: INV.SEED,
+        time: .1
+    }, {
+        r: [[3, 60], [5, 30], [2, 40], [1, 1]],
+        w: 1,
+        f: 0,
+        id: CRAFT.PICK_GOLD,
+        id2: INV.PICK_GOLD,
+        time: .05
+    }, {
+        r: [[6, 30], [5, 60], [2, 100], [7, 1]],
+        w: 1,
+        f: 0,
+        id: CRAFT.PICK_DIAMOND,
+        id2: INV.PICK_DIAMOND,
+        time: 1 / 30
+    }, {
+        r: [[3, 80], [5, 50], [2, 60], [0, 1]],
+        w: 1,
+        f: 0,
+        id: CRAFT.SWORD_GOLD,
+        id2: INV.SWORD_GOLD,
+        time: .05
+    }, {
+        r: [[6, 50], [5, 80], [2, 100], [9, 1]],
+        w: 1,
+        f: 0,
+        id: CRAFT.SWORD_DIAMOND,
+        id2: INV.SWORD_DIAMOND,
+        time: 1 / 30
+    }, {
+        r: [[3, 15]],
+        w: 0,
+        f: 0,
+        id: CRAFT.PICK_WOOD,
+        id2: INV.PICK_WOOD,
+        time: .2
+    }, {
+        r: [[3, 20]],
+        w: 1,
+        f: 0,
+        id: CRAFT.WALL,
+        id2: INV.WALL,
+        time: .2
+    }, {
+        r: [[16, 1], [3, 20], [2, 15]],
+        w: 1,
+        f: 0,
+        id: CRAFT.SPIKE,
+        id2: INV.SPIKE,
+        time: .05
+    }, {
+        r: [[18, 1]],
+        w: 0,
+        f: 1,
+        id: CRAFT.COOKED_MEAT,
+        id2: INV.COOKED_MEAT,
+        time: .1
+    }, {
+        r: [[11, 1], [3, 40], [2, 10]],
+        w: 0,
+        f: 0,
+        id: CRAFT.BIG_FIRE,
+        id2: INV.BIG_FIRE,
+        time: .1
+    }, {
+        r: [[22, 3]],
+        w: 1,
+        f: 0,
+        id: CRAFT.BANDAGE,
+        id2: INV.BANDAGE,
+        time: .2
+    }, {
+        r: [[16, 1], [2, 20]],
+        w: 1,
+        f: 0,
+        id: CRAFT.STONE_WALL,
+        id2: INV.STONE_WALL,
+        time: .2
+    }, {
+        r: [[23, 1], [5, 20]],
+        w: 1,
+        f: 0,
+        id: CRAFT.GOLD_WALL,
+        id2: INV.GOLD_WALL,
+        time: .2
+    }, {
+        r: [[24, 1], [6, 20]],
+        w: 1,
+        f: 0,
+        id: CRAFT.DIAMOND_WALL,
+        id2: INV.DIAMOND_WALL,
+        time: .2
+    }, {
+        r: [[3, 60]],
+        w: 1,
+        f: 0,
+        id: CRAFT.WOOD_DOOR,
+        id2: INV.WOOD_DOOR,
+        time: .125
+    }, {
+        r: [[3, 60], [2, 20], [5, 10]],
+        w: 1,
+        f: 0,
+        id: CRAFT.CHEST,
+        id2: INV.CHEST,
+        time: .05
+    }, {
+        r: [[23, 1], [2, 35]],
+        w: 1,
+        f: 0,
+        id: CRAFT.STONE_SPIKE,
+        id2: INV.STONE_SPIKE,
+        time: .05
+    }, {
+        r: [[24, 1], [5, 20], [2, 15]],
+        w: 1,
+        f: 0,
+        id: CRAFT.GOLD_SPIKE,
+        id2: INV.GOLD_SPIKE,
+        time: .05
+    }, {
+        r: [[25, 1], [6, 20], [2, 15]],
+        w: 1,
+        f: 0,
+        id: CRAFT.DIAMOND_SPIKE,
+        id2: INV.DIAMOND_SPIKE,
+        time: .05
+    }, {
+        r: [[26, 1], [2, 60]],
+        w: 1,
+        f: 0,
+        id: CRAFT.STONE_DOOR,
+        id2: INV.STONE_DOOR,
+        time: .125
+    }, {
+        r: [[31, 1], [5, 60]],
+        w: 1,
+        f: 0,
+        id: CRAFT.GOLD_DOOR,
+        id2: INV.GOLD_DOOR,
+        time: .125
+    }, {
+        r: [[32, 1], [6, 60]],
+        w: 1,
+        f: 0,
+        id: CRAFT.DIAMOND_DOOR,
+        id2: INV.DIAMOND_DOOR,
+        time: .125
+    }, {
+        r: [[34, 8], [22, 4]],
+        w: 1,
+        f: 0,
+        id: CRAFT.EARMUFFS,
+        id2: INV.EARMUFFS,
+        time: 1 / 15
+    }, {
+        r: [[36, 1], [34, 5], [35, 10], [22, 6]],
+        w: 1,
+        f: 0,
+        id: CRAFT.COAT,
+        id2: INV.COAT,
+        time: .04
+    }, {
+        r: [[3, 80], [2, 20]],
+        w: 1,
+        f: 0,
+        id: CRAFT.SPEAR,
+        id2: INV.SPEAR,
+        time: 1 / 15
+    }, {
+        r: [[3, 120], [5, 40], [2, 50], [38, 1]],
+        w: 1,
+        f: 0,
+        id: CRAFT.GOLD_SPEAR,
+        id2: INV.GOLD_SPEAR,
+        time: .05
+    }, {
+        r: [[3, 250], [6, 50], [5, 80], [39, 1]],
+        w: 1,
+        f: 0,
+        id: CRAFT.DIAMOND_SPEAR,
+        id2: INV.DIAMOND_SPEAR,
+        time: 1 / 30
+    }, {
+        r: [[3, 150], [2, 100], [5, 50]],
+        w: 1,
+        f: 0,
+        id: CRAFT.FURNACE,
+        id2: INV.FURNACE,
+        time: .05
+    }, {
+        r: [[47, 3], [34, 2]],
+        w: 1,
+        f: 0,
+        id: CRAFT.EXPLORER_HAT,
+        id2: INV.EXPLORER_HAT,
+        time: 1 / 15
+    }, {
+        r: [[2, 150], [3, 100]],
+        w: 1,
+        f: 0,
+        id: CRAFT.STONE_HELMET,
+        id2: INV.STONE_HELMET,
+        time: .05
+    }, {
+        r: [[2, 180], [3, 120], [5, 100], [43, 1]],
+        w: 1,
+        f: 0,
+        id: CRAFT.GOLD_HELMET,
+        id2: INV.GOLD_HELMET,
+        time: .025
+    }, {
+        r: [[2, 200], [5, 100], [6, 160], [44, 1]],
+        w: 1,
+        f: 0,
+        id: CRAFT.DIAMOND_HELMET,
+        id2: INV.DIAMOND_HELMET,
+        time: 1 / 60
+    }, {
+        r: [[47, 5], [22, 5], [35, 5]],
+        w: 1,
+        f: 0,
+        id: CRAFT.BOOK,
+        id2: INV.BOOK,
+        time: 1 / 30
+    }, {
+        r: [[3, 30]],
+        w: 0,
+        f: 1,
+        id: CRAFT.PAPER,
+        id2: INV.PAPER,
+        time: 1 / 3
+    }, {
+        r: [[22, 10], [35, 5]],
+        w: 1,
+        f: 0,
+        id: CRAFT.BAG,
+        id2: INV.BAG,
+        time: .05
+    }, {
+        r: [[6, 80], [5, 130], [49, 50], [10, 1]],
+        w: 1,
+        f: 0,
+        id: CRAFT.SWORD_AMETHYST,
+        id2: INV.SWORD_AMETHYST,
+        time: .025
+    }, {
+        r: [[6, 60], [5, 90], [49, 30], [8, 1]],
+        w: 1,
+        f: 0,
+        id: CRAFT.PICK_AMETHYST,
+        id2: INV.PICK_AMETHYST,
+        time: .025
+    }, {
+        r: [[49, 50], [6, 100], [5, 120], [40, 1]],
+        w: 1,
+        f: 0,
+        id: CRAFT.AMETHYST_SPEAR,
+        id2: INV.AMETHYST_SPEAR,
+        time: .025
+    }, {
+        r: [[3, 120], [2, 60]],
+        w: 1,
+        f: 0,
+        id: CRAFT.HAMMER,
+        id2: INV.HAMMER,
+        time: 1 / 15
+    }, {
+        r: [[3, 160], [2, 120], [5, 80], [53, 1]],
+        w: 1,
+        f: 0,
+        id: CRAFT.HAMMER_GOLD,
+        id2: INV.HAMMER_GOLD,
+        time: .05
+    }, {
+        r: [[6, 80], [2, 200], [5, 150], [54, 1]],
+        w: 1,
+        f: 0,
+        id: CRAFT.HAMMER_DIAMOND,
+        id2: INV.HAMMER_DIAMOND,
+        time: 1 / 30
+    }, {
+        r: [[6, 160], [49, 60], [5, 250], [55, 1]],
+        w: 1,
+        f: 0,
+        id: CRAFT.HAMMER_AMETHYST,
+        id2: INV.HAMMER_AMETHYST,
+        time: .025
+    }, {
+        r: [[25, 1], [49, 20]],
+        w: 1,
+        f: 0,
+        id: CRAFT.AMETHYST_WALL,
+        id2: INV.AMETHYST_WALL,
+        time: .2
+    }, {
+        r: [[57, 1], [49, 20], [2, 15]],
+        w: 1,
+        f: 0,
+        id: CRAFT.AMETHYST_SPIKE,
+        id2: INV.AMETHYST_SPIKE,
+        time: .05
+    }, {
+        r: [[33, 1], [49, 60]],
+        w: 1,
+        f: 0,
+        id: CRAFT.AMETHYST_DOOR,
+        id2: INV.AMETHYST_DOOR,
+        time: .125
+    }, {
+        r: [[37, 1], [61, 20], [62, 10]],
+        w: 1,
+        f: 0,
+        id: CRAFT.CAP_SCARF,
+        id2: INV.CAP_SCARF,
+        time: 1 / 60
+    }, {
+        r: [[6, 1], [22, 1]],
+        w: 1,
+        f: 0,
+        id: CRAFT.BLUE_CORD,
+        id2: INV.BLUE_CORD,
+        time: 1 / 3
+    }];
+    ModdedStarving.on("registry_init", {
+        CRAFT,
+        INV,
+        RECIPES
+    });
     function Flakes(c, g, f) {
         this.id = c;
         this.speed = 8 * (c + 5);
@@ -8465,9 +10987,21 @@ export function start(ModdedStarving) {
         this.alpha = 0;
     }
     function User() {
-        this.init = function () { };
-        this.furnace = { amount: 0, pid: 1, iid: -1, open: false };
-        this.chest = { id: -1, amount: 0, pid: 1, iid: -1, open: false };
+        this.init = function () { }
+            ;
+        this.furnace = {
+            amount: 0,
+            pid: 1,
+            iid: -1,
+            open: false
+        };
+        this.chest = {
+            id: -1,
+            amount: 0,
+            pid: 1,
+            iid: -1,
+            open: false
+        };
         this.day = this.uid = this.id = 0;
         this.cam = new Utils.Ease2d(Utils.ease_out_quad, 0, .4, 0, 0, canw2, canh2, canw2, canh2);
         this.cam.delay = 0;
@@ -8475,7 +11009,10 @@ export function start(ModdedStarving) {
             var c = world.fast_units[user.uid];
             if (c) {
                 this.delay = 0;
-                this.ease({ x: Math.max(Math.min(canw2 - c.x, -2), -world.w + 2 + canw), y: Math.max(Math.min(canh2 - c.y, -2), -world.h + 2 + canh) });
+                this.ease({
+                    x: Math.max(Math.min(canw2 - c.x, -2), -world.w + 2 + canw),
+                    y: Math.max(Math.min(canh2 - c.y, -2), -world.h + 2 + canh)
+                });
             } else {
                 this.delay += delta;
                 if (3 < this.delay) {
@@ -8499,7 +11036,12 @@ export function start(ModdedStarving) {
             this.ey = this.y;
         };
         this.control = {
-            angle: 0, timeout: 0, previous: 0, mouse: 0, attack: 0, update: function () {
+            angle: 0,
+            timeout: 0,
+            previous: 0,
+            mouse: 0,
+            attack: 0,
+            update: function () {
                 this.mouse += delta;
                 if (!mouse.state) {
                     var c = world.fast_units[user.uid];
@@ -8510,7 +11052,10 @@ export function start(ModdedStarving) {
                     }
                 }
                 var c = world.fast_units[user.uid];
-                var g = Utils.get_std_angle(mouse.pos, c ? { x: user.cam.x + c.x, y: user.cam.y + c.y } : canm);
+                var g = Utils.get_std_angle(mouse.pos, c ? {
+                    x: user.cam.x + c.x,
+                    y: user.cam.y + c.y
+                } : canm);
                 if (c = world.fast_units[user.uid]) {
                     c.angle = g;
                     c.nangle = g;
@@ -8545,7 +11090,16 @@ export function start(ModdedStarving) {
             }
         };
         this.gauges = {
-            c: 1, l: 1, h: 1, warn_cold: new Utils.LinearAnimation(true, 0, 1, 0, 3, 3), warn_life: new Utils.LinearAnimation(true, 0, 1, 0, 2, 2), warn_hunger: new Utils.LinearAnimation(true, 0, 1, 0, 3, 3), cold: new Utils.Ease(Utils.ease_out_quad, 0, 1, 0, 0, 1), life: new Utils.Ease(Utils.ease_out_quad, 0, 1, 0, 0, 1), hunger: new Utils.Ease(Utils.ease_out_quad, 0, 1, 0, 0, 1), update: function () {
+            c: 1,
+            l: 1,
+            h: 1,
+            warn_cold: new Utils.LinearAnimation(true, 0, 1, 0, 3, 3),
+            warn_life: new Utils.LinearAnimation(true, 0, 1, 0, 2, 2),
+            warn_hunger: new Utils.LinearAnimation(true, 0, 1, 0, 3, 3),
+            cold: new Utils.Ease(Utils.ease_out_quad, 0, 1, 0, 0, 1),
+            life: new Utils.Ease(Utils.ease_out_quad, 0, 1, 0, 0, 1),
+            hunger: new Utils.Ease(Utils.ease_out_quad, 0, 1, 0, 0, 1),
+            update: function () {
                 this.warn_cold.update();
                 this.warn_life.update();
                 this.warn_hunger.update();
@@ -8556,28 +11110,35 @@ export function start(ModdedStarving) {
         };
         this.bigmap = false;
         this.inv = {
-            max: 8, n: [], id: -1, can_select: [], free_place: function (c) {
+            max: 8,
+            n: [],
+            id: -1,
+            can_select: [],
+            free_place: function (c) {
                 for (i = 0; i < c.length; i++) {
                     if (this.n[c[i][0]] == c[i][1]) {
                         return true;
                     }
                 }
                 return false;
-            }, find_item: function (c) {
+            },
+            find_item: function (c) {
                 for (var g = 0; g < this.can_select.length; g++) {
                     if (this.can_select[g].id == c) {
                         return g;
                     }
                 }
                 return -1;
-            }, delete_item: function (c, g) {
+            },
+            delete_item: function (c, g) {
                 this.n[c] = 0;
                 this.can_select.splice(g, 1);
                 if (this.id == c) {
                     this.id = -1;
                 }
                 game.update_inv_buttons();
-            }, decrease: function (c, g, f) {
+            },
+            decrease: function (c, g, f) {
                 update = true;
                 this.n[c] = Math.max(0, this.n[c] - g);
                 if (!this.n[c] && 0 <= f) {
@@ -8586,7 +11147,13 @@ export function start(ModdedStarving) {
             }
         };
         this.auto_feed = {
-            enabled: false, translate: { x: 0, y: 0 }, delay: 0, update: function () {
+            enabled: false,
+            translate: {
+                x: 0,
+                y: 0
+            },
+            delay: 0,
+            update: function () {
                 if (!!this.enabled && !(0 <= user.craft.id)) {
                     this.delay += delta;
                     if (2 < this.delay) {
@@ -8605,7 +11172,15 @@ export function start(ModdedStarving) {
             }
         };
         this.craft = {
-            id: -1, id2: -1, timeout: new Utils.LinearAnimation(false, 0, 1, 0, 1, 1), crafting: false, preview: -1, can_craft: [], workbench: false, fire: false, do_craft: function (c) {
+            id: -1,
+            id2: -1,
+            timeout: new Utils.LinearAnimation(false, 0, 1, 0, 1, 1),
+            crafting: false,
+            preview: -1,
+            can_craft: [],
+            workbench: false,
+            fire: false,
+            do_craft: function (c) {
                 var g = RECIPES[c];
                 this.id = c;
                 this.crafting = true;
@@ -8617,7 +11192,8 @@ export function start(ModdedStarving) {
                     user.inv.decrease(f[0], f[1], user.inv.find_item(f[0]));
                 }
                 game.update_inv_buttons();
-            }, update: function () {
+            },
+            update: function () {
                 this.can_craft = [];
                 for (var c in RECIPES) {
                     var g = RECIPES[c];
@@ -8646,7 +11222,8 @@ export function start(ModdedStarving) {
                 game.update_craft_buttons();
                 game.update_chest_buttons();
                 game.update_furnace_button();
-            }, restart: function () {
+            },
+            restart: function () {
                 this.id = -1;
                 this.crafting = false;
                 this.timeout.v = 0;
@@ -8654,14 +11231,29 @@ export function start(ModdedStarving) {
                 this.update();
             }
         };
-        this.alert = { timeout: new Utils.LinearAnimation(false, 1, 1, 0, 4, .2), text: "", label: null, draw: draw_alert };
+        this.alert = {
+            timeout: new Utils.LinearAnimation(false, 1, 1, 0, 4, .2),
+            text: "",
+            label: null,
+            draw: draw_alert
+        };
         this.ldb = {
-            can: document.createElement("canvas"), ids: [], update: true, translate: { x: 0, y: 0 }, sort: function () {
+            can: document.createElement("canvas"),
+            ids: [],
+            update: true,
+            translate: {
+                x: 0,
+                y: 0
+            },
+            sort: function () {
                 var c = [];
                 var g = world.players;
                 for (var f = 0; f < g.length; f++) {
                     if (g[f].alive) {
-                        c.push({ id: f, s: g[f].score });
+                        c.push({
+                            id: f,
+                            s: g[f].score
+                        });
                     }
                 }
                 c.sort(function (c, e) {
@@ -8672,7 +11264,8 @@ export function start(ModdedStarving) {
                     this.ids.push(c[f].id);
                 }
                 this.update = true;
-            }, init: function (c) {
+            },
+            init: function (c) {
                 var g = world.players;
                 for (var f = 0; f < g.length; f++) {
                     g[f].score = 0;
@@ -8690,14 +11283,19 @@ export function start(ModdedStarving) {
         this.ldb.can.height = 300 * scale;
         this.ldb.ctx = this.ldb.can.getContext("2d");
         this.chat = {
-            open: false, input: document.getElementById("chat_input"), style: document.getElementById("chat_block").style, update: function () {
+            open: false,
+            input: document.getElementById("chat_input"),
+            style: document.getElementById("chat_block").style,
+            update: function () {
                 this.style.left = Math.floor(can.width / 2 - 150) + "px";
                 this.style.top = Math.floor(can.height / 2 - 15 - 110 * scale) + "px";
-            }, quit: function () {
+            },
+            quit: function () {
                 this.open = false;
                 this.style.display = "none";
                 this.input.value = "";
-            }, run: function () {
+            },
+            run: function () {
                 // if (!world.fast_units[user.uid].text) {
                 if (this.open && !world.fast_units[user.uid].text) {
                     this.open = false;
@@ -8715,7 +11313,8 @@ export function start(ModdedStarving) {
             }
         };
         this.winter = {
-            flakes: [], update: function (c) {
+            flakes: [],
+            update: function (c) {
                 if (keyboard.is_bottom()) {
                     c.y += delta * c.speed * 5.5;
                 } else {
@@ -8730,19 +11329,27 @@ export function start(ModdedStarving) {
                     c.x -= 30 * delta;
                 }
                 c.alpha = .2 < c.life ? Math.min(c.alpha + 3 * delta, 1) : Math.max(c.alpha - 5 * delta, 0);
-            }, add: function (c) {
+            },
+            add: function (c) {
                 if (this.flakes.length < Math.floor(SPRITE.FLAKES_NUMBER * Math.max(Math.min(c - SPRITE.WINTER_BIOME_Y, 3e3) / 3e3, 0))) {
                     this.flakes.push(new Flakes(Math.floor(Math.random() * SPRITE.FLAKES_SIZES), -user.cam.x + Math.floor(Math.random() * user.cam.w), -user.cam.y + Math.floor(400 * Math.random() * scale - 200 * scale)));
                 }
             }
         };
     }
-    var LOADER = { SERVER_INFO_URL: "servers" };
+    var LOADER = {
+        SERVER_INFO_URL: "servers"
+    };
     function Loader(c, g, f) {
         this.can = c;
         this.ctx = g;
         this.logo = {
-            translate: { x: 0, y: 0 }, style: document.getElementById("loading").style, update: function () {
+            translate: {
+                x: 0,
+                y: 0
+            },
+            style: document.getElementById("loading").style,
+            update: function () {
                 this.style.left = this.translate.x + "px";
                 this.style.top = Math.floor(this.translate.y) + "px";
             }
@@ -8754,7 +11361,9 @@ export function start(ModdedStarving) {
         this.stop = function () {
             this.is_run = false;
         };
-        this.loading = { total: 1 };
+        this.loading = {
+            total: 1
+        };
         var d = this;
         var e = function () { };
         var m = 0;
@@ -8802,7 +11411,8 @@ export function start(ModdedStarving) {
                 setTimeout(u, 1e3);
             }
         };
-        g = function () { };
+        g = function () { }
+            ;
         for (var v in IMAGES) {
             var t = IMAGES[v];
             IMAGES[v] = new Image;
@@ -8830,7 +11440,13 @@ export function start(ModdedStarving) {
         var f = this;
         this.waiting = false;
         this.loading = {
-            translate: { x: 0, y: 0 }, angle: 0, img: sprite[SPRITE.GEAR2], draw: function () {
+            translate: {
+                x: 0,
+                y: 0
+            },
+            angle: 0,
+            img: sprite[SPRITE.GEAR2],
+            draw: function () {
                 this.angle += 2 * delta;
                 g.save();
                 g.translate(this.translate.x + this.img.width / 2, this.translate.y + this.img.height / 2);
@@ -8842,13 +11458,26 @@ export function start(ModdedStarving) {
         this.logo = gui_create_image(IMAGES.LOGO);
         gui_add_breath_effect(this.logo, 1.01, .99, 32, 64, this.logo.img.width, this.logo.img.height);
         this.server_list = {
-            id: document.getElementById("region_select"), style: document.getElementById("region_select").style, translate: { x: 0, y: 0 }, update: function () {
+            id: document.getElementById("region_select"),
+            style: document.getElementById("region_select").style,
+            translate: {
+                x: 0,
+                y: 0
+            },
+            update: function () {
                 this.style.left = this.translate.x + "px";
                 this.style.top = Math.floor(this.translate.y) + "px";
             }
         };
         this.nickname = {
-            id: document.getElementById("nickname_block"), style: document.getElementById("nickname_block").style, input: document.getElementById("nickname_input"), translate: { x: 0, y: 0 }, update: function () {
+            id: document.getElementById("nickname_block"),
+            style: document.getElementById("nickname_block").style,
+            input: document.getElementById("nickname_input"),
+            translate: {
+                x: 0,
+                y: 0
+            },
+            update: function () {
                 this.style.left = this.translate.x + "px";
                 this.style.top = Math.floor(this.translate.y) + "px";
             }
@@ -8861,31 +11490,61 @@ export function start(ModdedStarving) {
         });
         this.nickname.input.value = Cookies.get("starve_nickname") ? Cookies.get("starve_nickname") : "";
         this.all_rights_reserved = {
-            id: document.getElementById("all_rights_reserved"), style: document.getElementById("all_rights_reserved").style, translate: { x: 0, y: 0 }, update: function () {
+            id: document.getElementById("all_rights_reserved"),
+            style: document.getElementById("all_rights_reserved").style,
+            translate: {
+                x: 0,
+                y: 0
+            },
+            update: function () {
                 this.style.left = this.translate.x + "px";
                 this.style.top = Math.floor(this.translate.y) + "px";
             }
         };
         this.creation = {
-            id: document.getElementById("creation"), style: document.getElementById("creation").style, translate: { x: 0, y: 0 }, update: function () {
+            id: document.getElementById("creation"),
+            style: document.getElementById("creation").style,
+            translate: {
+                x: 0,
+                y: 0
+            },
+            update: function () {
                 this.style.left = this.translate.x + "px";
                 this.style.top = Math.floor(this.translate.y) + "px";
             }
         };
         this.sidebox = {
-            id: document.getElementById("sidebox"), style: document.getElementById("sidebox").style, translate: { x: 0, y: 0 }, update: function () {
+            id: document.getElementById("sidebox"),
+            style: document.getElementById("sidebox").style,
+            translate: {
+                x: 0,
+                y: 0
+            },
+            update: function () {
                 this.style.left = this.translate.x + "px";
                 this.style.top = Math.floor(this.translate.y) + "px";
             }
         };
         this.discord = {
-            id: document.getElementById("discord"), style: document.getElementById("discord").style, translate: { x: 0, y: 0 }, update: function () {
+            id: document.getElementById("discord"),
+            style: document.getElementById("discord").style,
+            translate: {
+                x: 0,
+                y: 0
+            },
+            update: function () {
                 this.style.left = this.translate.x + "px";
                 this.style.top = Math.floor(this.translate.y) + "px";
             }
         };
         this.wiki = {
-            id: document.getElementById("wiki"), style: document.getElementById("wiki").style, translate: { x: 0, y: 0 }, update: function () {
+            id: document.getElementById("wiki"),
+            style: document.getElementById("wiki").style,
+            translate: {
+                x: 0,
+                y: 0
+            },
+            update: function () {
                 this.style.left = this.translate.x + "px";
                 this.style.top = Math.floor(this.translate.y) + "px";
             }
@@ -9071,12 +11730,31 @@ export function start(ModdedStarving) {
         var f = this;
         this.can = c;
         this.ctx = g;
-        this.minimap = { translate: { x: 0, y: 0 } };
-        this.leaderboard = { translate: { x: 0, y: 0 }, img: sprite[SPRITE.LEADERBOARD], can: document.createElement("canvas") };
+        this.minimap = {
+            translate: {
+                x: 0,
+                y: 0
+            }
+        };
+        this.leaderboard = {
+            translate: {
+                x: 0,
+                y: 0
+            },
+            img: sprite[SPRITE.LEADERBOARD],
+            can: document.createElement("canvas")
+        };
         this.leaderboard.can.width = this.leaderboard.img.width;
         this.leaderboard.can.height = this.leaderboard.img.height;
         this.leaderboard.ctx = this.leaderboard.can.getContext("2d");
-        this.gauges = { translate: { x: 0, y: 0 }, img: sprite[SPRITE.GAUGES], draw: draw_gauges };
+        this.gauges = {
+            translate: {
+                x: 0,
+                y: 0
+            },
+            img: sprite[SPRITE.GAUGES],
+            draw: draw_gauges
+        };
         this.furnace_button = gui_create_button(0, 0, "", sprite[SPRITE.FURNACE_BUTTON]);
         this.chest_buttons = [];
         this.chest_buttons[INV.SWORD] = gui_create_button(0, 0, "", sprite[SPRITE.CHEST_SWORD]);
@@ -9748,23 +12426,35 @@ export function start(ModdedStarving) {
             window.removeEventListener("keydown", this.trigger_keydown, false);
         };
     }
-    var fake_world = { time: Math.floor(2 * Math.random()), items: [] };
+    var fake_world = {
+        time: Math.floor(2 * Math.random()),
+        items: []
+    };
     init_fake_world();
     var ui;
-    var game = { is_run: false };
+    var game = {
+        is_run: false
+    };
     var world;
     var user;
     window.onbeforeunload = function () {
         if (game.is_run) {
             return "Are you sure you want quit starve.io ;-; ?";
         }
-    };
+    }
+        ;
     var client = new Client;
     var keyboard = new Keyboard;
     var mouse = new Mouse;
     var delta = 0;
     var old_timestamp = 0;
-    var fps = { img: false, counter: 0, delay: 0, cycle: 60, display: true };
+    var fps = {
+        img: false,
+        counter: 0,
+        delay: 0,
+        cycle: 60,
+        display: true
+    };
     var loader = new Loader(can, ctx, function () {
         create_images();
         game = new Game(can, ctx);
@@ -9775,7 +12465,8 @@ export function start(ModdedStarving) {
             loader.logo.style.display = "none";
             ui.run();
         });
-    });
+    }
+    );
     function draw(c) {
         window.requestAnimationFrame(draw);
         delta = (c - old_timestamp) / 1e3;

@@ -1,9 +1,8 @@
 import * as WebSocket from "ws";
-import { Clothes, Tool, Items, DamageType, Usable, Recipe, ItemStack, EntityType, Pickaxe, EntityItem } from './Item';
+import Item, { Clothes, Tool, Items, DamageType, Usable, Recipe, ItemStack, EntityType, Pickaxe, EntityItem } from './Item';
 import { Vector, Utils } from '.';
 import world from "./World";
 import Entity from "./Entity";
-import Item from '../../.history/server/src/Item_20200328182053';
 
 export enum EntityState {
     None = 0,

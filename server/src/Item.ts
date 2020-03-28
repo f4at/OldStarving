@@ -161,13 +161,13 @@ export class Items {
     static HAMMER_AMETHYST = new Tool(56, 41, 25, { pvp: 5, pve: 50 }, { r: [[6, 160], [49, 60], [5, 250], [55, 1]], w: 1, f: 0, time: .025 }, 4);
 
     static RABBIT = new Entityitem(128, 60, 0, 20, 1, 60, EntityType.MOB, {physcial:false,speed:300}, null);
-    static WOLF = new Entityitem(129, 61, 0, 32, 1, 300, EntityType.MOB, {physcial:false,offensive:true,dmg:40,speed:250}, null);
-    static SPIDER = new Entityitem(130, 62, 0, 30, 1, 120, EntityType.MOB, {physcial:false,offensive:true,dmg:20,speed:150}, null);
+    static WOLF = new Entityitem(129, 61, 0, 30, 1, 300, EntityType.MOB, {physcial:false,offensive:true,dmg:40,speed:250}, null);
+    static SPIDER = new Entityitem(130, 62, 0, 32, 1, 120, EntityType.MOB, {physcial:false,offensive:true,dmg:20,speed:150}, null);
     static FOX = new Entityitem(131, 63, 0, 30, 1, 300, EntityType.MOB, {physcial:false,offensive:true,dmg:25,speed:230}, null);
     static BEAR = new Entityitem(132, 63, 0, 35, 1, 900, EntityType.MOB, {physcial:false,offensive:true,dmg:60,speed:190}, null);
     static DRAGON = new Entityitem(133, 64, 0, 50, 1, 1500, EntityType.MOB, {physcial:false,offensive:true,dmg:90,speed:250}, null);
 
-    static Fruit = new Entityitem(134, 61, 0, 10, 1, 300, EntityType.MINE, {physcial:false}, null);
+    static Fruit = new Entityitem(134, 61, 0, 10, 1, 1, EntityType.MINE, {physcial:false}, null);
 
     //static AMETHYST_HELMET = new Clothes(81, { pvp: 6, pve: 23 }, 0, null);
     static find(f) {

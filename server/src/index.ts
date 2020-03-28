@@ -155,11 +155,13 @@ class Entity {
     raduis: number;
     XtoYfac: any;
 
+    offensive: boolean;
+    dmg: 0;
+    dmgRange: 0;
 
     updateLoop: any;
     updating: number;
     moveDelay: number;
-    moveFunc: Function;
 
     maxHealth: number;
     health: number;
@@ -181,10 +183,17 @@ class Entity {
                 break;
             }
         }
+
         if (!this.id) {
             this.error = "The limit of possible placed entities of this type exceeded";
             return
         }
+
+        if (this.getEntitiesinRange(1,1,false,true).find(e=>Utils.distance({x:pos.x-e.x,y:pos.y-e.y}) < Entityitem.raduis+e.raduis)) {
+            this.error = "Can't place entity in top of other Entities";
+            return
+        }
+        
         this.pos = pos;
         this.angle = angle;
         this.maxHealth = Entityitem.hp;
@@ -196,6 +205,9 @@ class Entity {
 
         let special = Entityitem.special;
         this.physical = special.physical;
+        this.offensive = special.offensive ? true : false;
+        this.dmg = special.dmg ? special.dmg : 0;
+        this.dmgRange = special.dmgRange ? special.dmgRange : 0;
         this.eangle = special.eangle ? special.eangle : 0;
         this.tier = special.tier ? special.tier : 0;
         this.speed = special.speed ? special.speed : 0;
@@ -204,7 +216,6 @@ class Entity {
         this.hitdmg = special.hitdmg ? special.hitdmg : 0;
         this.ftier = special.ftier ? special.ftier : 0;
         this.moveDelay = special.moveDelay ? special.moveDelay : 1;
-        this.moveFunc = special.moveFunc ? special.moveFunc : ()=>{};
         this.regen = special.regen ? special.regen : 0;
         this.mapid = special.mapid;
         this.stime = new Date().getTime();
@@ -236,11 +247,35 @@ class Entity {
                 break;
             case EntityType.MOB:
                 this.updateLoop = setInterval(()=>{
-                    let mov = this.counter%this.moveDelay === 0;
+                    this.counter += 1;
+                    let mov = (this.counter%(this.moveDelay/200)) < 1;
+                    if ((this.counter%(this.moveDelay/200)) < 1) { // TODO change this to attackDelay
+                        let players = this.getEntitiesinRange(1,1,true).filter(e=> Utils.distance({x:e.x-this.pos.x,y:e.y-this.pos.y}) < e.raduis+this.dmgRange);
+                        for (let player of players) {
+                            player.damage(this.hitdmg);
+                        }
+                    }
                     if (this.action || mov) {
-                        if (mov) {this.moveFunc()};//ai
+                        if (mov) {this.moveAI()};//ai
                         this.sendInfos();
                     } 
+                } ,200);
+                break;
+            case EntityType.SPIKE:
+                this.updateLoop = setInterval(()=>{
+                    this.counter += 1;
+                    if ((this.counter%(this.moveDelay/200)) < 1) { // TODO change this to attackDelay
+                        let players = this.getEntitiesinRange(1,1,true).filter(e=> Utils.distance({x:e.x-this.pos.x,y:e.y-this.pos.y}) < e.raduis+this.dmgRange);
+                        for (let player of players) {
+                            player.damage(this.hitdmg);
+                        }
+                    }
+                    if (this.action) {this.sendInfos()};
+                } ,200);
+                break;
+            default:
+                this.updateLoop = setInterval(()=>{
+                    if (this.action) {this.sendInfos()};
                 } ,200);
                 break;
 
@@ -254,6 +289,7 @@ class Entity {
             if (attacker) {
                 let tier = attacker.tool.tier ? attacker.tool.tier : 0;
                 fac = (this.tier>tier ? 0.5**(this.tier-tier) : 1);
+                if (this.hitdmg) {attacker.damage(this.hitdmg)};
             }
             this.health = Math.min(this.maxHealth,this.health-Math.floor(dmg/fac));
             if (this.health <= 0) {
@@ -293,6 +329,9 @@ class Entity {
         } 
     }
 
+    moveAI() {
+    }
+
     die(attacker: Player = null) {
         if (this.updateLoop) {
             clearInterval(this.updateLoop);
@@ -307,7 +346,6 @@ class Entity {
                     attacker.invADD(this.inv.id,this.inv.amount);
                 }
             }
-            //give part of its recipe
         };
         
     }
@@ -327,7 +365,7 @@ class Entity {
         if (visible) {
             let pos = { "x": Utils.toHex(this.pos.x), "y": Utils.toHex(this.pos.y) };
             let id = Utils.toHex(this.id);
-            return new Uint8Array([0, 0, this.pid, this.action, this.sid, this.angle, pos.x[0], pos.x[1], pos.y[0], pos.y[1], id[0], id[1], 0, 0]); // change 1 to this.sid
+            return new Uint8Array([0, 0, this.pid, this.action, this.sid, this.angle, pos.x[0], pos.x[1], pos.y[0], pos.y[1], id[0], id[1], 0, 0]);
         } else {
             return new Uint8Array([0, 0, this.pid, 1, this.sid, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
         }
@@ -343,6 +381,25 @@ class Entity {
                 }
             }
         }
+    }
+
+    getEntitiesinRange(x:number, y:number, player:boolean=true, entity:boolean=true) {
+        let ymin = Math.max(-x + this.chunk.y, 0), ymax = Math.min(x + 1 + this.chunk.y, world.mapSize.y),
+            xmin = Math.max(-y + this.chunk.x, 0), xmax = Math.min(y + 1 + this.chunk.x, world.mapSize.x);
+        let list = [];
+        for (let x = xmin; x < xmax; x++) {
+            for (let y = ymin; y < ymax; y++) {
+                if (player) {
+                    list = list.concat(world.chunks[x][y]);
+                }
+                if (entity) {
+                    for (let i=0;i<128;i++) {
+                        list = list.concat(world.echunks[x][y][i]);
+                    }
+                }
+            }
+        }
+        return list;
     }
 }
 
@@ -405,8 +462,6 @@ class Player {
         this.nick = nick;
         this.displayName = nick;
         this.token = token;
-        //this.pos = { "x": 1 + Math.random() * world.mapSize.x * 1000, "y": 1 + Math.random() * world.mapSize.y *1000 };
-        this.pos = {x: 5000, y: 5000};
         for (let i = 1; i < 128; i++) {
             if (world.players.find(e => e.pid == i) === undefined) {
                 this.pid = i;
@@ -415,10 +470,25 @@ class Player {
         }
         if (!this.pid) {
             this.error = 'Full Server';
-            this.send(new Uint8Array([5]));
-            this.ws.close();
+            ws.send(new Uint8Array([5]));
+            ws.close();
             return
-        }     
+        }
+        let found = false,counter=0;
+        while (counter < 64 && !found) {
+            this.pos = { "x": 1 + Math.random() * 5000, "y": 1 + Math.random() * 5000 }; //spawn in forest biome
+            if (this.getEntitiesinRange(1,1,false,true).find(e=>Utils.distance({x:this.pos.x-e.x,y:this.pos.y-e.y}) < this.raduis+e.raduis+(e.type == EntityType.WALL || e.type == EntityType.SPIKE || e.type == EntityType.DOOR ? 500 : 0))) {
+                counter += 1;
+            } else {
+                found = true;
+            }
+        }
+        if (!found) {
+            this.error = "Can't find spawning location.";
+            ws.send(new Uint8Array([5]));
+            ws.close();
+            return
+        }
         for (let slot=0;slot<this.inv.length;slot++) { this.inv[slot] = {} };
         this.invADD(Items.STONE_WALL.id,10);
         this.invADD(Items.BANDAGE.id,10);

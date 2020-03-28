@@ -8188,9 +8188,9 @@ export function start(ModdedStarving) {
         }
         if (d && f < c.max) {
             g = sprite[SPRITE.EMPTY_SLOT][2];
-            x = d.info.translate.x;
-            y = d.info.translate.y;
-            for (j = 1; f < c.max; f++,
+            const x = d.info.translate.x;
+            const y = d.info.translate.y;
+            for (let j = 1; f < c.max; f++,
                 j++) {
                 ctx.drawImage(g, x + j * (g.width + 5), y);
             }
@@ -9266,7 +9266,7 @@ export function start(ModdedStarving) {
         TIMEOUT_NUMBER: 3,
         PING: "[13]",
         PING_DELAY: 6e4,
-        ROTATE: 1/32,
+        ROTATE: 1 / 32,
         ATTACK: .2,
         CAM_DELAY: 50,
         MUTE_DELAY: 125e3,
@@ -9340,12 +9340,13 @@ export function start(ModdedStarving) {
             ui.waiting = false;
         };
         this.build_stop = function () {
-            if (user.craft.id == INV.BAG) {
-                user.inv.max = 10;
-            } else {
+            if (user.craft.id !== INV.BAG) {
                 this.gather([0, user.craft.id, 1]);
             }
             user.craft.restart();
+        };
+        this.set_inventory_size = function (size) {
+            user.inv.max = size;
         };
         this.get_focus = function () {
             this.socket.send(JSON.stringify([11]));
@@ -10043,6 +10044,8 @@ export function start(ModdedStarving) {
                                 break;
                             case 25:
                                 c.cancel_craft();
+                            case 26:
+                                c.set_inventory_size(d[1]);
                         }
                     }
                 }
@@ -11182,7 +11185,7 @@ export function start(ModdedStarving) {
             workbench: false,
             fire: false,
             do_craft: function (c) {
-                var g = RECIPES.find(e=>e.id==c);
+                var g = RECIPES.find(e => e.id == c);
                 this.id = c;
                 this.crafting = true;
                 c = world.fast_units[user.uid];

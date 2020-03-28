@@ -41,8 +41,12 @@ export abstract class Utils {
     }
 
     static coordsToAngle(coords: any) {
-        let angle = Math.atan2(coords.y, coords.x) / Math.PI * 128;
-        return angle < 0 ? angle + 256 : angle;
+        if (coords.x || coords.y) {
+            let angle = Math.atan2(coords.y, coords.x) / Math.PI * 128;
+            return angle < 0 ? angle + 256 : angle;
+        } else {
+            return 0;
+        }
 
     }
 

@@ -93,7 +93,7 @@ export class EntityItem extends Item { //use it to create entities later :3
     constructor(id: number, sid: number, numberOfSides: number = -1, radius: number, XtoYfactor: number, hp: number, type: EntityType, special: any) {
         super(id);
         this.sid = sid,
-            this.numberOfSides = numberOfSides;
+        this.numberOfSides = numberOfSides;
         this.radius = radius;
         this.XtoYfactor = XtoYfactor;
         this.hp = hp;
@@ -139,20 +139,20 @@ export class Items {
     static WOOD_SPIKE = new EntityItem(17, 5, 0, 50, 1, 150, EntityType.SPIKE, { physical: true, Lifespan: 15, LifeUpdate: 2, hitdmg: 2, dmg: 5 });
     static MEAT = new Usable(18, 25, 0, -10, -5);
     static COOKED_MEAT = new Usable(19, 20, 0, 0, 5);
-    static BIG_FIRE = new EntityItem(20, 6, 0, 35, 1, 700, EntityType.FIRE, { physcial: false, Lifespan: 5, dmg: 20 });
+    static BIG_FIRE = new EntityItem(20, 6, 0, 35, 1, 700, EntityType.FIRE, { physical: false, Lifespan: 5, dmg: 20 });
     static BANDAGE = new Usable(21, 25, 0, -10, -5);
     static CORD = new Item(22);
-    static STONE_WALL = new EntityItem(23, 7, 7, 50, 1, 1500, EntityType.WALL, { physcial: true, tier: 1, Lifespan: 120, LifeUpdate: 5 });
-    static GOLD_WALL = new EntityItem(24, 8, 7, 50, 1, 2000, EntityType.WALL, { physcial: true, tier: 2, Lifespan: 720, LifeUpdate: 30 });
-    static DIAMOND_WALL = new EntityItem(25, 9, 7, 50, 1, 2500, EntityType.WALL, { physcial: true, tier: 3 });
-    static WOOD_DOOR = new EntityItem(26, 10, 0, 50, 1, 3500, EntityType.DOOR, { physcial: true, Lifespan: 30, LifeUpdate: 2 });
-    static CHEST = new EntityItem(27, 11, 4, 25, 1.3, 300, EntityType.CHEST, { physcial: true });
-    static STONE_SPIKE = new EntityItem(28, 12, 7, 50, 1, 300, EntityType.SPIKE, { physcial: true, tier: 1, Lifespan: 60, LifeUpdate: 5, hitdmg: 4, dmg: 10 });
-    static GOLD_SPIKE = new EntityItem(29, 13, 7, 50, 1, 600, EntityType.SPIKE, { physcial: true, tier: 2, Lifespan: 360, LifeUpdate: 30, hitdmg: 8, dmg: 20 });
-    static DIAMOND_SPIKE = new EntityItem(30, 14, 7, 50, 1, 900, EntityType.SPIKE, { physcial: true, tier: 3, hitdmg: 4, dmg: 30 });
-    static STONE_DOOR = new EntityItem(31, 15, 7, 50, 1, 1500, EntityType.DOOR, { physcial: true, tier: 1, Lifespan: 120, LifeUpdate: 5 });
-    static GOLD_DOOR = new EntityItem(32, 16, 7, 50, 1, 2000, EntityType.DOOR, { physcial: true, tier: 2, Lifespan: 720, LifeUpdate: 30 });
-    static DIAMOND_DOOR = new EntityItem(33, 17, 7, 50, 1, 2500, EntityType.DOOR, { physcial: true, tier: 3 });
+    static STONE_WALL = new EntityItem(23, 7, 7, 50, 1, 1500, EntityType.WALL, { physical: true, tier: 1, Lifespan: 120, LifeUpdate: 5 });
+    static GOLD_WALL = new EntityItem(24, 8, 7, 50, 1, 2000, EntityType.WALL, { physical: true, tier: 2, Lifespan: 720, LifeUpdate: 30 });
+    static DIAMOND_WALL = new EntityItem(25, 9, 7, 50, 1, 2500, EntityType.WALL, { physical: true, tier: 3 });
+    static WOOD_DOOR = new EntityItem(26, 10, 0, 50, 1, 3500, EntityType.DOOR, { physical: true, Lifespan: 30, LifeUpdate: 2 });
+    static CHEST = new EntityItem(27, 11, 4, 25, 1.3, 300, EntityType.CHEST, { physical: true });
+    static STONE_SPIKE = new EntityItem(28, 12, 7, 50, 1, 300, EntityType.SPIKE, { physical: true, tier: 1, Lifespan: 60, LifeUpdate: 5, hitdmg: 4, dmg: 10 });
+    static GOLD_SPIKE = new EntityItem(29, 13, 7, 50, 1, 600, EntityType.SPIKE, { physical: true, tier: 2, Lifespan: 360, LifeUpdate: 30, hitdmg: 8, dmg: 20 });
+    static DIAMOND_SPIKE = new EntityItem(30, 14, 7, 50, 1, 900, EntityType.SPIKE, { physical: true, tier: 3, hitdmg: 4, dmg: 30 });
+    static STONE_DOOR = new EntityItem(31, 15, 7, 50, 1, 1500, EntityType.DOOR, { physical: true, tier: 1, Lifespan: 120, LifeUpdate: 5 });
+    static GOLD_DOOR = new EntityItem(32, 16, 7, 50, 1, 2000, EntityType.DOOR, { physical: true, tier: 2, Lifespan: 720, LifeUpdate: 30 });
+    static DIAMOND_DOOR = new EntityItem(33, 17, 7, 50, 1, 2500, EntityType.DOOR, { physical: true, tier: 3 });
     static FUR = new Item(34);
     static FUR_WOLF = new Item(35);
     static EARMUFFS = new Clothes(36, { pvp: 0, pve: 1 }, 2);
@@ -160,7 +160,7 @@ export class Items {
     static STONE_SPEAR = new Tool(38, 70, 34, { pvp: 14, pve: 4 });
     static GOLD_SPEAR = new Tool(39, 71, 35, { pvp: 15, pve: 5 });
     static DIAMOND_SPEAR = new Tool(40, 72, 36, { pvp: 17, pve: 5 });
-    static FURNACE = new EntityItem(41, 18, 0, 60, 1, 700, EntityType.FIRE, { physcial: true });
+    static FURNACE = new EntityItem(41, 18, 0, 60, 1, 700, EntityType.FIRE, { physical: true });
     static EXPLORER_HAT = new Clothes(42, { pvp: 0, pve: 4 }, 0);
     static STONE_HELMET = new Clothes(43, { pvp: 2, pve: 8 }, 0);
     static GOLD_HELMET = new Clothes(44, { pvp: 4, pve: 13 }, 0);
@@ -177,21 +177,21 @@ export class Items {
     static HAMMER_DIAMOND = new Tool(55, 40, 25, { pvp: 4, pve: 40 }, 3);
     static HAMMER_AMETHYST = new Tool(56, 41, 25, { pvp: 5, pve: 50 }, 4);
     // TODO zero check collisions
-    static AMETHYST_WALL = new EntityItem(57, 9, 7, 50, 1, 3500, EntityType.WALL, { physcial: true, tier: 4 });
-    static AMETHYST_SPIKE = new EntityItem(58, 14, 7, 50, 1, 2400, EntityType.SPIKE, { physcial: true, tier: 4, hitdmg: 4, dmg: 50 });
-    static AMETHYST_DOOR = new EntityItem(59, 17, 7, 50, 1, 2500, EntityType.DOOR, { physcial: true, tier: 4 });
+    static AMETHYST_WALL = new EntityItem(57, 9, 7, 50, 1, 3500, EntityType.WALL, { physical: true, tier: 4 });
+    static AMETHYST_SPIKE = new EntityItem(58, 14, 7, 50, 1, 2400, EntityType.SPIKE, { physical: true, tier: 4, hitdmg: 4, dmg: 50 });
+    static AMETHYST_DOOR = new EntityItem(59, 17, 7, 50, 1, 2500, EntityType.DOOR, { physical: true, tier: 4 });
     static CAP_SCARF = new Clothes(60, { pvp: 0, pve: 0 }, 3);
     static FUR_WINTER = new Item(61);
     static BLUE_CORD = new Item(62);
 
-    static RABBIT = new EntityItem(128, 60, 0, 20, 1, 60, EntityType.MOB, { physcial: false, speed: 300 });
-    static WOLF = new EntityItem(129, 61, 0, 30, 1, 300, EntityType.MOB, { physcial: false, offensive: true, dmg: 40, speed: 250 });
-    static SPIDER = new EntityItem(130, 62, 0, 32, 1, 120, EntityType.MOB, { physcial: false, offensive: true, dmg: 20, speed: 150 });
-    static FOX = new EntityItem(131, 63, 0, 30, 1, 300, EntityType.MOB, { physcial: false, offensive: true, dmg: 25, speed: 230 });
-    static BEAR = new EntityItem(132, 63, 0, 35, 1, 900, EntityType.MOB, { physcial: false, offensive: true, dmg: 60, speed: 190 });
-    static DRAGON = new EntityItem(133, 64, 0, 50, 1, 1500, EntityType.MOB, { physcial: false, offensive: true, dmg: 90, speed: 250 });
+    static RABBIT = new EntityItem(128, 60, 0, 20, 1, 60, EntityType.MOB, { physical: false, speed: 300 });
+    static WOLF = new EntityItem(129, 61, 0, 30, 1, 300, EntityType.MOB, { physical: false, offensive: true, dmg: 40, speed: 250 });
+    static SPIDER = new EntityItem(130, 62, 0, 32, 1, 120, EntityType.MOB, { physical: false, offensive: true, dmg: 20, speed: 150 });
+    static FOX = new EntityItem(131, 63, 0, 30, 1, 300, EntityType.MOB, { physical: false, offensive: true, dmg: 25, speed: 230 });
+    static BEAR = new EntityItem(132, 63, 0, 35, 1, 900, EntityType.MOB, { physical: false, offensive: true, dmg: 60, speed: 190 });
+    static DRAGON = new EntityItem(133, 64, 0, 50, 1, 1500, EntityType.MOB, { physical: false, offensive: true, dmg: 90, speed: 250 });
 
-    static FRUIT = new EntityItem(134, 61, 0, 10, 1, 1, EntityType.HARVESTABLE, { physcial: false });
+    static FRUIT = new EntityItem(134, 61, 0, 10, 1, 1, EntityType.HARVESTABLE, { physical: false });
 
     static AMETHYST_HELMET = new Clothes(81, { pvp: 6, pve: 23 }, 0);
 

@@ -11,11 +11,12 @@ export default class Entity {
     id: number;
     item: Item;
     mapId: number;
-    physical: number;
+    physical: boolean;
     tier: number;
     miningTier: number;
     error: string;
     entityItem: EntityItem;
+    info: number = 0;
 
     pos: Vector;
     angle: number;
@@ -38,7 +39,7 @@ export default class Entity {
     dmgRange: 0;
 
     updateLoop: any;
-    updating: number;
+    updating: boolean;
     moveDelay: number;
 
     maxHealth: number;
@@ -55,8 +56,8 @@ export default class Entity {
         this.entityType = entityItem; //entity id
         this.item = Items.get(entityItem.id); //item id
         this.owner = owner;
-        for (let i = 1; i < 1024; i++) {
-            if (!world.entities[this.entityType.id].find(e => e.id == i)) {
+        for (let i = 1; i < 256**2; i++) {
+            if (![].concat(...world.entities).find(e => e.id == i)) {
                 this.id = i;
                 break;
             }
@@ -69,10 +70,6 @@ export default class Entity {
 
         this.pos = pos;
         this.chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
-        if (this.getEntitiesInRange(1, 1, false, true).find(e => Utils.distance({ x: pos.x - e.x, y: pos.y - e.y }) < entityItem.radius + e.radius)) {
-            this.error = "Can't place entity in top of other Entities";
-            return;
-        }
 
         this.angle = angle;
         this.maxHealth = entityItem.hp;
@@ -99,8 +96,13 @@ export default class Entity {
         this.mapId = special.mapid;
         this.stime = new Date().getTime();
 
-        world.entities[this.entityType.id].push(this);
-        world.echunks[this.chunk.x][this.chunk.y][this.entityType.id].push(this);
+        if (this.getEntitiesInRange(1, 1, false, true).find(e => Utils.distance({ x: pos.x - e.pos.x, y: pos.y - e.pos.y }) < this.radius + e.radius)) {
+            this.error = "Can't place entity in top of other Entities";
+            return;
+        }
+
+        world.entities[this.entityType.sid].push(this);
+        world.echunks[this.chunk.x][this.chunk.y][this.entityType.sid].push(this);
 
         if (this.lifespan) {
             if (this.type == EntityType.MOB) {
@@ -191,6 +193,7 @@ export default class Entity {
                 case EntityType.SPIKE:
                     if (this.hitDamage) { attacker.damage(this.hitDamage); };
                     break;
+
             }
             let angle;
             switch (this.type) {
@@ -198,10 +201,14 @@ export default class Entity {
                     angle = Math.round(Utils.coordsToAngle({ x: this.pos.y - attacker.pos.y, y: this.pos.x - attacker.pos.x }));
                     this.sendToRange(new Uint16Array([9, Math.floor(this.pos.x / 100), Math.floor(this.pos.y), angle, this.mapId]));
                     break;
+                case EntityType.DOOR:
+                    this.info = this.info ? 0 : 1;
+                    this.physical = !this.physical;
+                    this.sendInfos();
                 default:
                     let id = Utils.toHex(this.id);
                     angle = Math.round(Utils.coordsToAngle({ x: this.pos.y - attacker.pos.y, y: this.pos.x - attacker.pos.x }));
-                    this.sendToRange(new Uint8Array([22, id[0], id[1], this.entityType.id, angle]));
+                    this.sendToRange(new Uint8Array([22, 0, id[0], id[1], this.entityType.sid, angle]));
                     break;
             }
         }
@@ -239,27 +246,27 @@ export default class Entity {
         }
     }
 
-    infoPacket(visible = true) {
+    infoPacket(visible = true,uint8:boolean = true) {
         const ownerId =  this.owner === null ? 0 : this.owner.pid;
+        let arr;
         if (visible) {
             let pos = { "x": Utils.toHex(this.pos.x), "y": Utils.toHex(this.pos.y) };
             let id = Utils.toHex(this.id);
-            return new Uint8Array([0, 0, ownerId, this.action, this.entityType.sid, this.angle, pos.x[0], pos.x[1], pos.y[0], pos.y[1], id[0], id[1], 0, 0]);
+            let info = Utils.toHex(this.info);
+            arr = [0, 0, ownerId, this.action, this.entityType.sid, this.angle, pos.x[0], pos.x[1], pos.y[0], pos.y[1], id[0], id[1], info[0], info[1]];
         } else {
-            return new Uint8Array([0, 0, ownerId, 1, this.entityType.sid, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+            arr = [0, 0, ownerId, 1, this.entityType.sid, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        }
+        if (uint8) {
+            return new Uint8Array(arr);
+        } else {
+            return arr;
         }
     }
 
     sendToRange(packet) {
-        let xmin = Math.max(-2 + this.chunk.x, 0), xmax = Math.min(3 + this.chunk.x, world.mapSize.x),
-            ymin = Math.max(-2 + this.chunk.y, 0), ymax = Math.min(3 + this.chunk.y, world.mapSize.y);
-        for (let x = xmin; x < xmax; x++) {
-            for (let y = ymin; y < ymax; y++) {
-                for (let player of world.chunks[x][y]) {
-                    player.send(packet);
-                }
-            }
-        }
+        let players = this.getEntitiesInRange(2,2,true,false);
+        for (let player of players) {player.send(packet)};
     }
 
     getEntitiesInRange(x: number, y: number, player: boolean = true, entity: boolean = true) {

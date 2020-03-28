@@ -8236,8 +8236,8 @@ export function start(ModdedStarving) {
             g = f = 0;
         }
         c = sprite[c][world.time];
-        w = -c.width;
-        h = -c.height;
+        const w = -c.width;
+        const h = -c.height;
         ctx.drawImage(c, -w / 2 + f, -h / 2 + g, w, h);
         ctx.restore();
     }

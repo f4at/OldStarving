@@ -35,7 +35,7 @@ export class PlayerInventory extends Inventory {
     }
 
     updateSize(size: number = this.size) {
-        this.player.ws.send([26, this.size = size]);
+        this.player.send([26, this.size = size]);
     }
 
     remove(id: Item, amount: number) {
@@ -182,6 +182,15 @@ export default class Player {
             return;
         }
 
+        this.bag = true;
+        this.inventory.add(Items.STONE_WALL, 10);
+        this.inventory.add(Items.BANDAGE, 10);
+        this.inventory.add(Items.WOOD, 100);
+        this.inventory.add(Items.STONE_SWORD, 100);
+        this.inventory.add(Items.STONE_DOOR, 100);
+        this.inventory.add(Items.PICK_STONE, 100);
+        this.inventory.add(Items.SWORD_GOLD, 100);
+
         world.players.push(this);
         world.chunks[this.chunk.x][this.chunk.y].push(this);
         this.join(ws);
@@ -229,18 +238,9 @@ export default class Player {
             this.changeDisplayNick();
         }, 150);
 
-        // TODO remove
-        this.bag = true;
-        this.inventory.add(Items.STONE_WALL, 10);
-        this.inventory.add(Items.BANDAGE, 10);
-        this.inventory.add(Items.WOOD, 100);
-        this.inventory.add(Items.STONE_SWORD, 100);
-        this.inventory.add(Items.PICK_STONE, 100);
-        this.inventory.add(Items.SWORD_GOLD, 100);
-        this.gatherAll();
     }
 
-    getEntitiesInRange(x: number, y: number, player: boolean = true, entity: boolean = true): Entity[] {
+    getEntitiesInRange(x: number, y: number, player: boolean = true, entity: boolean = true) {
         let ymin = Math.max(-x + this.chunk.y, 0), ymax = Math.min(x + 1 + this.chunk.y, world.mapSize.y),
             xmin = Math.max(-y + this.chunk.x, 0), xmax = Math.min(y + 1 + this.chunk.x, world.mapSize.x);
         let list = [];
@@ -266,7 +266,7 @@ export default class Player {
         let dis, vec, angle, collide;
         while (true) {
             collide = false;
-            for (let entity of entities) {
+            for (let entity of entities.filter(e=> e.physical)) {
                 vec = { x: this.pos.x - entity.pos.x, y: this.pos.y - entity.pos.y };
                 if (entity.numberOfSides === 0) {
                     dis = entity.radius + this.radius - Utils.distance(vec);
@@ -310,35 +310,11 @@ export default class Player {
         if (this.online) { this.ws.send(packet); };
     }
 
-    getInfos(visible: boolean = true, to: Player[] = null) {
-        let list = new Uint8Array([0, 0]);
-        let added = false;
-        if (to) {
-            for (let player of to) {
-                list = Utils.concatUint8(list, player.infoPacket(visible));
-                added = true;
-            }
-        } else {
-            let xmin = Math.max(-2 + this.chunk.x, 0), xmax = Math.min(3 + this.chunk.x, world.mapSize.x),
-                ymin = Math.max(-2 + this.chunk.y, 0), ymax = Math.min(3 + this.chunk.y, world.mapSize.y);
-            for (let x = xmin; x < xmax; x++) {
-                for (let y = ymin; y < ymax; y++) {
-                    for (let player of world.chunks[x][y]) {
-                        list = Utils.concatUint8(list, player.infoPacket(visible));
-                        added = true;
-                    }
-                    for (let i = 0; i < 128; i++) {
-                        for (let entity of world.echunks[x][y][y]) {
-                            if (entity.type != EntityType.HARVESTABLE) {
-                                list = Utils.concatUint8(list, entity.infoPacket(visible).slice(2));
-                                added = true;
-                            }
-                        }
-                    }
-                }
-            }
+    getInfos(visible: boolean = true, to: any[] = null) {
+        if (!(to && to.length > 0)) {
+            to = this.getEntitiesInRange(2,2);
         }
-        if (added) { this.send(list); };
+        this.send(new Uint8Array([0,0].concat(...to.filter(e=>e.type != EntityType.HARVESTABLE).map(e=> e.infoPacket(visible,false).slice(2)))));
     }
 
     move(dir: number) {
@@ -473,26 +449,26 @@ export default class Player {
         }
     }
 
-    infoPacket(visible = true) {
+    infoPacket(visible = true,uint8:boolean = true) {
+        let arr;
         if (visible) {
             let pos = { "x": Utils.toHex(this.pos.x), "y": Utils.toHex(this.pos.y) };
             //let id = Utils.toHex(this.id);
             let infos = Utils.toHex(this.tool.id + this.clothes.id * 128 + (this.bag ? 1 : 0) * 16384);
-            return new Uint8Array([0, 0, this.pid, this.action, this.sid, this.angle, pos.x[0], pos.x[1], pos.y[0], pos.y[1], 0, 0, infos[0], infos[1]]);
+            arr = [0, 0, this.pid, this.action, this.sid, this.angle, pos.x[0], pos.x[1], pos.y[0], pos.y[1], 0, 0, infos[0], infos[1]];
         } else {
-            return new Uint8Array([0, 0, this.pid, 1, this.sid, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+            arr = [0, 0, this.pid, 1, this.sid, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        }
+        if (uint8) {
+            return new Uint8Array(arr);
+        } else {
+            return arr;
         }
     }
 
     sendToRange(packet) {
-        let xmin = Math.max(-2 + this.chunk.x, 0), xmax = Math.min(3 + this.chunk.x, world.mapSize.x),
-            ymin = Math.max(-2 + this.chunk.y, 0), ymax = Math.min(3 + this.chunk.y, world.mapSize.y);
-        for (let x = xmin; x < xmax; x++) {
-            for (let y = ymin; y < ymax; y++) {
-                for (let player of world.chunks[x][y]) {
-                    player.send(packet);
-                }
-            }
+        for (let player of this.getEntitiesInRange(2,2,true,false)) {
+            (player as Player).send(packet);
         }
     }
 

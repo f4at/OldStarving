@@ -9379,6 +9379,7 @@ export function start(ModdedStarving) {
                 d[f].label = null;
                 d[f].label_winter = null;
                 d[f].alive = true;
+                user.ldb.update = true;
             }
         };
         this.empty_res = function () {
@@ -11492,7 +11493,7 @@ export function start(ModdedStarving) {
                 f.play_game();
             }
         });
-        this.nickname.input.value = Cookies.get("starve_nickname") ? Cookies.get("starve_nickname") : "";
+        this.nickname.input.value = decodeURIComponent(Cookies.get("starve_nickname") ? Cookies.get("starve_nickname") : "");
         this.all_rights_reserved = {
             id: document.getElementById("all_rights_reserved"),
             style: document.getElementById("all_rights_reserved").style,

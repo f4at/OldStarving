@@ -1,4 +1,5 @@
-import Discord, { Client } from 'discord.js';
+import Discord from 'discord.js';
+import * as config from "../config.json";
 
 export default class DiscordBot {
     client: Discord.Client;
@@ -10,12 +11,16 @@ export default class DiscordBot {
             console.log(`Logged in as ${this.client.user.tag}!`);
         });
 
-        this.client.login('NjkyMDY2MzY0MjU2NjgyMDM0.XnpcFA.MgOj1ZNs_2NiTUA2CdBv1iiKMIo');
+        this.client.login(config.token);
     }
 
     async checkUser(id: string | number) {
-        const guild = this.client.guilds.resolve("692062782656348250");
+        const guild = this.client.guilds.resolve(config.guildId);
+        if (!guild)
+            return false;
         const member = await guild.members.fetch(id.toString());
-        return member.roles.cache.has("692090005522219020");
+        if (!member)
+            return false;
+        return member.roles.cache.has(config.roleId);
     }
 };

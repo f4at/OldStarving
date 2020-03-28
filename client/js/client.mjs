@@ -9266,7 +9266,7 @@ export function start(ModdedStarving) {
         TIMEOUT_NUMBER: 3,
         PING: "[13]",
         PING_DELAY: 6e4,
-        ROTATE: .2,
+        ROTATE: 1/32,
         ATTACK: .2,
         CAM_DELAY: 50,
         MUTE_DELAY: 125e3,
@@ -9340,10 +9340,10 @@ export function start(ModdedStarving) {
             ui.waiting = false;
         };
         this.build_stop = function () {
-            if (user.craft.id2 == INV.BAG) {
+            if (user.craft.id == INV.BAG) {
                 user.inv.max = 10;
             } else {
-                this.gather([0, user.craft.id2, 1]);
+                this.gather([0, user.craft.id, 1]);
             }
             user.craft.restart();
         };
@@ -9814,7 +9814,8 @@ export function start(ModdedStarving) {
                 var f = Math.floor(c.x / 100);
                 var d = Math.floor(c.y / 100);
                 if (this.last_cam.i != f || this.last_cam.j != d) {
-                    //this.socket.send(JSON.stringify([1, Math.floor(-c.x), Math.floor(-c.y)])); lol LAPA ? retarded ?                this.last_cam.i = f;
+                    //this.socket.send(JSON.stringify([1, Math.floor(-c.x), Math.floor(-c.y)])); lol LAPA ? retarded ?
+                    this.last_cam.i = f;
                     this.last_cam.j = d;
                 }
             }
@@ -11139,7 +11140,7 @@ export function start(ModdedStarving) {
                 game.update_inv_buttons();
             },
             decrease: function (c, g, f) {
-                update = true;
+                this.update = true;
                 this.n[c] = Math.max(0, this.n[c] - g);
                 if (!this.n[c] && 0 <= f) {
                     this.delete_item(c, f);
@@ -11181,7 +11182,7 @@ export function start(ModdedStarving) {
             workbench: false,
             fire: false,
             do_craft: function (c) {
-                var g = RECIPES[c];
+                var g = RECIPES.find(e=>e.id==c);
                 this.id = c;
                 this.crafting = true;
                 c = world.fast_units[user.uid];

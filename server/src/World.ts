@@ -1,6 +1,70 @@
 import Player from "./Player";
 import Entity from "./Entity";
 import { Vector } from ".";
+import * as fs from "fs";
+
+export enum MapEntityType {
+    HERB = "h",
+    PLANT = "p",
+    STONES = "s",
+    TREE = "t",
+    GOLD = "g",
+    DIAMOND = "d",
+    TREE_BRANCH = "b",
+    FIR = "f",
+    STONES_WINTER = "sw",
+    GOLD_WINTER = "gw",
+    DIAMOND_WINTER = "dw",
+    AMETHYST = "a",
+    DRAGON_GROUND = "dg",
+    SNOW = "so",
+    HERB_WINTER = "hw",
+}
+
+for (const key in MapEntityType) {
+    const value = MapEntityType[key];
+    MapEntityType[value] = key;
+}
+
+export class MapEntity {
+    type: MapEntityType;
+    position: Vector;
+}
+
+export class Map {
+    raw: string;
+    height: number;
+    width: number;
+    chunks: MapEntity[][][] = [];
+
+    loadFromFile(file: fs.PathLike) {
+        const map = JSON.parse(fs.readFileSync(file).toString());
+        this.height = map.h;
+        this.width = map.w;
+        let mapEntities = 0;
+
+        let y = 0;
+        for (const column of map.tiles) {
+            this.chunks[y] = [];
+
+            let x = 0;
+            for (const row of column) {
+                this.chunks[y][x] = [];
+                for (const type in row) {
+                    let chunk = this.chunks[y][x] = this.chunks[y][x] || [];
+                    for (const mapEntity of row[type]) {
+                        mapEntities++;
+                        chunk.push({ type: MapEntityType[type], position: mapEntity[0] || { x: x * 100, y: y * 100 } });
+                    }
+                }
+                x++;
+            }
+            y++;
+        }
+        console.log(`Loaded map ${this.width}x${this.height} (${mapEntities} map entities)`);
+        this.raw = JSON.stringify(map);
+    }
+}
 
 export class World {
     private static _instance;
@@ -16,6 +80,7 @@ export class World {
     tickRate: number = 32;
     stime: number = new Date().getTime();
     mode: number = 0; //id of mode, probably useless for the moment.
+    map: Map = new Map();
 
     constructor() {
         for (let i = 0; i < this.mapSize.x; i++) {

@@ -4,6 +4,7 @@ import * as fs from "fs";
 import world from "./World";
 import Player from "./Player";
 import { Items } from "./Item";
+import * as express from 'express';
 
 export interface Vector {
     x: number;
@@ -78,10 +79,16 @@ export abstract class Utils {
     }
 }
 
+world.map.loadFromFile("./map.json");
+
+const app = express();
+
 const server = https.createServer({
     key: fs.readFileSync("data/ssl/key.pem"),
     cert: fs.readFileSync("data/ssl/cert.pem")
-}).listen(8080);
+}, app).listen(8080, () => {
+    console.log("Listening on port 8080");
+});
 
 const wss = new WebSocket.Server({ server });
 
@@ -152,7 +159,7 @@ wss.on("connection", (ws) => {
         }
     });
     ws.on("close", () => {
-        if (player) { player.online = false };
+        if (player) { player.online = false; };
         ws.close();
     });
 });
@@ -161,12 +168,3 @@ wss.on("connection", (ws) => {
 wss.on("listening", () => {
     console.log("Started WebSocket server");
 });
-
-// TODO server should post info to master
-// server.on("request", (req, res) => {
-//     if (req.url == "/info.txt") {
-//         res.setHeader("access-control-allow-origin", "*");
-//         res.setHeader("content-type", "application/json");
-//         res.end(JSON.stringify([{ name: "Test Server", players: { online: 0, max: 0 }, "ip": "localhost" }]));
-//     }
-// });

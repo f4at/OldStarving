@@ -266,7 +266,11 @@ export default class Player {
         let dis, vec, angle, collide;
         while (true) {
             collide = false;
-            for (let entity of entities.filter(e=> e.physical)) {
+            // TODO for zero :>
+            let mapEntities: Entity[] = world.map.chunks[Math.trunc(this.pos.y / 100)][Math.trunc(this.pos.x / 100)].map(x => (({ pos: x.position, numberOfSides: 0, radius: 50, angle: 0, eangle: 0 }) as any as Entity));
+            for (let entity of entities.filter(e => e.physical).concat(mapEntities)) {
+                if (entity.pos == null)
+                    continue;
                 vec = { x: this.pos.x - entity.pos.x, y: this.pos.y - entity.pos.y };
                 if (entity.numberOfSides === 0) {
                     dis = entity.radius + this.radius - Utils.distance(vec);
@@ -288,7 +292,7 @@ export default class Player {
 
     join(ws) {
         this.ws = ws;
-        this.ws.send(JSON.stringify([3, this.pid, 1024, world.leaderboard, this.pos.x, this.pos.y, 256, world.mode, world.isDay ? 0 : 1, this.sessionId]));
+        this.ws.send(JSON.stringify([3, this.pid, 1024, world.leaderboard, this.pos.x, this.pos.y, 256, world.mode, world.isDay ? 0 : 1, this.sessionId, world.map.raw]));
         this.online = true;
         this.getInfos();
         this.sendInfos();
@@ -312,9 +316,9 @@ export default class Player {
 
     getInfos(visible: boolean = true, to: any[] = null) {
         if (!(to && to.length > 0)) {
-            to = this.getEntitiesInRange(2,2);
+            to = this.getEntitiesInRange(2, 2);
         }
-        this.send(new Uint8Array([0,0].concat(...to.filter(e=>e.type != EntityType.HARVESTABLE).map(e=> e.infoPacket(visible,false).slice(2)))));
+        this.send(new Uint8Array([0, 0].concat(...to.filter(e => e.type != EntityType.HARVESTABLE).map(e => e.infoPacket(visible, false).slice(2)))));
     }
 
     move(dir: number) {
@@ -435,7 +439,6 @@ export default class Player {
         world.chunks[this.chunk.x][this.chunk.y] = world.chunks[this.chunk.x][this.chunk.y].filter(e => e != this);
         this.chunk = chunk;
         world.chunks[this.chunk.x][this.chunk.y].push(this);
-
     }
 
     sendInfos(visible: boolean = true, to: Player[] = null) {
@@ -449,7 +452,7 @@ export default class Player {
         }
     }
 
-    infoPacket(visible = true,uint8:boolean = true) {
+    infoPacket(visible = true, uint8: boolean = true) {
         let arr;
         if (visible) {
             let pos = { "x": Utils.toHex(this.pos.x), "y": Utils.toHex(this.pos.y) };
@@ -467,7 +470,7 @@ export default class Player {
     }
 
     sendToRange(packet) {
-        for (let player of this.getEntitiesInRange(2,2,true,false)) {
+        for (let player of this.getEntitiesInRange(2, 2, true, false)) {
             (player as Player).send(packet);
         }
     }

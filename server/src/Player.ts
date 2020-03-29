@@ -311,7 +311,7 @@ export default class Player {
     }
 
     getInfos(visible: boolean = true, to: any[] = null) {
-        if (!(to && to.length > 0)) {
+        if (to === null) {
             to = this.getEntitiesInRange(2,2);
         }
         this.send(new Uint8Array([0,0].concat(...to.filter(e=>e.type != EntityType.HARVESTABLE).map(e=> e.infoPacket(visible,false).slice(2)))));
@@ -403,39 +403,18 @@ export default class Player {
     }
 
     updateChunk(chunk: Vector) {
-        let ymin = Math.max(-2 + this.chunk.y, 0), ymax = Math.min(3 + this.chunk.y, world.mapSize.y),
-            xmin = Math.max(-2 + this.chunk.x, 0), xmax = Math.min(3 + this.chunk.x, world.mapSize.x);
-        let list = [], elist = [];
-        for (let x = xmin; x < xmax; x++) {
-            for (let y = ymin; y < ymax; y++) {
-                if (Math.abs(chunk.x - x) > 2 || Math.abs(chunk.y - y) > 2) {
-                    list = list.concat(world.chunks[x][y]);
-                    for (let i = 0; i < 128; i++) {
-                        elist = list.concat(world.echunks[x][y][i]);
-                    }
-                }
-            }
-        }
+        let list = this.getEntitiesInRange(2,2,true,false).filter(e=> Math.abs(e.chunk.x-chunk.x) > 2 || Math.abs(e.chunk.y-chunk.y) > 2 );
+        let elist = this.getEntitiesInRange(2,2,false,true).filter(e=> Math.abs(e.chunk.x-chunk.x) > 2 || Math.abs(e.chunk.y-chunk.y) > 2 );
         this.sendInfos(false, list);
         this.getInfos(false, list.concat(elist));
-        ymin = Math.max(-2 + chunk.y, 0), ymax = Math.min(3 + chunk.y, world.mapSize.y),
-            xmin = Math.max(-2 + chunk.x, 0), xmax = Math.min(3 + chunk.x, world.mapSize.x);
-        list = [], elist = [];
-        for (let x = xmin; x < xmax; x++) {
-            for (let y = ymin; y < ymax; y++) {
-                if (Math.abs(this.chunk.x - x) > 2 || Math.abs(this.chunk.y - y) > 2) {
-                    list = list.concat(world.chunks[x][y]);
-                    for (let i = 0; i < 128; i++) {
-                        list = elist.concat(world.echunks[x][y][i]);
-                    }
-                }
-            }
-        }
-        this.getInfos(true, list.concat(elist));
+        
         world.chunks[this.chunk.x][this.chunk.y] = world.chunks[this.chunk.x][this.chunk.y].filter(e => e != this);
+        let echunk = this.chunk;
         this.chunk = chunk;
         world.chunks[this.chunk.x][this.chunk.y].push(this);
 
+        list = this.getEntitiesInRange(2,2,true,true).filter(e=> Math.abs(e.chunk.x-chunk.x) > 2 || Math.abs(e.chunk.y-echunk.y) > 2 );
+        this.getInfos(true, list);
     }
 
     sendInfos(visible: boolean = true, to: Player[] = null) {
@@ -452,8 +431,7 @@ export default class Player {
     infoPacket(visible = true,uint8:boolean = true) {
         let arr;
         if (visible) {
-            let pos = { "x": Utils.toHex(this.pos.x), "y": Utils.toHex(this.pos.y) };
-            //let id = Utils.toHex(this.id);
+            let pos = { "x": Utils.toHex(Math.round(this.pos.x*2)), "y": Utils.toHex(Math.round(this.pos.y*2)) };
             let infos = Utils.toHex(this.tool.id + this.clothes.id * 128 + (this.bag ? 1 : 0) * 16384);
             arr = [0, 0, this.pid, this.action, this.sid, this.angle, pos.x[0], pos.x[1], pos.y[0], pos.y[1], 0, 0, infos[0], infos[1]];
         } else {

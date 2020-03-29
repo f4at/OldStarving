@@ -9273,7 +9273,7 @@ export function start(ModdedStarving) {
         TIMEOUT_SERVER: 6e5,
         WAITING_FOR_SERVER: 8e3,
         DELAY_CONNECTION_UPDATE: 5,
-        LAG_DISTANCE: 200,
+        LAG_DISTANCE: 500,
         LOOSE_FOCUS: 15
     };
     function Client() {
@@ -9619,17 +9619,19 @@ export function start(ModdedStarving) {
                     world.delete_units(q);
                 } else {
                     var v = f[m + 2];
-                    var t = c[p + 2];
-                    var z = c[p + 3];
+                    var t = c[p + 2]/2;
+                    var z = c[p + 3]/2;
                     var p = c[p + 5];
                     var m = f[m + 3] / 255 * Math.PI * 2;
                     if (world.fast_units[q]) {
                         q = world.fast_units[q];
+                        q.speed =  ((q.r.x-t)**2+(q.r.y-z)**2)**0.5*31.9;
                         q.r.x = t;
                         q.r.y = z;
                         if (n != 0 && Utils.dist(q, q.r) > CLIENT.LAG_DISTANCE) {
                             q.x = t;
                             q.y = z;
+                            q.speed = 0;
                         }
                         if (q.id != user.id) {
                             q.nangle = m;
@@ -10461,7 +10463,7 @@ export function start(ModdedStarving) {
                 }
             }
         };
-        this.move_units = function (c, d, f, g, r) {
+        this.move_units = function (c) {
             for (var u = 0; u < c.length; u++) {
                 let b = c[u];
                 if (b.angle != b.nangle) {
@@ -10488,7 +10490,7 @@ export function start(ModdedStarving) {
                     }
                     b.action |= STATE.WALK;
                     q = Utils.get_std_angle(b, b.r) + Math.PI;
-                    q = Utils.build_vector(f && b.action & STATE.ATTACK ? delta * f : b.collide ? delta * g : 0 < b.pid && b.r.x >= SPRITE.WINTER_BIOME_Y ? delta * r : delta * d, q);
+                    q = Utils.build_vector( (b.speed ? b.speed : 0)*delta , q); // TODO
                     if (Utils.norm(q) < Utils.norm(Utils.get_vector(b, b.r))) {
                         Utils.add_vector(b, q);
                     } else {
@@ -10544,13 +10546,13 @@ export function start(ModdedStarving) {
             }
         };
         this.update = function () {
-            this.move_units(this.units[ITEMS.PLAYERS], WORLD.SPEED, WORLD.SPEED_ATTACK, WORLD.SPEED_COLLIDE, WORLD.SPEED_WINTER);
-            this.move_units(this.units[ITEMS.RABBIT], WORLD.RABBIT_SPEED);
-            this.move_units(this.units[ITEMS.WOLF], WORLD.WOLF_SPEED);
-            this.move_units(this.units[ITEMS.SPIDER], WORLD.SPIDER_SPEED);
-            this.move_units(this.units[ITEMS.FOX], WORLD.FOX_SPEED);
-            this.move_units(this.units[ITEMS.BEAR], WORLD.BEAR_SPEED);
-            this.move_units(this.units[ITEMS.DRAGON], WORLD.DRAGON_SPEED);
+            this.move_units(this.units[ITEMS.PLAYERS]);
+            this.move_units(this.units[ITEMS.RABBIT]);
+            this.move_units(this.units[ITEMS.WOLF]);
+            this.move_units(this.units[ITEMS.SPIDER]);
+            this.move_units(this.units[ITEMS.FOX]);
+            this.move_units(this.units[ITEMS.BEAR]);
+            this.move_units(this.units[ITEMS.DRAGON]);
         };
     }
     // var CRAFT = { FIRE: 0, WORKBENCH: 1, SWORD: 2, PICK: 3, SEED: 4, PICK_GOLD: 5, PICK_DIAMOND: 6, SWORD_GOLD: 7, SWORD_DIAMOND: 8, PICK_WOOD: 9, WALL: 10, SPIKE: 11, COOKED_MEAT: 12, BIG_FIRE: 13, BANDAGE: 14, STONE_WALL: 15, GOLD_WALL: 16, DIAMOND_WALL: 17, WOOD_DOOR: 18, CHEST: 19, STONE_SPIKE: 20, GOLD_SPIKE: 21, DIAMOND_SPIKE: 22, STONE_DOOR: 23, GOLD_DOOR: 24, DIAMOND_DOOR: 25, EARMUFFS: 26, COAT: 27, SPEAR: 28, GOLD_SPEAR: 29, DIAMOND_SPEAR: 30, FURNACE: 31, EXPLORER_HAT: 32, STONE_HELMET: 33, GOLD_HELMET: 34, DIAMOND_HELMET: 35, BOOK: 36, PAPER: 37, BAG: 38, SWORD_AMETHYST: 39, PICK_AMETHYST: 40, AMETHYST_SPEAR: 41, HAMMER: 42, HAMMER_GOLD: 43, HAMMER_DIAMOND: 44, HAMMER_AMETHYST: 45, AMETHYST_WALL: 46, AMETHYST_SPIKE: 47, AMETHYST_DOOR: 48, CAP_SCARF: 49, BLUE_CORD: 50 };

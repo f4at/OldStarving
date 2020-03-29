@@ -24,6 +24,7 @@ export abstract class Utils {
     }
 
     static toHex(data: number) {
+        data = Math.round(data);
         return [data % 256, Math.floor(data / 256)];
     }
 
@@ -68,13 +69,6 @@ export abstract class Utils {
             }
         }
         return id;
-    }
-
-    static concatUint8(array1: Uint8Array, array2: Uint8Array) {
-        let array = new Uint8Array(array1.length + array2.length);
-        array.set(array1);
-        array.set(array2, array1.length);
-        return array;
     }
 }
 

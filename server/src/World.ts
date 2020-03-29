@@ -13,7 +13,7 @@ export class World {
     mapSize: Vector = { x: 30, y: 10 };
     chunks: Player[][][] = new Array(this.mapSize.x);
     echunks: Entity[][][][] = new Array(this.mapSize.x);
-    tickRate: number = 32;
+    tickRate: number = 24;
     stime: number = new Date().getTime();
     mode: number = 0; //id of mode, probably useless for the moment.
 

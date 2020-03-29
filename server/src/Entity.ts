@@ -250,7 +250,7 @@ export default class Entity {
         const ownerId =  this.owner === null ? 0 : this.owner.pid;
         let arr;
         if (visible) {
-            let pos = { "x": Utils.toHex(this.pos.x), "y": Utils.toHex(this.pos.y) };
+            let pos = { "x": Utils.toHex(this.pos.x*2), "y": Utils.toHex(this.pos.y*2) };
             let id = Utils.toHex(this.id);
             let info = Utils.toHex(this.info);
             arr = [0, 0, ownerId, this.action, this.entityType.sid, this.angle, pos.x[0], pos.x[1], pos.y[0], pos.y[1], id[0], id[1], info[0], info[1]];

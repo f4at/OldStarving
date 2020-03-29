@@ -263,9 +263,10 @@ export default class Player {
         //collision version 1(not real collision just simulation to save time and ressources will make real one later)
         // VERY HARD
         let entities = this.getEntitiesInRange(1, 1, false);
-        let dis, vec, angle, collide;
+        let dis, vec, angle, collide, counter = 0;
         while (true) {
             collide = false;
+            counter += 1;
             for (let entity of entities.filter(e=> e.physical)) {
                 vec = { x: this.pos.x - entity.pos.x, y: this.pos.y - entity.pos.y };
                 if (entity.numberOfSides === 0) {
@@ -282,7 +283,7 @@ export default class Player {
                     break;
                 }
             }
-            if (!collide) { break; };
+            if (!collide || counter == 32) { break; };
         }
     }
 

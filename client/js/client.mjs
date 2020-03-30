@@ -9429,7 +9429,7 @@ export function start(ModdedStarving) {
             var d = new Uint16Array(f);
             var e = (c.length - 2) / 4;
             for (var m = 0; m < e; m++) {
-                var p = c[5 + 4 * m] / 255 * Math.PI * 2;
+                var p = c[5 + 4 * m] / 128 * Math.PI;
                 var n = world.fast_units[c[4 + 4 * m] * world.max_units + d[1 + 2 * m]];
                 if (n && n.hit) {
                     n.hit.angle = p;
@@ -9442,7 +9442,7 @@ export function start(ModdedStarving) {
             var f = (c.length - 1) / 4;
             for (var d = 0; d < f; d++) {
                 var e = 4 * d;
-                var m = c[3 + e] / 255 * Math.PI * 2;
+                var m = c[3 + e] / 128 * Math.PI;
                 var p = MAP.tiles[c[2 + e]][c[1 + e]];
                 switch (c[4 + e]) {
                     case 0:
@@ -9616,10 +9616,21 @@ export function start(ModdedStarving) {
                     var t = c[p + 2]/2;
                     var z = c[p + 3]/2;
                     var p = c[p + 5];
-                    var m = f[m + 3] / 255 * Math.PI * 2;
+                    var m = f[m + 3] / 128 * Math.PI;
                     if (world.fast_units[q]) {
                         q = world.fast_units[q];
-                        q.speed =  ((q.r.x-t)**2+(q.r.y-z)**2)**0.5*31.9;
+
+                        let dis=((q.r.x-t)**2+(q.r.y-z)**2)**0.5, rdis=((q.x-t)**2+(q.y-z)**2)**0.5, fac = Math.min(1,Math.max(0,(rdis-dis)/200)),speed = ((1-fac)*dis+fac*rdis),sum=0;
+                        q.ospeed = q.ospeed ? q.ospeed : [];
+                        q.ospeed.push(speed);
+
+                        for (let i=1;i<=Math.min(4,q.ospeed.length);i++) {
+                            sum += q.ospeed[q.ospeed.length-i];
+                        }
+                        
+                        q.speed = sum/Math.min(4,q.ospeed.length)*23;
+                        console.log(rdis,dis)
+                        
                         q.r.x = t;
                         q.r.y = z;
                         if (n != 0 && Utils.dist(q, q.r) > CLIENT.LAG_DISTANCE) {

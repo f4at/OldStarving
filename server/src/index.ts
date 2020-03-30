@@ -80,7 +80,7 @@ const app = express();
 const server = https.createServer({
     key: fs.readFileSync("data/ssl/key.pem"),
     cert: fs.readFileSync("data/ssl/cert.pem")
-}, app).listen(8080, () => {
+},app).listen(8080, () => {
     console.log("Listening on port 8080");
 });
 
@@ -100,8 +100,10 @@ wss.on("connection", (ws) => {
                     player = world.players.find(e => e.session == data[2] && e.sessionId == data[3]);
                     if (!player) {
                         player = new Player(data[0], data[1], data[2], data[3], ws);
+                        console.log(player.pid,'new');
                     } else {
                         player.join(ws);
+                        console.log(player.pid,'old');
                     }
 
                 } else {

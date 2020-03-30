@@ -114,7 +114,7 @@ export default class Player {
 
     set bag(bag) {
         if (bag != this.bag) {
-            this.inventory.updateSize(bag ? 10 : 8);
+            this.inventory.updateSize(bag ? 11 : 8);
             this._bag = bag;
         }
     }
@@ -137,6 +137,7 @@ export default class Player {
     updating: boolean;
     updateLoop: NodeJS.Timeout;
     attackLoop: NodeJS.Timeout;
+    displayLoop: NodeJS.Timeout;
     craftTimeout: NodeJS.Timeout;
     movVector: Vector = { "x": 0, "y": 0 };
 
@@ -166,6 +167,7 @@ export default class Player {
             return;
         }
         let found = false, counter = 0;
+        /*
         while (counter < 64 && !found) {
             this.pos = { "x": 1 + Math.random() * 5000, "y": 1 + Math.random() * 5000 }; //spawn in forest biome
             this.chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
@@ -181,15 +183,18 @@ export default class Player {
             ws.close();
             return;
         }
+        */
+        this.pos = {x:5000,y:5000};
+        this.chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
 
         this.bag = true;
         this.inventory.add(Items.STONE_WALL, 10);
-        this.inventory.add(Items.BANDAGE, 10);
-        this.inventory.add(Items.WOOD, 100);
-        this.inventory.add(Items.STONE_SWORD, 100);
-        this.inventory.add(Items.STONE_DOOR, 100);
+        this.inventory.add(Items.PICK_WOOD, 100);
         this.inventory.add(Items.PICK_STONE, 100);
+        this.inventory.add(Items.PICK_AMETHYST, 100);
         this.inventory.add(Items.SWORD_GOLD, 100);
+        this.inventory.add(Items.STONE_SPEAR, 100);
+        this.inventory.add(Items.AMETHYST_SPEAR, 100);
 
         world.players.push(this);
         world.chunks[this.chunk.x][this.chunk.y].push(this);
@@ -234,15 +239,15 @@ export default class Player {
             }
         }, 1000 / world.tickRate);
         this.attackLoop = null;
-        setInterval(() => {
+        this.displayLoop = setInterval(() => {
             this.changeDisplayNick();
         }, 150);
 
     }
 
     getEntitiesInRange(x: number, y: number, player: boolean = true, entity: boolean = true) {
-        let ymin = Math.max(-x + this.chunk.y, 0), ymax = Math.min(x + 1 + this.chunk.y, world.mapSize.y),
-            xmin = Math.max(-y + this.chunk.x, 0), xmax = Math.min(y + 1 + this.chunk.x, world.mapSize.x);
+        let ymin = Math.max(-y + this.chunk.y, 0), ymax = Math.min(y + 1 + this.chunk.y, world.mapSize.y),
+            xmin = Math.max(-x + this.chunk.x, 0), xmax = Math.min(x + 1 + this.chunk.x, world.mapSize.x);
         let list = [];
         for (let x = xmin; x < xmax; x++) {
             for (let y = ymin; y < ymax; y++) {
@@ -259,24 +264,38 @@ export default class Player {
         return list;
     }
 
+    getMapEntitiesInRange(x:number,y:number) {
+        let ymin = Math.max(-y + Math.floor(this.pos.y/100), 0), ymax = Math.min(y + 1 + Math.floor(this.pos.y/100), world.map.height),
+            xmin = Math.max(-x + Math.floor(this.pos.x/100), 0), xmax = Math.min(x + 1 + Math.floor(this.pos.x/100), world.map.width);
+        let list = [];
+        for (let x = xmin; x < xmax; x++) {
+            for (let y = ymin; y < ymax; y++) {
+                list = list.concat(world.map.chunks[y][x]);
+            }
+        }
+        return list;
+    }
+
     collision() {
         //collision version 1(not real collision just simulation to save time and ressources will make real one later)
         // VERY HARD
-        let entities = this.getEntitiesInRange(1, 1, false);
-        let dis, vec, angle, collide, counter = 0;
+        let entities = this.getEntitiesInRange(1, 1, false, true);
+        let mapEntities = this.getMapEntitiesInRange(3,3);
+        let dis, vec, angle, angle2, collide, counter = 0;
         while (true) {
             collide = false;
             counter += 1;
-            for (let entity of entities.filter(e=> e.physical)) {
+            for (let entity of entities.filter(e=> e.physical).concat(mapEntities)) {
                 vec = { x: this.pos.x - entity.pos.x, y: this.pos.y - entity.pos.y };
                 if (entity.numberOfSides === 0) {
                     dis = entity.radius + this.radius - Utils.distance(vec);
                 } else {
                     angle = Utils.toRadians(Utils.coordsToAngle(vec) - entity.angle - entity.eangle);
-                    dis = Utils.distance({ x: Math.cos(Math.PI / entity.numberOfSides), y: Math.sin(angle % (Math.PI / entity.numberOfSides)) }) * entity.radius + this.radius - Utils.distance(vec);
+                    angle2 = Math.PI/entity.numberOfSides;
+                    dis = Utils.distance({ x: Math.cos(angle2), y: Math.sin(angle2-Math.abs(angle2-angle%(2*angle2))) }) * entity.radius + this.radius - Utils.distance(vec);
                 }
                 if (dis > 1e-4) {
-                    vec = Utils.angleToCoords(entity.numberOfSides === 0 ? Utils.coordsToAngle(vec) : Utils.toBinary(Math.round(angle * entity.numberOfSides / 2 / Math.PI) * 2 * Math.PI / entity.numberOfSides) + entity.angle + entity.eangle);
+                    vec = Utils.angleToCoords(entity.numberOfSides === 0 ? Utils.coordsToAngle(vec) : Utils.toBinary(Math.round(angle/(2*angle2))*2*angle2) + entity.angle + entity.eangle);
                     this.pos.x += vec.x * dis;
                     this.pos.y += vec.y * dis;
                     collide = true;
@@ -289,7 +308,7 @@ export default class Player {
 
     join(ws) {
         this.ws = ws;
-        this.ws.send(JSON.stringify([3, this.pid, 1024, world.leaderboard, this.pos.x, this.pos.y, 256, world.mode, world.isDay ? 0 : 1, this.sessionId]));
+        this.ws.send(JSON.stringify([3, this.pid, 1024, world.leaderboard, this.pos.x, this.pos.y, 256, world.mode, world.isDay ? 0 : 1, this.sessionId, world.map.raw]));
         this.online = true;
         this.getInfos();
         this.sendInfos();
@@ -356,17 +375,10 @@ export default class Player {
         this.action |= EntityState.Attack;
         let agCoords = Utils.angleToCoords(this.angle);
         let center = { "x": agCoords.x * (this.tool.range + this.tool.range2) + this.pos.x, "y": agCoords.y * (this.tool.range + this.tool.range2) + this.pos.y };
-        let ymin = Math.max(-1 + this.chunk.y, 0), ymax = Math.min(2 + this.chunk.y, world.mapSize.y),
-            xmin = Math.max(-1 + this.chunk.x, 0), xmax = Math.min(2 + this.chunk.x, world.mapSize.x);
-        for (let x = xmin; x < xmax; x++) {
-            for (let y = ymin; y < ymax; y++) {
-                let players = world.chunks[x][y].filter(e => Utils.distance({ x: center.x - e.pos.x, y: center.y - e.pos.y }) < this.tool.range + e.radius);
-                for (let player of players) { if (player != this) { player.damage(this.tool.damage.pvp, this); } };
-                for (let i = 0; i < 128; i++) {
-                    let entities = world.echunks[x][y][i].filter(e => Utils.distance({ x: center.x - e.pos.x, y: center.y - e.pos.y }) < this.tool.range + e.radius);
-                    for (let entity of entities) { entity.damage(this.tool.damage.pve, this); };
-                }
-            }
+
+        let entities = this.getEntitiesInRange(1,1,true,true).concat(this.getMapEntitiesInRange(4,4)).filter(e => Utils.distance({ x: center.x - e.pos.x, y: center.y - e.pos.y }) < this.tool.range + e.radius && e !== this);
+        for (let entity of entities) {
+            entity.damage(entity.type === EntityType.PLAYER ? this.tool.damage.pvp : this.tool.damage.pve ,this);
         }
     }
 
@@ -392,14 +404,13 @@ export default class Player {
     }
 
     die() {
-        //send death packet Eidt: no need lol client disconnect when player gets "dissapear" state, and thats not good.
         clearInterval(this.updateLoop);
         clearInterval(this.attackLoop);
-        world.players = world.players.filter(e => e == this);
-        world.chunks[this.chunk.x][this.chunk.y] = world.chunks[this.chunk.x][this.chunk.y].filter(e => e == this);
+        clearInterval(this.updateLoop);
+        world.players = world.players.filter(e => e !== this);
+        world.chunks[this.chunk.x][this.chunk.y] = world.chunks[this.chunk.x][this.chunk.y].filter(e => e !== this);
         this.send(new Uint8Array([2]));
         this.sendInfos(false);
-
         this.ws.close();
     }
 
@@ -568,7 +579,7 @@ export default class Player {
         this.send(new Uint8Array([14].concat(...this.inventory.items.filter(e => e.amount).map(e => [e.item.id, e.amount]))));
     }
 
-    gather(id: number, amount: number = 1) {
-
+    gather(item: Item, amount: number = 1) {
+        this.send(new Uint8Array([14,item.id,amount]));
     }
 }

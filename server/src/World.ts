@@ -1,58 +1,60 @@
 import Player from "./Player";
 import Entity from "./Entity";
-import {EntityType} from "./Item";
+import { EntityType, ItemStack, Items, EntityItem } from './Item';
 import { Vector } from ".";
 import * as fs from "fs";
 
-export class MapEntityType {
+export class MapEntityDrop extends ItemStack {
+    delay: number = 3600;
+    respawn?: number = 1;
+    minimum?: number = 0;
+    maximum?: number = 0;
+}
+
+export class MapEntityType extends EntityItem {
     id: number;
     type = EntityType.HARVESTABLE;
     mType: string;
     physical: boolean;
-    numberofsides: number;
-    raduis: number;
-    XtoYfactor: number;
     sizes: number[];
     eangle: number;
-    inv: any;
+    drop: MapEntityDrop;
     miningTier: number;
-    constructor(id:number, type: string, physical: boolean=false, numberofsides:number=0, radius: number = 0, XtoYfactor: number=1, sizes:number[] = [1] ,angle=0,inv:any = {id:null,amount:0,maximum:0,delay:3600,respawn:1},miningTier:number=-1) {
-        this.id = id;
+
+    constructor(id: number, type: string, physical: boolean = false, numberOfSides: number = 0, radius: number = 0, XtoYfactor: number = 1, sizes: number[] = [1], angle = 0, drop: MapEntityDrop = new MapEntityDrop(undefined), miningTier: number = -1) {
+        super(id, -1, numberOfSides, radius, XtoYfactor, -1, EntityType.HARVESTABLE, null);
         this.mType = type;
         this.physical = physical;
-        this.numberofsides = numberofsides;
-        this.raduis = radius;
-        this.XtoYfactor = XtoYfactor;
         this.sizes = sizes;
         this.eangle = angle;
-        this.inv = inv;
+        this.drop = drop;
         this.miningTier = miningTier;
     }
 }
 
 export class MapEntityTypes {
-    static HERB = new MapEntityType(null,"h",false);
+    static HERB = new MapEntityType(null, "h", false);
 
-    static PLANT = new MapEntityType(0,"p",true,0,50,1,[1],0,{id:4,amount:4,max:4,delay:10,respawn:1},-1);
-    static STONES = new MapEntityType(1,"s",true,7,40,1,[1,1.5,1.82],21,{id:2,amount:20,max:20,delay:4,respawn:1},1);
-    static TREE = new MapEntityType(4,"t",true,4,80,1.1,[1.5,1.5,1.25,1.25,1,1],0,{id:3,amount:30,max:30,delay:3,respawn:1},0);
-    static GOLD = new MapEntityType(10,"g",true,7,40,1,[1,1,1],0,{id:5,amount:20,max:20,delay:5,respawn:1},2);
-    static DIAMOND = new MapEntityType(13,"d",true,3,40,1,[1,1,1],0,{id:6,amount:15,max:15,delay:6,respawn:1},3);
-    static TREE_BRANCH = new MapEntityType(16,"b",true,4,80,1.1,[1.5,1.5,1.25,1.25],27,{id:3,amount:40,max:40,delay:3,respawn:1},0);
-    static FIR = new MapEntityType(20,"f",true,7,80,1,[1,1,1],0,{id:3,amount:30,max:30,delay:3,respawn:1},0);
-    static STONES_WINTER = new MapEntityType(23,"sw",true,7,40,1,[1,1.5,1.82],0,{id:2,amount:20,max:20,delay:4,respawn:1},1);
-    static GOLD_WINTER = new MapEntityType(26,"gw",true,7,40,1,[1,1,1],0,{id:5,amount:20,max:20,delay:5,respawn:1},2);
-    static DIAMOND_WINTER = new MapEntityType(29,"dw",true,3,40,1,[1,1,1],0,{id:6,amount:15,max:15,delay:6,respawn:1},3);
-    static AMETHYST = new MapEntityType(32,"a",true,0,30,1,[1,1,1],0,{id:3,amount:10,max:10,delay:7,respawn:1},4);
+    static PLANT = new MapEntityType(0, "p", true, 0, 50, 1, [1], 0, { item: Items.PLANT, amount: 4, maximum: 4, delay: 10, respawn: 1 }, -1);
+    static STONES = new MapEntityType(1, "s", true, 7, 40, 1, [1, 1.5, 1.82], 21, { item: Items.STONE, amount: 20, maximum: 20, delay: 4, respawn: 1 }, 1);
+    static TREE = new MapEntityType(4, "t", true, 4, 80, 1.1, [1.5, 1.5, 1.25, 1.25, 1, 1], 0, { item: Items.WOOD, amount: 30, maximum: 30, delay: 3, respawn: 1 }, 0);
+    static GOLD = new MapEntityType(10, "g", true, 7, 40, 1, [1, 1, 1], 0, { item: Items.GOLD, amount: 20, maximum: 20, delay: 5, respawn: 1 }, 2);
+    static DIAMOND = new MapEntityType(13, "d", true, 3, 40, 1, [1, 1, 1], 0, { item: Items.DIAMOND, amount: 15, maximum: 15, delay: 6, respawn: 1 }, 3);
+    static TREE_BRANCH = new MapEntityType(16, "b", true, 4, 80, 1.1, [1.5, 1.5, 1.25, 1.25], 27, { item: Items.WOOD, amount: 40, maximum: 40, delay: 3, respawn: 1 }, 0);
+    static FIR = new MapEntityType(20, "f", true, 7, 80, 1, [1, 1, 1], 0, { item: Items.WOOD, amount: 30, maximum: 30, delay: 3, respawn: 1 }, 0);
+    static STONES_WINTER = new MapEntityType(23, "sw", true, 7, 40, 1, [1, 1.5, 1.82], 0, { item: Items.STONE, amount: 20, maximum: 20, delay: 4, respawn: 1 }, 1);
+    static GOLD_WINTER = new MapEntityType(26, "gw", true, 7, 40, 1, [1, 1, 1], 0, { item: Items.GOLD, amount: 20, maximum: 20, delay: 5, respawn: 1 }, 2);
+    static DIAMOND_WINTER = new MapEntityType(29, "dw", true, 3, 40, 1, [1, 1, 1], 0, { item: Items.DIAMOND, amount: 15, maximum: 15, delay: 6, respawn: 1 }, 3);
+    static AMETHYST = new MapEntityType(32, "a", true, 0, 30, 1, [1, 1, 1], 0, { item: Items.AMETHYST, amount: 10, maximum: 10, delay: 7, respawn: 1 }, 4);
 
-    static DRAGON_GROUND = new MapEntityType(null,"dg",false,4,72,1,[1,],0);
-    static SNOW = new MapEntityType(null,"so",false,4,72,1,[1,],0);
-    static HERB_WINTER = new MapEntityType(null,"hw",false);
+    static DRAGON_GROUND = new MapEntityType(null, "dg", false, 4, 72, 1, [1,], 0);
+    static SNOW = new MapEntityType(null, "so", false, 4, 72, 1, [1,], 0);
+    static HERB_WINTER = new MapEntityType(null, "hw", false);
 
     static TYPES: Map<string, MapEntityType> = new Map();
 
-    static get(key): MapEntityType {
-        return Array.from(this.TYPES.values()).filter(e=> e instanceof MapEntityType).find(item => item.mType === key);
+    static get(key: string): MapEntityType {
+        return Array.from(this.TYPES.values()).filter(e => e instanceof MapEntityType).find(item => item.mType === key);
     }
 }
 
@@ -61,12 +63,29 @@ for (let name in MapEntityTypes) {
 }
 
 
-export class MapEntity {
-    type: MapEntityType;
-    position: Vector;
-    constructor(type: MapEntityType, position:Vector) {
-        this.type = type;
-        this.position = position;
+export class MapEntity extends Entity {
+    constructor(type: MapEntityType, position: Vector, size: number = 0) {
+        super(position, 0, null, null);
+        this.type = type.type;
+        this.entityType = type;
+        this.id = type.id + size;
+        this.eangle = type.eangle;
+
+        this.inv = Object.assign({}, type.drop);
+        this.inv.maximum = Math.floor(this.inv.maximum * type.sizes[size] ** 2);
+        this.pos = position;
+        this.angle = 0;
+        this.chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
+
+        this.numberOfSides = type.numberOfSides;
+        this.radius = type.radius * type.sizes[size];
+        this.XtoYfac = type.XtoYfactor;
+        this.stime = new Date().getTime();
+        this.miningTier = type.miningTier;
+        this.physical = type.physical;
+
+        this.type = EntityType.HARVESTABLE;
+        this.init();
     }
 }
 
@@ -74,8 +93,7 @@ export class GameMap {
     raw: string;
     height: number;
     width: number;
-    chunks: any[][][] = [];
-    mapEntities: MapEntity[] = [];
+    chunks: MapEntity[][][] = [];
 
     loadFromFile(file: fs.PathLike) {
         const map = JSON.parse(fs.readFileSync(file).toString());
@@ -83,21 +101,21 @@ export class GameMap {
         this.width = map.w;
         let mapEntitiesCounter = 0;
 
-        this.chunks = new Array(Math.floor(this.height/100));
+        this.chunks = new Array(Math.floor(this.height / 100));
         let y = 0;
         for (const column of map.tiles) {
-            this.chunks[y] = new Array(Math.floor(this.width/100));
+            this.chunks[y] = new Array(Math.floor(this.width / 100));
             let x = 0;
             for (const row of column) {
                 this.chunks[y][x] = [];
-                for (const type in row) {
+                for (const typeName in row) {
                     let s = 0;
-                    for (const mapEntity of row[type]) {
+                    for (const mapEntity of row[typeName]) {
                         if (mapEntity.length) {
                             mapEntitiesCounter++;
-                            let mEntity = MapEntityTypes.get(type);
-                            if (mEntity.physical === true) {
-                                this.chunks[y][x].push(new Entity({x:mapEntity[0].x,y:mapEntity[0].y},0,null,mEntity,s));
+                            let type = MapEntityTypes.get(typeName);
+                            if (type.physical === true) {
+                                this.chunks[y][x].push(new MapEntity(type, { x: mapEntity[0].x, y: mapEntity[0].y }, s));
                             }
                         }
                         s++;
@@ -121,7 +139,7 @@ export class World {
     players: Array<Player> = new Array();
     entities: Entity[][] = new Array(128);
     mapSize: Vector = { x: 30, y: 10 };
-    chunks: Player[][][] = new Array(this.mapSize.x);
+    chunks: Entity[][][] = new Array(this.mapSize.x);
     echunks: Entity[][][][] = new Array(this.mapSize.x);
     tickRate: number = 24;
     stime: number = new Date().getTime();

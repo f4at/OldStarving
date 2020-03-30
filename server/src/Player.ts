@@ -2,20 +2,8 @@ import * as WebSocket from "ws";
 import Item, { Clothes, Tool, Items, DamageType, Usable, Recipe, ItemStack, EntityType, Pickaxe, EntityItem } from './Item';
 import { Vector, Utils } from '.';
 import world from "./World";
-import Entity from "./Entity";
-
-export enum EntityState {
-    None = 0,
-    Delete = 1,
-    Hurt = 2,
-    Cold = 4,
-    Hunger = 8,
-    Attack = 16,
-    Walk = 32,
-    Idle = 64,
-    Heal = 128,
-    Web = 132
-}
+import Entity, { Collider, EntityState } from "./Entity";
+import { MapEntity } from './World';
 
 // TODO Move to Entity.ts
 export abstract class Inventory {
@@ -81,7 +69,7 @@ export class PlayerInventory extends Inventory {
     }
 }
 
-export default class Player {
+export default class Player extends Entity {
     session: string;
     sessionId: string;
     ws: WebSocket;
@@ -100,7 +88,7 @@ export default class Player {
     displayName: string;
     pos: Vector;
     angle: number;
-    action: number = EntityState.None;
+    action: EntityState = EntityState.None;
     chunk: Vector;
     speed: number = 200;
     tool: Tool = Items.HAND;
@@ -129,6 +117,8 @@ export default class Player {
     radius: number = 24;
     XtoYFac: number = 1;
     numberOfSides: number = 0;
+    physical: boolean = true;
+    eangle: number = 0;
 
     //UPDATING
     moving: boolean;
@@ -150,7 +140,8 @@ export default class Player {
     regenMin: number = 2;
 
     constructor(nick: string, version: number, session: string, sessionId: string, ws: WebSocket) {
-        this.sessionId = Utils.randomID(16);
+        super(null, null, null, null);
+        this.sessionId = Utils.randomString(16);
         this.nick = nick;
         this.displayName = nick;
         this.session = session;
@@ -184,7 +175,7 @@ export default class Player {
             return;
         }
         */
-        this.pos = {x:5000,y:5000};
+        this.pos = { x: 5000, y: 5000 };
         this.chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
 
         this.bag = true;
@@ -245,7 +236,7 @@ export default class Player {
 
     }
 
-    getEntitiesInRange(x: number, y: number, player: boolean = true, entity: boolean = true) {
+    getEntitiesInRange(x: number, y: number, player: boolean = true, entity: boolean = true): Entity[] {
         let ymin = Math.max(-y + this.chunk.y, 0), ymax = Math.min(y + 1 + this.chunk.y, world.mapSize.y),
             xmin = Math.max(-x + this.chunk.x, 0), xmax = Math.min(x + 1 + this.chunk.x, world.mapSize.x);
         let list = [];
@@ -264,9 +255,13 @@ export default class Player {
         return list;
     }
 
-    getMapEntitiesInRange(x:number,y:number) {
-        let ymin = Math.max(-y + Math.floor(this.pos.y/100), 0), ymax = Math.min(y + 1 + Math.floor(this.pos.y/100), world.map.height),
-            xmin = Math.max(-x + Math.floor(this.pos.x/100), 0), xmax = Math.min(x + 1 + Math.floor(this.pos.x/100), world.map.width);
+    getPlayersInRange(x: number, y: number): Player[] {
+        return this.getEntitiesInRange(x, y).filter(x => x instanceof Player) as Player[];
+    }
+
+    getMapEntitiesInRange(x: number, y: number): MapEntity[] {
+        let ymin = Math.max(-y + Math.floor(this.pos.y / 100), 0), ymax = Math.min(y + 1 + Math.floor(this.pos.y / 100), world.map.height),
+            xmin = Math.max(-x + Math.floor(this.pos.x / 100), 0), xmax = Math.min(x + 1 + Math.floor(this.pos.x / 100), world.map.width);
         let list = [];
         for (let x = xmin; x < xmax; x++) {
             for (let y = ymin; y < ymax; y++) {
@@ -279,23 +274,24 @@ export default class Player {
     collision() {
         //collision version 1(not real collision just simulation to save time and ressources will make real one later)
         // VERY HARD
-        let entities = this.getEntitiesInRange(1, 1, false, true);
-        let mapEntities = this.getMapEntitiesInRange(3,3);
-        let dis, vec, angle, angle2, collide, counter = 0;
+        // let entities = this.getEntitiesInRange(1, 1, false, true);
+        // let mapEntities = this.getMapEntitiesInRange(3, 3);
+        let colliders: Collider[] = (this.getMapEntitiesInRange(3, 3) as Collider[]).concat(this.getEntitiesInRange(1, 1, false, true));
+        let dis: number, vec: Vector, angle: number, angle2: number, collide: boolean, counter = 0;
         while (true) {
             collide = false;
             counter += 1;
-            for (let entity of entities.filter(e=> e.physical).concat(mapEntities)) {
-                vec = { x: this.pos.x - entity.pos.x, y: this.pos.y - entity.pos.y };
-                if (entity.numberOfSides === 0) {
-                    dis = entity.radius + this.radius - Utils.distance(vec);
+            for (let collider of colliders.filter(e => e.physical)) {
+                vec = { x: this.pos.x - collider.pos.x, y: this.pos.y - collider.pos.y };
+                if (collider.numberOfSides === 0) {
+                    dis = collider.radius + this.radius - Utils.distance(vec);
                 } else {
-                    angle = Utils.toRadians(Utils.coordsToAngle(vec) - entity.angle - entity.eangle);
-                    angle2 = Math.PI/entity.numberOfSides;
-                    dis = Utils.distance({ x: Math.cos(angle2), y: Math.sin(angle2-Math.abs(angle2-angle%(2*angle2))) }) * entity.radius + this.radius - Utils.distance(vec);
+                    angle = Utils.toRadians(Utils.coordsToAngle(vec) - collider.angle - collider.eangle);
+                    angle2 = Math.PI / collider.numberOfSides;
+                    dis = Utils.distance({ x: Math.cos(angle2), y: Math.sin(angle2 - Math.abs(angle2 - angle % (2 * angle2))) }) * collider.radius + this.radius - Utils.distance(vec);
                 }
                 if (dis > 1e-4) {
-                    vec = Utils.angleToCoords(entity.numberOfSides === 0 ? Utils.coordsToAngle(vec) : Utils.toBinary(Math.round(angle/(2*angle2))*2*angle2) + entity.angle + entity.eangle);
+                    vec = Utils.angleToCoords(collider.numberOfSides === 0 ? Utils.coordsToAngle(vec) : Utils.toBinary(Math.round(angle / (2 * angle2)) * 2 * angle2) + collider.angle + collider.eangle);
                     this.pos.x += vec.x * dis;
                     this.pos.y += vec.y * dis;
                     collide = true;
@@ -332,9 +328,9 @@ export default class Player {
 
     getInfos(visible: boolean = true, to: any[] = null) {
         if (to === null) {
-            to = this.getEntitiesInRange(2,2);
+            to = this.getEntitiesInRange(2, 2);
         }
-        this.send(new Uint8Array([0,0].concat(...to.filter(e=>e.type != EntityType.HARVESTABLE).map(e=> e.infoPacket(visible,false).slice(2)))));
+        this.send(new Uint8Array([0, 0].concat(...to.filter(e => e.type != EntityType.HARVESTABLE).map(e => e.infoPacket(visible, false).slice(2)))));
     }
 
     move(dir: number) {
@@ -376,9 +372,9 @@ export default class Player {
         let agCoords = Utils.angleToCoords(this.angle);
         let center = { "x": agCoords.x * (this.tool.range + this.tool.range2) + this.pos.x, "y": agCoords.y * (this.tool.range + this.tool.range2) + this.pos.y };
 
-        let entities = this.getEntitiesInRange(1,1,true,true).concat(this.getMapEntitiesInRange(4,4)).filter(e => Utils.distance({ x: center.x - e.pos.x, y: center.y - e.pos.y }) < this.tool.range + e.radius && e !== this);
+        let entities = (this.getEntitiesInRange(1, 1, true, true) as any[]).concat(this.getMapEntitiesInRange(4, 4)).filter(e => Utils.distance({ x: center.x - e.pos.x, y: center.y - e.pos.y }) < this.tool.range + e.radius && e !== this);
         for (let entity of entities) {
-            entity.damage(entity.type === EntityType.PLAYER ? this.tool.damage.pvp : this.tool.damage.pve ,this);
+            entity.damage(entity.type === EntityType.PLAYER ? this.tool.damage.pvp : this.tool.damage.pve, this);
         }
     }
 
@@ -407,6 +403,7 @@ export default class Player {
         clearInterval(this.updateLoop);
         clearInterval(this.attackLoop);
         clearInterval(this.updateLoop);
+        clearInterval(this.displayLoop);
         world.players = world.players.filter(e => e !== this);
         world.chunks[this.chunk.x][this.chunk.y] = world.chunks[this.chunk.x][this.chunk.y].filter(e => e !== this);
         this.send(new Uint8Array([2]));
@@ -415,18 +412,18 @@ export default class Player {
     }
 
     updateChunk(chunk: Vector) {
-        let list = this.getEntitiesInRange(2,2,true,false).filter(e=> Math.abs(e.chunk.x-chunk.x) > 2 || Math.abs(e.chunk.y-chunk.y) > 2 );
-        let elist = this.getEntitiesInRange(2,2,false,true).filter(e=> Math.abs(e.chunk.x-chunk.x) > 2 || Math.abs(e.chunk.y-chunk.y) > 2 );
+        let list = this.getPlayersInRange(2, 2).filter(e => Math.abs(e.chunk.x - chunk.x) > 2 || Math.abs(e.chunk.y - chunk.y) > 2);
+        let elist = this.getEntitiesInRange(2, 2, false, true).filter(e => Math.abs(e.chunk.x - chunk.x) > 2 || Math.abs(e.chunk.y - chunk.y) > 2);
         this.sendInfos(false, list);
-        this.getInfos(false, list.concat(elist));
-        
+        this.getInfos(false, elist.concat(list));
+
         world.chunks[this.chunk.x][this.chunk.y] = world.chunks[this.chunk.x][this.chunk.y].filter(e => e != this);
         let echunk = this.chunk;
         this.chunk = chunk;
         world.chunks[this.chunk.x][this.chunk.y].push(this);
 
-        list = this.getEntitiesInRange(2,2,true,true).filter(e=> Math.abs(e.chunk.x-chunk.x) > 2 || Math.abs(e.chunk.y-echunk.y) > 2 );
-        this.getInfos(true, list);
+        elist = this.getEntitiesInRange(2, 2, true, true).filter(e => Math.abs(e.chunk.x - chunk.x) > 2 || Math.abs(e.chunk.y - echunk.y) > 2);
+        this.getInfos(true, elist);
     }
 
     sendInfos(visible: boolean = true, to: Player[] = null) {
@@ -440,10 +437,10 @@ export default class Player {
         }
     }
 
-    infoPacket(visible = true,uint8:boolean = true) {
+    infoPacket(visible = true, uint8: boolean = true) {
         let arr;
         if (visible) {
-            let pos = { "x": Utils.toHex(Math.round(this.pos.x*2)), "y": Utils.toHex(Math.round(this.pos.y*2)) };
+            let pos = { "x": Utils.toHex(Math.round(this.pos.x * 2)), "y": Utils.toHex(Math.round(this.pos.y * 2)) };
             let infos = Utils.toHex(this.tool.id + this.clothes.id * 128 + (this.bag ? 1 : 0) * 16384);
             arr = [0, 0, this.pid, this.action, this.sid, this.angle, pos.x[0], pos.x[1], pos.y[0], pos.y[1], 0, 0, infos[0], infos[1]];
         } else {
@@ -457,7 +454,7 @@ export default class Player {
     }
 
     sendToRange(packet) {
-        for (let player of this.getEntitiesInRange(2,2,true,false)) {
+        for (let player of this.getEntitiesInRange(2, 2, true, false)) {
             (player as Player).send(packet);
         }
     }
@@ -580,6 +577,6 @@ export default class Player {
     }
 
     gather(item: Item, amount: number = 1) {
-        this.send(new Uint8Array([14,item.id,amount]));
+        this.send(new Uint8Array([14, item.id, amount]));
     }
 }

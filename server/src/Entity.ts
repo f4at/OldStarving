@@ -1,12 +1,34 @@
 import { EntityType, EntityItem, Pickaxe, Items } from "./Item";
 import { Vector, Utils } from ".";
-import Player, { EntityState } from "./Player";
-import  world, { MapEntityType } from "./World";
+import Player from "./Player";
+import world, { MapEntityDrop } from "./World";
 import Item from './Item';
 
-export default class Entity {
+export interface Collider {
+    physical: boolean;
+    numberOfSides: number;
+    angle: number;
+    eangle: number;
+    radius: number;
+    pos: Vector;
+}
+
+export enum EntityState {
+    None = 0,
+    Delete = 1,
+    Hurt = 2,
+    Cold = 4,
+    Hunger = 8,
+    Attack = 16,
+    Walk = 32,
+    Idle = 64,
+    Heal = 128,
+    Web = 132
+}
+
+export default class Entity implements Collider {
     type: EntityType;
-    entityType: EntityItem | MapEntityType;
+    entityType: EntityItem;
     owner: Player;
     id: number;
     item: Item;
@@ -24,7 +46,7 @@ export default class Entity {
     chunk: Vector;
     speed: number;
     counter: number;
-    inv: any;
+    inv: MapEntityDrop;
     hitDamage: number;
     score: number; //score given when player destroy it
     regen: number = 0;
@@ -49,13 +71,13 @@ export default class Entity {
     lifeUpdate: number;
     lifeLoop: any;
 
-    constructor(pos: Vector, angle: number, owner: Player, entityItem: EntityItem | MapEntityType, size:number=0) {
-        if (entityItem instanceof EntityItem) {
+    constructor(pos: Vector, angle: number, owner: Player, entityItem: EntityItem) {
+        if (entityItem !== null) {
             this.type = entityItem.type; //enitity type
             this.entityType = entityItem; //entity id
             this.item = Items.get(entityItem.id); //item id
             this.owner = owner;
-            for (let i = 1; i < 256**2; i++) {
+            for (let i = 1; i < 256 ** 2; i++) {
                 if (!world.entities[this.owner.pid].find(e => e.id == i)) {
                     this.id = i;
                     break;
@@ -95,7 +117,7 @@ export default class Entity {
             this.mapId = special.mapid;
             this.stime = new Date().getTime();
 
-            if (this.getEntitiesInRange(1, 1, false, true).concat(this.getMapEntitiesInRange(5,5)).find(e => Utils.distance({ x: pos.x - e.pos.x, y: pos.y - e.pos.y }) < this.radius + e.radius)) {
+            if (this.getEntitiesInRange(1, 1, false, true).concat(this.getMapEntitiesInRange(5, 5)).find(e => Utils.distance({ x: pos.x - e.pos.x, y: pos.y - e.pos.y }) < this.radius + e.radius)) {
                 this.error = "Can't place entity in top of other Entities";
                 return;
             }
@@ -103,25 +125,10 @@ export default class Entity {
             world.entities[this.owner.pid].push(this);
             world.echunks[this.chunk.x][this.chunk.y][this.owner.pid].push(this);
             this.sendInfos();
-        } else {
-            this.type = entityItem.type;
-            this.entityType = entityItem;
-            this.id = entityItem.id+size;
-            this.eangle = entityItem.eangle;
-            this.owner = owner;
+        }
+    }
 
-            this.inv = entityItem.inv;
-            this.inv.max = Math.floor(this.inv.max*entityItem.sizes[size]**2 );
-            this.pos = pos;
-            this.angle = angle;
-            this.chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
-            
-            this.numberOfSides = entityItem.numberofsides;
-            this.radius = entityItem.raduis*entityItem.sizes[size];
-            this.XtoYfac = entityItem.XtoYfactor;
-            this.stime = new Date().getTime();
-            this.miningTier = entityItem.miningTier;
-        }  
+    init() {
         if (this.lifespan) {
             if (this.type == EntityType.MOB) {
                 this.lifeLoop = setInterval(() => {
@@ -137,11 +144,12 @@ export default class Entity {
                 }, this.lifeUpdate);
             }
         }
+
         switch (this.type) {
             case EntityType.HARVESTABLE:
                 this.updateLoop = setInterval(() => {
-                    this.inv.amount = Math.min(this.inv.max, this.inv.amount + this.inv.respawn);
-                }, this.inv.delay);
+                    this.inv.amount = Math.min(this.inv.maximum, this.inv.amount + this.inv.respawn);
+                }, this.inv.delay * 1000);
                 break;
             case EntityType.MOB:
                 this.updateLoop = setInterval(() => {
@@ -176,28 +184,27 @@ export default class Entity {
                     if (this.action) { this.sendInfos(); };
                 }, 200);
                 break;
-
         }
     }
 
     damage(dmg: number, attacker: Player = null) { // use negative values to increase hp
-        if (this.entityType instanceof MapEntityType) {
-            if (this.miningTier<0) {
+        if (this.type == EntityType.HARVESTABLE) {
+            if (this.miningTier < 0) {
                 let amount = Math.min(this.inv.amount, 1);
-                let item = Items.get(this.inv.id);
+                let item = this.inv.item;
                 attacker.inventory.add(item, amount);
-                attacker.gather(item,amount);
+                attacker.gather(item, amount);
                 this.inv.amount -= amount;
-            } else if (attacker.tool instanceof Pickaxe && this.miningTier <= attacker.tool.miningTier) {     
-                let amount = Math.min(this.inv.amount, attacker.tool.miningTier-this.miningTier+1);
-                let item = Items.get(this.inv.id);
+            } else if (attacker.tool instanceof Pickaxe && this.miningTier <= attacker.tool.miningTier) {
+                let amount = Math.min(this.inv.amount, attacker.tool.miningTier - this.miningTier + 1);
+                let item = this.inv.item;
                 attacker.inventory.add(item, amount);
-                attacker.gather(item,amount);
+                attacker.gather(item, amount);
                 this.inv.amount -= amount;
             }
-            
-            let angle = Math.round(Utils.coordsToAngle({ x: this.pos.x-attacker.pos.x, y: this.pos.y-attacker.pos.y }))%256;
-            this.sendToRange(new Uint16Array([9, Math.floor(this.pos.x / 100),Math.floor(this.pos.y / 100), angle, this.id]));
+
+            let angle = Math.round(Utils.coordsToAngle({ x: this.pos.x - attacker.pos.x, y: this.pos.y - attacker.pos.y })) % 256;
+            this.sendToRange(new Uint16Array([9, Math.floor(this.pos.x / 100), Math.floor(this.pos.y / 100), angle, this.id]));
         } else {
             if (this.maxHealth > 0) {
                 let fac = 1;
@@ -219,23 +226,23 @@ export default class Entity {
                     case EntityType.SPIKE:
                         if (this.hitDamage) { attacker.damage(this.hitDamage); };
                         break;
-    
+
                 }
                 let angle;
-            switch (this.type) {
-                case EntityType.DOOR:
-                    this.info = this.info ? 0 : 1;
-                    this.physical = !this.physical;
-                    this.sendInfos();
-                default:
-                    let id = Utils.toHex(this.id);
-                    angle = Math.round(Utils.coordsToAngle({ x: this.pos.x-attacker.pos.x, y: this.pos.y-attacker.pos.y}));
-                    this.sendToRange(new Uint8Array([22, 0, id[0], id[1], this.owner.pid, angle]));
-                    break;
+                switch (this.type) {
+                    case EntityType.DOOR:
+                        this.info = this.info ? 0 : 1;
+                        this.physical = !this.physical;
+                        this.sendInfos();
+                    default:
+                        let id = Utils.toHex(this.id);
+                        angle = Math.round(Utils.coordsToAngle({ x: this.pos.x - attacker.pos.x, y: this.pos.y - attacker.pos.y }));
+                        this.sendToRange(new Uint8Array([22, 0, id[0], id[1], this.owner.pid, angle]));
+                        break;
                 }
             }
         }
-        
+
     }
 
     moveAI() {
@@ -253,7 +260,7 @@ export default class Entity {
                 attacker.score += 10 + this.score;
                 if (this.inv) { //give what in inv.
                     if (this.inv.amount) {
-                        attacker.inventory.add(this.inv.id, this.inv.amount);
+                        attacker.inventory.add(this.inv.item, this.inv.amount);
                     }
                 }
             }
@@ -273,12 +280,12 @@ export default class Entity {
         }
     }
 
-    infoPacket(visible = true,uint8:boolean = true) {
+    infoPacket(visible = true, uint8: boolean = true) {
         if (this.entityType instanceof EntityItem) {
-            const ownerId =  this.owner === null ? 0 : this.owner.pid;
+            const ownerId = this.owner === null ? 0 : this.owner.pid;
             let arr;
             if (visible) {
-                let pos = { "x": Utils.toHex(this.pos.x*2), "y": Utils.toHex(this.pos.y*2) };
+                let pos = { "x": Utils.toHex(this.pos.x * 2), "y": Utils.toHex(this.pos.y * 2) };
                 let id = Utils.toHex(this.id);
                 let info = Utils.toHex(this.info);
                 arr = [0, 0, ownerId, this.action, this.entityType.sid, this.angle, pos.x[0], pos.x[1], pos.y[0], pos.y[1], id[0], id[1], info[0], info[1]];
@@ -294,8 +301,8 @@ export default class Entity {
     }
 
     sendToRange(packet) {
-        let players = this.getEntitiesInRange(2,2,true,false);
-        for (let player of players) {player.send(packet)};
+        let players = this.getEntitiesInRange(2, 2, true, false);
+        for (let player of players) { player.send(packet); };
     }
 
     getEntitiesInRange(x: number, y: number, player: boolean = true, entity: boolean = true) {
@@ -317,9 +324,9 @@ export default class Entity {
         return list;
     }
 
-    getMapEntitiesInRange(x:number,y:number) {
-        let ymin = Math.max(-y + Math.floor(this.pos.y/100), 0), ymax = Math.min(y + 1 + Math.floor(this.pos.y/100), world.map.height),
-            xmin = Math.max(-x + Math.floor(this.pos.x/100), 0), xmax = Math.min(x + 1 + Math.floor(this.pos.x/100), world.map.width);
+    getMapEntitiesInRange(x: number, y: number) {
+        let ymin = Math.max(-y + Math.floor(this.pos.y / 100), 0), ymax = Math.min(y + 1 + Math.floor(this.pos.y / 100), world.map.height),
+            xmin = Math.max(-x + Math.floor(this.pos.x / 100), 0), xmax = Math.min(x + 1 + Math.floor(this.pos.x / 100), world.map.width);
         let list = [];
         for (let x = xmin; x < xmax; x++) {
             for (let y = ymin; y < ymax; y++) {
@@ -328,5 +335,4 @@ export default class Entity {
         }
         return list;
     }
-
 }

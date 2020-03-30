@@ -56,7 +56,7 @@ export abstract class Utils {
         return (vector.x ** 2 + vector.y ** 2) ** 0.5;
     }
 
-    static randomID(n: number) {
+    static randomString(length: number) {
         let dict = '0123456789abcedfghejklmnopqrstuvwyzABCDEFGHEJKLMNEPQRSTUVWYZ';
         let id;
         while (true) {
@@ -80,7 +80,7 @@ const app = express();
 const server = https.createServer({
     key: fs.readFileSync("data/ssl/key.pem"),
     cert: fs.readFileSync("data/ssl/cert.pem")
-},app).listen(8080, () => {
+}, app).listen(8080, () => {
     console.log("Listening on port 8080");
 });
 
@@ -100,10 +100,10 @@ wss.on("connection", (ws) => {
                     player = world.players.find(e => e.session == data[2] && e.sessionId == data[3]);
                     if (!player) {
                         player = new Player(data[0], data[1], data[2], data[3], ws);
-                        console.log(player.pid,'new');
+                        console.log(player.pid, 'new');
                     } else {
                         player.join(ws);
-                        console.log(player.pid,'old');
+                        console.log(player.pid, 'old');
                     }
 
                 } else {
@@ -125,6 +125,7 @@ wss.on("connection", (ws) => {
                             break;
                         case 6:
                             player.inventory.remove(data[1], data[2]);
+                            break;
                         case 7:
                             player.craft(Items.get(data[1]));
                             break;
@@ -139,9 +140,6 @@ wss.on("connection", (ws) => {
                             break;
                         case 12:
                             // TODO Add wood to furnace
-                            break;
-                        case 7:
-                            player.craft(data[1]);
                             break;
                         case 14:
                             player.stopHitting();

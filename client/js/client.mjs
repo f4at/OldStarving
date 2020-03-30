@@ -9629,7 +9629,7 @@ export function start(ModdedStarving) {
                         }
                         
                         q.speed = sum/Math.min(4,q.ospeed.length)*23;
-                        console.log(rdis,dis)
+//                         console.log(rdis,dis)
                         
                         q.r.x = t;
                         q.r.y = z;
@@ -11141,7 +11141,7 @@ export function start(ModdedStarving) {
             id: -1,
             can_select: [],
             free_place: function (c) {
-                for (i = 0; i < c.length; i++) {
+                for (let i = 0; i < c.length; i++) {
                     if (this.n[c[i][0]] == c[i][1]) {
                         return true;
                     }

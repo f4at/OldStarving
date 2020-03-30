@@ -92,7 +92,7 @@ export class EntityItem extends Item { //use it to create entities later :3
 
     constructor(id: number, sid: number, numberOfSides: number = -1, radius: number, XtoYfactor: number, hp: number, type: EntityType, special: any) {
         super(id);
-        this.sid = sid,
+        this.sid = sid;
         this.numberOfSides = numberOfSides;
         this.radius = radius;
         this.XtoYfactor = XtoYfactor;

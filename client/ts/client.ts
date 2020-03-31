@@ -15,22 +15,6 @@ export function start(ModdedStarving: ModdedStarving) {
         }
     });
     ModdedStarving.on("start", proxy);
-    const session = new class Session {
-        token: string;
-        id: string;
-
-        load() {
-            this.token = Cookies.get("session_token") || Array(15).fill(null).map(() => Math.random().toString(36).substr(2)).join('');
-            this.id = Cookies.get("session_id") || "";
-            this.save();
-        };
-
-        save() {
-            Cookies.set("session_token", this.token);
-            Cookies.set("session_id", this.id);
-        };
-    };
-    session.load();
     const Utils = {
         open_in_new_tab: function (c) {
             window.open(c, "_blank").focus();
@@ -10066,9 +10050,7 @@ export function start(ModdedStarving: ModdedStarving) {
             ___adsvid++;
             clearTimeout(this.timeout_handler);
             this.timeout_server = old_timestamp;
-            this.load_map(JSON.parse(c[10]));
-            session.id = c[9];
-            session.save();
+            this.load_map(JSON.parse(c[9]));
             user.gauges.cold.ed = user.gauges.cold.em;
             user.gauges.hunger.ed = user.gauges.hunger.em;
             user.gauges.l = 1;
@@ -10146,9 +10128,13 @@ export function start(ModdedStarving: ModdedStarving) {
             this.timeout_number = 0;
             this.connect_timeout();
         };
-        this.connect_timeout = function () {
+        this.connect_timeout = async function () {
             var g = ui.server_list.id.selectedIndex - 1;
-            this.socket = new WebSocket((this.server_list[g].ssl ? "wss" : "ws") + "://" + this.server_list[g].ip + ":" + this.server_list[g].port);
+            const server = this.server_list[g];
+            await fetch("/api/join", {
+                method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ server: server.id })
+            });
+            this.socket = new WebSocket((server.ssl ? "wss" : "ws") + "://" + server.ip + ":" + server.port);
             this.socket.binaryType = "arraybuffer";
             this.socket._current_id = this._current_id;
             this.socket.onmessage = function (f) {
@@ -10256,7 +10242,7 @@ export function start(ModdedStarving: ModdedStarving) {
             };
             this.socket.onopen = function () {
                 clearTimeout(c.timeout_handler);
-                c.socket.send(JSON.stringify([ui.nickname.input.value, CLIENT.VERSION_NUMBER, session.token, session.id]));
+                c.socket.send(JSON.stringify([ui.nickname.input.value, CLIENT.VERSION_NUMBER, Cookies.get("account_id")]));
                 c.timeout_handler = setTimeout(c.timeout, CLIENT.TIMEOUT_TIME);
             };
             this.timeout_handler = setTimeout(c.timeout, CLIENT.TIMEOUT_TIME);

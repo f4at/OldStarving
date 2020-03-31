@@ -11,5 +11,8 @@
   "dependencies": {
     "js-cookie": "^2.2.1",
     "webpack-obfuscator": "^0.27.2"
+  },
+  "scripts": {
+    "watch": "webpack --watch --mode development"
   }
 }

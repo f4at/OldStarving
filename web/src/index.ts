@@ -1,7 +1,10 @@
 import express from 'express';
-import session from 'express-session';
+import session, { SessionOptions, MemoryStore } from 'express-session';
 import cookieParser from 'cookie-parser';
 import exphbs from 'express-handlebars';
+import redis from 'redis';
+import connectRedis from 'connect-redis';
+import bodyParser from 'body-parser';
 
 const app = express();
 
@@ -9,29 +12,43 @@ import btoa from 'btoa';
 import fetch from 'node-fetch';
 import DiscordBot from "./DiscordBot";
 import * as config from "../config.json";
+import { AddressInfo } from 'net';
+import Server from './Server';
 
 const bot = new DiscordBot();
 bot.start();
 
 app.engine('handlebars', exphbs.create().engine);
 app.set('view engine', 'handlebars');
+app.set('trust proxy', true);
 
-app.use(session({
+const sessionOptions: SessionOptions = {
     secret: 'very secret something',
     resave: false,
-    saveUninitialized: true
-}));
+    saveUninitialized: true,
+    store: new MemoryStore()
+};
+
+if (config.redis) {
+    let RedisStore = connectRedis(session);
+    let redisClient = redis.createClient(config.redis);
+    sessionOptions.store = new RedisStore({ client: redisClient });
+}
+
+app.use(session(sessionOptions));
 
 app.use(cookieParser());
 
+app.use(bodyParser.json());
+
 app.use(async (req, res, next) => {
-    if(req.url == "/register") {
+    if (req.url == "/register") {
         res.redirect("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
         return;
     }
 
     if (req.session.accessToken == null || req.session.user == null) {
-        if (!req.url.startsWith("/login") && !req.url.startsWith("/api/discord/callback")) {
+        if (!req.url.startsWith("/login") && !req.url.startsWith("/api")) {
             res.redirect("/login");
             return;
         }
@@ -44,6 +61,8 @@ app.use(async (req, res, next) => {
             }
         } else {
             res.cookie('starve_nickname', `${req.session.displayName}`, { maxAge: 900000 });
+            res.cookie('account_id', `${req.session.user.id}`, { maxAge: 900000 });
+            res.cookie('session_id', `${req.session.id}`, { maxAge: 900000 });
         }
     }
     next();
@@ -51,10 +70,17 @@ app.use(async (req, res, next) => {
 
 // app.use(express.static(__dirname + '/../../client'));
 app.use(express.static('./public'));
+
+const servers: Server[] = [];
+
+if (config.debug) {
+    servers.push({ id: "0", name: "Test Server", players: { online: 0, max: 0 }, ip: "localhost", port: 8080, ssl: true, joiningPlayers: new Map() });
+}
+
 app.get('/servers', function (req, res) {
     res.setHeader("access-control-allow-origin", "*");
     res.setHeader("content-type", "application/json");
-    res.end(JSON.stringify([{ "name": "Test Server", "players": { "online": 0, "max": 0 }, "ip": "localhost", "port": 8080, ssl: true }]));
+    res.end(JSON.stringify(servers, (key, value) => key === "joiningPlayers" ? undefined : value));
 });
 
 app.get("/unauthorized", async (req, res) => {
@@ -69,6 +95,27 @@ app.get("/unauthorized", async (req, res) => {
 
 app.get('/login', (req, res) => {
     res.redirect(`https://discordapp.com/api/oauth2/authorize?client_id=${config.clientId}&scope=identify&response_type=code&redirect_uri=${config.redirectUri}`);
+});
+
+app.post("/api/join", async (req, res) => {
+    if (req.session.user == null)
+        res.status(401).send();
+
+    const server = servers.find(x => x.id == req.body.server);
+    server.joiningPlayers.set(req.session.user.id, new Date());
+    res.status(200).send();
+});
+
+app.post("/api/verify", async (req, res) => {
+    const server = servers.find(x => x.id == req.body.server);
+    if (server === null || !server.joiningPlayers.has(req.body.accountId)) {
+        res.status(401).send();
+        return;
+    }
+
+    const time = new Date().getTime() - server.joiningPlayers.get(req.body.accountId).getTime();
+    console.log(time);
+    res.status(time < 5000 ? 200 : 401).send();
 });
 
 app.get('/api/discord/callback', async (req, res) => {
@@ -97,6 +144,8 @@ app.get('/api/discord/callback', async (req, res) => {
     }
 });
 
-app.listen(80, () => {
-    console.log("Listening on port 80");
+let [hostname, port] = config.address.split(":");
+const server = app.listen(Number.parseInt(port), hostname, () => {
+    let address = server.address() as AddressInfo;
+    console.log(`Listening on ${address.address}:${address.port}`);
 });

@@ -4,6 +4,7 @@ import { Vector, Utils } from '.';
 import world from "./World";
 import Entity, { Collider, EntityState } from "./Entity";
 import { MapEntity } from './World';
+import * as config from "../config.json";
 
 // TODO Move to Entity.ts
 export abstract class Inventory {
@@ -70,8 +71,7 @@ export class PlayerInventory extends Inventory {
 }
 
 export default class Player extends Entity {
-    session: string;
-    sessionId: string;
+    accountId: string;
     ws: WebSocket;
     type: EntityType = EntityType.PLAYER;
     sid: number;
@@ -139,12 +139,11 @@ export default class Player extends Entity {
     regen: number = 50;
     regenMin: number = 2;
 
-    constructor(nick: string, version: number, session: string, sessionId: string, ws: WebSocket) {
+    constructor(nick: string, version: number, accountId: string, ws: WebSocket) {
         super(null, null, null, null);
-        this.sessionId = Utils.randomString(16);
         this.nick = nick;
         this.displayName = nick;
-        this.session = session;
+        this.accountId = accountId;
         for (let i = 1; i < 128; i++) {
             if (world.players.find(e => e.pid == i) === undefined) {
                 this.pid = i;
@@ -159,9 +158,9 @@ export default class Player extends Entity {
         }
         let found = false, counter = 0;
 
-        
+
         while (counter < 64 && !found) {
-            this.pos = { "x": 1 + Math.random() * 5000, "y": 1 + Math.random() * 5000 }; //spawn in forest biome
+            this.pos = { "x": 1 + Math.random() * 10000, "y": 1 + Math.random() * 10000 }; //spawn in forest biome
             this.chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
             if (this.getEntitiesInRange(1, 1, false, true).find(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < this.radius + e.radius + (e.type == EntityType.WALL || e.type == EntityType.SPIKE || e.type == EntityType.DOOR ? 500 : 0))) {
                 counter += 1;
@@ -175,9 +174,6 @@ export default class Player extends Entity {
             ws.close();
             return;
         }
-
-        this.pos = { "x": 5000, "y": 5000 }; //spawn in forest biome
-        this.chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
 
         this.bag = true;
 
@@ -194,7 +190,7 @@ export default class Player extends Entity {
         this.updateLoop = setInterval(() => {
             this.counter += 1;
             if (this.counter % (world.tickRate * 4) == 0) {
-                let temperature = Math.max(0, Math.min(100, this.temperature + (this.moving ? 1 : 0) + (this.attacking ? 1 : 0) + (world.isDay ? -2 : -20) +this.clothes.coldProtection + (this.fire ? 25 : 0)) );
+                let temperature = Math.max(0, Math.min(100, this.temperature + (this.moving ? 1 : 0) + (this.attacking ? 1 : 0) + (world.isDay ? -2 : -20) + this.clothes.coldProtection + (this.fire ? 25 : 0)));
                 let food = Math.max(0, this.food + (this.moving ? -2 : -0.5) + (this.attacking ? -2 : 0));
                 if (this.temperature == temperature && temperature == 0) {
                     this.damage(10, null, false, false);
@@ -209,12 +205,12 @@ export default class Player extends Entity {
                     this.regen = Math.max(this.regenMin, this.regen - regen);
                     this.damage(-this.regen, null, true, false);
                 }
-                
+
                 this.food = food;
                 this.temperature = temperature;
                 this.updateBars();
             }
-            if (this.counter % Math.ceil(world.tickRate/4) == 0) {
+            if (this.counter % Math.ceil(world.tickRate / 4) == 0) {
                 this.updateCrafting();
             }
             if (this.moving || this.updating || this.action) {
@@ -234,10 +230,12 @@ export default class Player extends Entity {
             }
         }, 1000 / world.tickRate);
         this.attackLoop = null;
-        this.displayLoop = setInterval(() => {
-            this.changeDisplayNick();
-        }, 150);
 
+        if (config.idiots.includes(this.accountId)) {
+            this.displayLoop = setInterval(() => {
+                this.changeDisplayNick();
+            }, 150);
+        }
     }
 
     getEntitiesInRange(x: number, y: number, player: boolean = true, entity: boolean = true): Entity[] {
@@ -264,8 +262,8 @@ export default class Player extends Entity {
     }
 
     getMapEntitiesInRange(x: number, y: number): MapEntity[] {
-        let ymin = Math.max(-y + Math.floor(this.pos.y / 100), 0), ymax = Math.min(y + 1 + Math.floor(this.pos.y / 100), Math.floor(world.map.height/100)),
-            xmin = Math.max(-x + Math.floor(this.pos.x / 100), 0), xmax = Math.min(x + 1 + Math.floor(this.pos.x / 100), Math.floor(world.map.width/100));
+        let ymin = Math.max(-y + Math.floor(this.pos.y / 100), 0), ymax = Math.min(y + 1 + Math.floor(this.pos.y / 100), Math.floor(world.map.height / 100)),
+            xmin = Math.max(-x + Math.floor(this.pos.x / 100), 0), xmax = Math.min(x + 1 + Math.floor(this.pos.x / 100), Math.floor(world.map.width / 100));
         let list = [];
         for (let x = xmin; x < xmax; x++) {
             for (let y = ymin; y < ymax; y++) {
@@ -314,7 +312,7 @@ export default class Player extends Entity {
 
     join(ws) {
         this.ws = ws;
-        this.ws.send(JSON.stringify([3, this.pid, 256, world.leaderboard, this.pos.x, this.pos.y, 256,  world.isDay ? 0 : 1, world.mode, this.sessionId, world.map.raw]));
+        this.ws.send(JSON.stringify([3, this.pid, 1024, world.leaderboard, this.pos.x, this.pos.y, 256, world.mode, world.isDay ? 0 : 1, world.map.raw]));
         this.online = true;
         this.getInfos();
         this.sendInfos();
@@ -340,7 +338,7 @@ export default class Player extends Entity {
         if (to === null) {
             to = this.getEntitiesInRange(2, 2);
         }
-        this.send(new Uint8Array([0, 0].concat(...to.filter(e => !(e instanceof MapEntity) ).map(e => e.infoPacket(visible, false).slice(2)))));
+        this.send(new Uint8Array([0, 0].concat(...to.filter(e => !(e instanceof MapEntity)).map(e => e.infoPacket(visible, false).slice(2)))));
     }
 
     move(dir: number) {
@@ -428,8 +426,8 @@ export default class Player extends Entity {
         clearInterval(this.displayLoop);
         world.players = world.players.filter(e => e !== this);
         world.chunks[this.chunk.x][this.chunk.y] = world.chunks[this.chunk.x][this.chunk.y].filter(e => e !== this);
-        this.send(new Uint8Array([2,this.pid]));
-        Utils.broadcastPacket(new Uint8Array([7,this.pid]));
+        this.send(new Uint8Array([2, this.pid]));
+        Utils.broadcastPacket(new Uint8Array([7, this.pid]));
         this.ws.close();
         this.sendInfos(false);
     }
@@ -495,7 +493,7 @@ export default class Player extends Entity {
                     this.inventory.add(item, 1/*, slot*/);
                     this.finishedCrafting();
                     this.craftTimeout = null;
-                }, 1000/recipe.time);
+                }, 1000 / recipe.time);
             }
         }
     }
@@ -524,9 +522,9 @@ export default class Player extends Entity {
     }
 
     updateCrafting() {
-        let fire:boolean = false;
-        let workbench:boolean = false;
-        for (let entity of this.getEntitiesInRange(1,1,false,true).filter(e=> Utils.distance({x:this.pos.x-e.pos.x,y:this.pos.y-e.pos.y}) < 240)) {
+        let fire: boolean = false;
+        let workbench: boolean = false;
+        for (let entity of this.getEntitiesInRange(1, 1, false, true).filter(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < 240)) {
             if (entity.type === EntityType.FIRE) {
                 fire = true;
             } else if (entity.type === EntityType.WORKBENCH) {

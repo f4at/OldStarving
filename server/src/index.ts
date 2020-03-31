@@ -6,6 +6,8 @@ import Player from "./Player";
 import { Items } from "./Item";
 import * as express from 'express';
 import Entity from "./Entity";
+import fetch from 'node-fetch';
+import * as config from "../config.json";
 
 export interface Vector {
     x: number;
@@ -31,11 +33,11 @@ export abstract class Utils {
     }
 
     static toRadians(angle: number) {
-        return (angle / 128 * Math.PI)%(Math.PI*2);
+        return (angle / 128 * Math.PI) % (Math.PI * 2);
     }
 
     static toBinary(angle: number) {
-        return (angle * 128 / Math.PI)%256;
+        return (angle * 128 / Math.PI) % 256;
     }
 
     static angleToCoords(angle: number) {
@@ -91,20 +93,31 @@ wss.on("connection", (ws) => {
     let player: Player;
 
     ws.binaryType = "arraybuffer";
-    ws.on("message", (message) => {
+    ws.on("message", async (message) => {
         try {
             if (message instanceof ArrayBuffer) {
                 //nothing
             } else {
                 let data = JSON.parse(message.toString());
                 if (!player) {
-                    player = world.players.find(e => e.session == data[2] && e.sessionId == data[3]);
-                    if (!player) {
-                        player = new Player(data[0], data[1], data[2], data[3], ws);
-                    } else {
-                        player.join(ws);
-                    }
+                    if (typeof data[0] === "string") {
+                        const response = await fetch(config.api + "/api/verify", {
+                            method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ accountId: data[2], server: 0 })
+                        });
+                        if (response.status !== 200) {
+                            ws.send(JSON.stringify([1, "Authentication failed"]));
+                            return;
+                        }
 
+                        player = world.players.find(e => e.accountId == data[2]);
+                        if (!player) {
+                            player = new Player(data[0], data[1], data[2], ws);
+                            console.log(player.pid, 'new');
+                        } else {
+                            player.join(ws);
+                            console.log(player.pid, 'old');
+                        }
+                    }
                 } else {
                     switch (data[0]) {
                         case 0:
@@ -138,9 +151,9 @@ wss.on("connection", (ws) => {
                             player.cancelCrafting(); // lose items
                             break;
                         case 12:
-                            if (player.inventory.findStack(Items.WOOD,data[1])) {
-                                player.inventory.remove(Items.WOOD,data[1]);
-                                let entity = world.entities[data[2]].find(e=> e.id = data[3]);
+                            if (player.inventory.findStack(Items.WOOD, data[1])) {
+                                player.inventory.remove(Items.WOOD, data[1]);
+                                let entity = world.entities[data[2]].find(e => e.id = data[3]);
                                 entity.inv.amount += data[1];
                                 entity.info = entity.inv.amount;
                                 entity.sendInfos();

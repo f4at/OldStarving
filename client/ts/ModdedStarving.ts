@@ -2,18 +2,16 @@ export class ModdedStarving {
     version = "0.1";
     mods: Mod[] = [];
 
-    initialize() {
+    async initialize() {
         console.log(`ModdedStarving v${this.version} initializing`);
 
         const promises = [];
-        // promises.push(this.loadMod("./mods/AmethystHelmet"));
+        promises.push(this.loadMod(await import("./mods/AmethystHelmet")));
 
         return Promise.all(promises);
     }
 
-    async loadMod(url) {
-        console.log("Loading " + url);
-        const module = await import(url);
+    async loadMod(module) {
         const mod = module.default;
         mod.on("load");
         this.mods.push(mod);

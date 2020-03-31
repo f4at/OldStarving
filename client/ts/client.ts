@@ -1,30 +1,34 @@
-import Cookies from 'https://cdn.jsdelivr.net/npm/js-cookie@3.0.0-rc.0/dist/js.cookie.min.mjs';
+import { ModdedStarving } from "./ModdedStarving";
+import Cookies from "js-cookie";
 
-export function start(ModdedStarving) {
+export function start(ModdedStarving: ModdedStarving) {
     var proxy = new Proxy({}, {
         get(target, name) {
             try {
-                return eval(name);
+                return eval(name.toString());
             } catch (e) {
                 return undefined;
             }
         },
         set(target, name, value) {
-            return eval(name + "=JSON.parse('" + JSON.stringify(value) + "')");
+            return eval(name.toString() + "=JSON.parse('" + JSON.stringify(value) + "')");
         }
     });
     ModdedStarving.on("start", proxy);
-    const session = {
+    const session = new class Session {
+        token: string;
+        id: string;
+
         load() {
             this.token = Cookies.get("session_token") || Array(15).fill(null).map(() => Math.random().toString(36).substr(2)).join('');
             this.id = Cookies.get("session_id") || "";
             this.save();
-        },
+        };
 
         save() {
             Cookies.set("session_token", this.token);
             Cookies.set("session_id", this.id);
-        }
+        };
     };
     session.load();
     const Utils = {
@@ -156,10 +160,10 @@ export function start(ModdedStarving) {
             this.h = d;
         },
         randomize_list: function (c) {
-            a = [];
+            let a = [];
             a.push.apply(a, c);
             for (c = []; 0 < a.length;) {
-                var g = Math.floor(Math.random() * a.length);
+                const g = Math.floor(Math.random() * a.length);
                 c.push(a[g]);
                 a.splice(g, 1);
             }
@@ -195,14 +199,14 @@ export function start(ModdedStarving) {
         ease_out_quad: function (c) {
             return c * (2 - c);
         },
-        LinearAnimation: function (c, g, f, d, e, m) {
+        LinearAnimation: function (c, g, f, d, e, m): void {
             this.o = c;
             this.v = g;
             this.max = f;
             this.min = d;
             this.max_speed = e;
             this.min_speed = m;
-            this.update = function () {
+            this.update = function (): boolean {
                 if (this.o) {
                     var c = this.v + delta * this.max_speed;
                     if (c > this.max) {
@@ -220,9 +224,8 @@ export function start(ModdedStarving) {
                         this.v = c;
                     }
                 }
-            }
-                ;
-            return false;
+            };
+            return;// false;
         },
         Ease: function (c, g, f, d, e, m) {
             this.fun = c;
@@ -246,8 +249,7 @@ export function start(ModdedStarving) {
                         this.x = this.sx + (this.ex - this.sx) * c;
                     }
                 }
-            }
-                ;
+            };
         },
         Ease2d: function (c, g, f, d, e, m, p, n, r) {
             this.fun = c;
@@ -278,113 +280,112 @@ export function start(ModdedStarving) {
                         this.y = this.sy + (this.ey - this.sy) * c;
                     }
                 }
-            }
-                ;
+            };
         }
     };
-    (function () {
-        // var c = function () {
-        //     function c() {
-        //         var c = 0;
-        //         for (var d = {}; c < arguments.length; c++) {
-        //             var e = arguments[c];
-        //             var g;
-        //             for (g in e) {
-        //                 d[g] = e[g];
-        //             }
-        //         }
-        //         return d;
-        //     }
-        //     function g(f) {
-        //         function d(e, g, p) {
-        //             var n;
-        //             if (typeof document !== "undefined") {
-        //                 if (1 < arguments.length) {
-        //                     p = c({ path: "/" }, d.defaults, p);
-        //                     if (typeof p.expires === "number") {
-        //                         var r = new Date;
-        //                         r.setMilliseconds(r.getMilliseconds() + 864e5 * p.expires);
-        //                         p.expires = r;
-        //                     }
-        //                     try {
-        //                         n = JSON.stringify(g);
-        //                         if (/^[\{\[]/.test(n)) {
-        //                             g = n;
-        //                         }
-        //                     } catch (A) { }
-        //                     g = f.write ? f.write(g, e) : encodeURIComponent(String(g)).replace(/%(23|24|26|2B|3A|3C|3E|3D|2F|3F|40|5B|5D|5E|60|7B|7D|7C)/g, decodeURIComponent);
-        //                     e = encodeURIComponent(String(e));
-        //                     e = e.replace(/%(23|24|26|2B|5E|60|7C)/g, decodeURIComponent);
-        //                     e = e.replace(/[\(\)]/g, escape);
-        //                     return document.cookie = [e, "=", g, p.expires ? "; expires=" + p.expires.toUTCString() : "", p.path ? "; path=" + p.path : "", p.domain ? "; domain=" + p.domain : "", p.secure ? "; secure" : ""].join("");
-        //                 }
-        //                 if (!e) {
-        //                     n = {};
-        //                 }
-        //                 var r = document.cookie ? document.cookie.split("; ") : [];
-        //                 var u = /(%[0-9A-Z]{2})+/g;
-        //                 for (var q = 0; q < r.length; q++) {
-        //                     var v = r[q].split("=");
-        //                     var t = v.slice(1).join("=");
-        //                     if (t.charAt(0) === '"') {
-        //                         t = t.slice(1, -1);
-        //                     }
-        //                     try {
-        //                         var z = v[0].replace(u, decodeURIComponent);
-        //                         var t = f.read ? f.read(t, z) : f(t, z) || t.replace(u, decodeURIComponent);
-        //                         if (this.json) {
-        //                             try {
-        //                                 t = JSON.parse(t);
-        //                             } catch (A) { }
-        //                         }
-        //                         if (e === z) {
-        //                             n = t;
-        //                             break;
-        //                         }
-        //                         if (!e) {
-        //                             n[z] = t;
-        //                         }
-        //                     } catch (A) { }
-        //                 }
-        //                 return n;
-        //             }
-        //         }
-        //         d.set = d;
-        //         d.get = function (c) {
-        //             return d.call(d, c);
-        //         };
-        //         d.getJSON = function () {
-        //             return d.apply({ json: true }, [].slice.call(arguments));
-        //         };
-        //         d.defaults = {};
-        //         d.remove = function (e, f) {
-        //             d(e, "", c(f, { expires: -1 }));
-        //         };
-        //         d.withConverter = g;
-        //         return d;
-        //     }
-        //     return g(function () { });
-        // };
-        var g = false;
-        if (typeof define === "function" && define.amd) {
-            define(c);
-            g = true;
-        }
-        if (typeof exports === "object") {
-            module.exports = c();
-            g = true;
-        }
-        if (!g) {
-            var f = Cookies;
-            var d = Cookies;
-            // = c();
-            d.noConflict = function () {
-                window.Cookies = f;
-                return d;
-            }
-                ;
-        }
-    }());
+    // (function () {
+    //     // var c = function () {
+    //     //     function c() {
+    //     //         var c = 0;
+    //     //         for (var d = {}; c < arguments.length; c++) {
+    //     //             var e = arguments[c];
+    //     //             var g;
+    //     //             for (g in e) {
+    //     //                 d[g] = e[g];
+    //     //             }
+    //     //         }
+    //     //         return d;
+    //     //     }
+    //     //     function g(f) {
+    //     //         function d(e, g, p) {
+    //     //             var n;
+    //     //             if (typeof document !== "undefined") {
+    //     //                 if (1 < arguments.length) {
+    //     //                     p = c({ path: "/" }, d.defaults, p);
+    //     //                     if (typeof p.expires === "number") {
+    //     //                         var r = new Date;
+    //     //                         r.setMilliseconds(r.getMilliseconds() + 864e5 * p.expires);
+    //     //                         p.expires = r;
+    //     //                     }
+    //     //                     try {
+    //     //                         n = JSON.stringify(g);
+    //     //                         if (/^[\{\[]/.test(n)) {
+    //     //                             g = n;
+    //     //                         }
+    //     //                     } catch (A) { }
+    //     //                     g = f.write ? f.write(g, e) : encodeURIComponent(String(g)).replace(/%(23|24|26|2B|3A|3C|3E|3D|2F|3F|40|5B|5D|5E|60|7B|7D|7C)/g, decodeURIComponent);
+    //     //                     e = encodeURIComponent(String(e));
+    //     //                     e = e.replace(/%(23|24|26|2B|5E|60|7C)/g, decodeURIComponent);
+    //     //                     e = e.replace(/[\(\)]/g, escape);
+    //     //                     return document.cookie = [e, "=", g, p.expires ? "; expires=" + p.expires.toUTCString() : "", p.path ? "; path=" + p.path : "", p.domain ? "; domain=" + p.domain : "", p.secure ? "; secure" : ""].join("");
+    //     //                 }
+    //     //                 if (!e) {
+    //     //                     n = {};
+    //     //                 }
+    //     //                 var r = document.cookie ? document.cookie.split("; ") : [];
+    //     //                 var u = /(%[0-9A-Z]{2})+/g;
+    //     //                 for (var q = 0; q < r.length; q++) {
+    //     //                     var v = r[q].split("=");
+    //     //                     var t = v.slice(1).join("=");
+    //     //                     if (t.charAt(0) === '"') {
+    //     //                         t = t.slice(1, -1);
+    //     //                     }
+    //     //                     try {
+    //     //                         var z = v[0].replace(u, decodeURIComponent);
+    //     //                         var t = f.read ? f.read(t, z) : f(t, z) || t.replace(u, decodeURIComponent);
+    //     //                         if (this.json) {
+    //     //                             try {
+    //     //                                 t = JSON.parse(t);
+    //     //                             } catch (A) { }
+    //     //                         }
+    //     //                         if (e === z) {
+    //     //                             n = t;
+    //     //                             break;
+    //     //                         }
+    //     //                         if (!e) {
+    //     //                             n[z] = t;
+    //     //                         }
+    //     //                     } catch (A) { }
+    //     //                 }
+    //     //                 return n;
+    //     //             }
+    //     //         }
+    //     //         d.set = d;
+    //     //         d.get = function (c) {
+    //     //             return d.call(d, c);
+    //     //         };
+    //     //         d.getJSON = function () {
+    //     //             return d.apply({ json: true }, [].slice.call(arguments));
+    //     //         };
+    //     //         d.defaults = {};
+    //     //         d.remove = function (e, f) {
+    //     //             d(e, "", c(f, { expires: -1 }));
+    //     //         };
+    //     //         d.withConverter = g;
+    //     //         return d;
+    //     //     }
+    //     //     return g(function () { });
+    //     // };
+    //     var g = false;
+    //     if (typeof define === "function" && define.amd) {
+    //         define(c);
+    //         g = true;
+    //     }
+    //     if (typeof exports === "object") {
+    //         module.exports = c();
+    //         g = true;
+    //     }
+    //     if (!g) {
+    //         var f = Cookies;
+    //         var d = Cookies;
+    //         // = c();
+    //         d.noConflict = function () {
+    //             window.Cookies = f;
+    //             return d;
+    //         }
+    //             ;
+    //     }
+    // }());
     function Mouse() {
         this.DOWN = 0;
         this.UP = 1;
@@ -414,6 +415,7 @@ export function start(ModdedStarving) {
             }
         };
     }
+
     function Keyboard() {
         this.set_azerty = function () {
             this.LEFT = 81;
@@ -532,7 +534,8 @@ export function start(ModdedStarving) {
             return this.keys[this.B];
         };
     }
-    var can = document.getElementById("game_canvas");
+
+    var can = document.getElementById("game_canvas") as HTMLCanvasElement;
     var ctx = can.getContext("2d");
     var canw = can.width;
     var canh = can.height;
@@ -545,8 +548,8 @@ export function start(ModdedStarving) {
     var scale = 1;
     can.oncontextmenu = function () {
         return false;
-    }
-        ;
+    };
+
     function CTI(c) {
         var g = new Image;
         g.src = c.toDataURL("image/png");
@@ -554,6 +557,7 @@ export function start(ModdedStarving) {
         g.height = c.height;
         return g;
     }
+
     function resize_canvas() {
         if (can.width != window.innerWidth) {
             can.width = window.innerWidth;
@@ -581,15 +585,14 @@ export function start(ModdedStarving) {
             game.update();
         }
     }
+
     var game_body = document.getElementById("game_body");
     game_body.ondragstart = function () {
         return false;
-    }
-        ;
+    };
     game_body.ondrop = function () {
         return false;
-    }
-        ;
+    };
     game_body.onresize = resize_canvas;
     (function () {
         var c = 0;
@@ -599,7 +602,7 @@ export function start(ModdedStarving) {
             window.cancelAnimationFrame = window[g[f] + "CancelAnimationFrame"] || window[g[f] + "CancelRequestAnimationFrame"];
         }
         if (!window.requestAnimationFrame) {
-            window.requestAnimationFrame = function (d, e) {
+            window.requestAnimationFrame = function (d) {
                 var f = (new Date).getTime();
                 var g = Math.max(0, 16 - (f - c));
                 var n = window.setTimeout(function () {
@@ -607,20 +610,18 @@ export function start(ModdedStarving) {
                 }, g);
                 c = f + g;
                 return n;
-            }
-                ;
+            };
         }
         if (!window.cancelAnimationFrame) {
             window.cancelAnimationFrame = function (c) {
                 clearTimeout(c);
-            }
-                ;
+            };
         }
     }());
-    const IMAGES = {
+    const IMAGES: any = {
         LOGO: "img/logo.png"
     };
-    const SPRITE = {
+    const SPRITE: any = {
         GROUND: ["#133A2B", "#032428"],
         SNOW_GROUND: ["#EBF2F0", "#136167"],
         CRAFT_LOADING: ["#4EB687", "#187484"],
@@ -881,7 +882,7 @@ export function start(ModdedStarving) {
         HURT_FOX: 256,
         HURT_BEAR: 257,
         HURT_DRAGON: 258,
-        SLOT_NUMBER: 259,
+        // SLOT_NUMBER: 259,
         HURT_WING_LEFT: 208,
         HURT_WING_RIGHT: 207,
         FLAKES: 264,
@@ -939,7 +940,8 @@ export function start(ModdedStarving) {
         BIGMAP: 311
     };
     const sprite = [];
-    function fill_path(c, g, f, d) {
+
+    function fill_path(c, g, f?, d?) {
         if (g) {
             c.fillStyle = g;
             c.fill();
@@ -950,6 +952,7 @@ export function start(ModdedStarving) {
             c.stroke();
         }
     }
+
     function round_rect(c, g, f, d, e, m) {
         if (d < 2 * m) {
             m = d / 2;
@@ -968,10 +971,12 @@ export function start(ModdedStarving) {
         c.arcTo(g, f, g + d, f, m);
         c.closePath();
     }
+
     function circle(c, g, f, d) {
         c.beginPath();
         c.arc(g, f, d, 0, 2 * Math.PI);
     }
+
     function round_regular_polygon(c, g, f, d) {
         var e = 2 * Math.PI / g;
         c.beginPath();
@@ -996,6 +1001,7 @@ export function start(ModdedStarving) {
         }
         c.closePath();
     }
+
     function create_rotated_img(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -1008,13 +1014,16 @@ export function start(ModdedStarving) {
         d.drawImage(g, -g.width / 2, -g.height / 2);
         return f;
     }
-    function strokeMixedText(ctx, args, x, y, maxWidth) {
-        mixedText(ctx, args, x, y, maxWidth, "strokeText");
+
+    function strokeMixedText(ctx: CanvasRenderingContext2D, args, x: number, y: number, maxWidth?: number) {
+        mixedText(ctx, args, x, y, maxWidth, ctx.strokeText);
     }
-    function fillMixedText(ctx, args, x, y, maxWidth) {
-        mixedText(ctx, args, x, y, maxWidth, "fillText");
+
+    function fillMixedText(ctx: CanvasRenderingContext2D, args, x: number, y: number, maxWidth?: number) {
+        mixedText(ctx, args, x, y, maxWidth, ctx.fillText);
     }
-    function mixedText(ctx, args, x, y, maxWidth, func) {
+
+    function mixedText(ctx: CanvasRenderingContext2D, args, x: number, y: number, maxWidth: number, callback: (text: string, x: number, y: number, maxWidth?: number) => void) {
         let defaultFillStyle = ctx.fillStyle;
         let defaultFont = ctx.font;
 
@@ -1022,12 +1031,13 @@ export function start(ModdedStarving) {
         args.forEach(({ text, fillStyle, font }) => {
             ctx.fillStyle = fillStyle || defaultFillStyle;
             ctx.font = font || defaultFont;
-            ctx[func](text, x, y, maxWidth);
+            callback.call(ctx, text, x, y, maxWidth);
             x += ctx.measureText(text).width;
         }
         );
         ctx.restore();
     }
+
     // https://www.colorschemer.com/minecraft-color-codes/
     const colorCodes = {
         '4': "#AA0000",
@@ -1047,8 +1057,9 @@ export function start(ModdedStarving) {
         '8': "#555555",
         '0': "#000000"
     };
+
     function formatText(text) {
-        let args = [];
+        let args: any = [];
         args.fullText = "";
         let arg = 0;
         let waitingForColor = false;
@@ -1073,6 +1084,7 @@ export function start(ModdedStarving) {
 
         return args;
     }
+
     function create_message(c, g) {
         const formatted = formatText(g);
         g = formatted.fullText;
@@ -1096,6 +1108,7 @@ export function start(ModdedStarving) {
         fillMixedText(d, formatted, p, e / 2);
         return f;
     }
+
     function create_hurt_player(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -1115,6 +1128,7 @@ export function start(ModdedStarving) {
         fill_path(d, g, g, v);
         return f;
     }
+
     function create_player(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -1170,6 +1184,7 @@ export function start(ModdedStarving) {
         fill_path(d, g[4]);
         return f;
     }
+
     function create_plant_seed(c, g, f) {
         g = document.createElement("canvas");
         var d = g.getContext("2d");
@@ -1193,6 +1208,7 @@ export function start(ModdedStarving) {
         d.restore();
         return g;
     }
+
     function create_food_plant(c) {
         var g = document.createElement("canvas");
         var f = g.getContext("2d");
@@ -1210,6 +1226,7 @@ export function start(ModdedStarving) {
         f.drawImage(c, 32, 45);
         return g;
     }
+
     function create_gear(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -1234,7 +1251,8 @@ export function start(ModdedStarving) {
         d.fill();
         return f;
     }
-    function create_minimap_object(c, g, f, d, e, m, p) {
+
+    function create_minimap_object(c, g, f, d, e, m, p?) {
         p = p === void 0 ? 0 : p;
         for (var n = m == -1 ? 0 : m; n >= p; n--) {
             for (var r = 0; 300 > r; r++) {
@@ -1253,6 +1271,7 @@ export function start(ModdedStarving) {
             }
         }
     }
+
     function create_minimap(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -1301,6 +1320,7 @@ export function start(ModdedStarving) {
         d.stroke();
         return f;
     }
+
     function create_workbench(c, g, f) {
         var d = document.createElement("canvas");
         var e = d.getContext("2d");
@@ -1361,6 +1381,7 @@ export function start(ModdedStarving) {
         fill_path(e, null, f[5], 8 * c);
         return d;
     }
+
     function create_rabbit(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -1424,6 +1445,7 @@ export function start(ModdedStarving) {
         fill_path(d, g[4]);
         return f;
     }
+
     function create_hurt_rabbit(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -1445,6 +1467,7 @@ export function start(ModdedStarving) {
         fill_path(d, g, g, e);
         return f;
     }
+
     function create_hurt_wolf(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -1465,6 +1488,7 @@ export function start(ModdedStarving) {
         fill_path(d, g, g, 4);
         return f;
     }
+
     function create_wolf(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -1530,6 +1554,7 @@ export function start(ModdedStarving) {
         fill_path(d, g[4]);
         return f;
     }
+
     function create_meat(c, g, f) {
         g = document.createElement("canvas");
         var d = g.getContext("2d");
@@ -1553,6 +1578,7 @@ export function start(ModdedStarving) {
         fill_path(d, f[2], f[3], 3);
         return g;
     }
+
     function create_hurt_spider(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -1647,6 +1673,7 @@ export function start(ModdedStarving) {
         d.stroke();
         return f;
     }
+
     function create_spider(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -1922,6 +1949,7 @@ export function start(ModdedStarving) {
         d.fill();
         return f;
     }
+
     function create_web(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -2043,6 +2071,7 @@ export function start(ModdedStarving) {
         fill_path(d, void 0, g[0], 4);
         return f;
     }
+
     function create_cord(c, g, f) {
         g = document.createElement("canvas");
         var d = g.getContext("2d");
@@ -2082,6 +2111,7 @@ export function start(ModdedStarving) {
         fill_path(d, f[2]);
         return g;
     }
+
     function create_bandage(c, g, f) {
         g = document.createElement("canvas");
         var d = g.getContext("2d");
@@ -2110,6 +2140,7 @@ export function start(ModdedStarving) {
         fill_path(d, f[1]);
         return g;
     }
+
     function create_craft_button(c, g, f, d, e) {
         var m = document.createElement("canvas");
         var p = m.getContext("2d");
@@ -2159,6 +2190,7 @@ export function start(ModdedStarving) {
         }
         return c;
     }
+
     function create_big_fire_wood(c, g, f) {
         g = document.createElement("canvas");
         var d = g.getContext("2d");
@@ -2187,6 +2219,7 @@ export function start(ModdedStarving) {
         fill_path(d, f[0], f[1], v);
         return g;
     }
+
     function create_fire(c, g, f) {
         g = document.createElement("canvas");
         var d = g.getContext("2d");
@@ -2216,6 +2249,7 @@ export function start(ModdedStarving) {
         fill_path(d, f[2]);
         return g;
     }
+
     function create_wood_fire(c, g, f) {
         g = document.createElement("canvas");
         var d = g.getContext("2d");
@@ -2241,6 +2275,7 @@ export function start(ModdedStarving) {
         fill_path(d, f[0], f[1], c);
         return g;
     }
+
     function create_ground_fire(c, g, f) {
         g = document.createElement("canvas");
         var d = g.getContext("2d");
@@ -2255,6 +2290,7 @@ export function start(ModdedStarving) {
         fill_path(d, f[0]);
         return g;
     }
+
     function create_halo_fire(c, g, f) {
         g = document.createElement("canvas");
         var d = g.getContext("2d");
@@ -2267,6 +2303,7 @@ export function start(ModdedStarving) {
         fill_path(d, f[0]);
         return g;
     }
+
     function create_hand(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -2282,6 +2319,7 @@ export function start(ModdedStarving) {
         fill_path(d, g[0], g[1], n);
         return f;
     }
+
     function create_hand_shadow(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -2297,6 +2335,7 @@ export function start(ModdedStarving) {
         d.globalAlpha = 1;
         return f;
     }
+
     function create_apricot_tree(c, g, f) {
         var d = document.createElement("canvas");
         var e = d.getContext("2d");
@@ -2325,6 +2364,7 @@ export function start(ModdedStarving) {
         fill_path(e, g[3]);
         return d;
     }
+
     function create_tree_branch(c, g, f) {
         var d = document.createElement("canvas");
         var e = d.getContext("2d");
@@ -2402,6 +2442,7 @@ export function start(ModdedStarving) {
         e.restore();
         return d;
     }
+
     function create_apricot_forest(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -2413,6 +2454,7 @@ export function start(ModdedStarving) {
         d.drawImage(g, (e - g.width) / 2, (m - g.height) / 2);
         return f;
     }
+
     function create_pickaxe(c, g, f) {
         var d = document.createElement("canvas");
         var e = d.getContext("2d");
@@ -2457,6 +2499,7 @@ export function start(ModdedStarving) {
         fill_path(e, f[5], f[6], n);
         return d;
     }
+
     function create_sword(c, g, f) {
         var d = document.createElement("canvas");
         var e = d.getContext("2d");
@@ -2536,6 +2579,7 @@ export function start(ModdedStarving) {
         fill_path(e, f[1], f[2], 7 * c);
         return d;
     }
+
     function create_seed(c) {
         var g = document.createElement("canvas");
         var f = g.getContext("2d");
@@ -2635,11 +2679,12 @@ export function start(ModdedStarving) {
         f.restore();
         return g;
     }
-    function create_text(c, g, f, d, e, m, p, n, r, u, q) {
+
+    function create_text(c, g, f, d, e?, m?, p?, n?, r?, u?, q?) {
         const formatted = formatText(g);
         g = formatted.fullText;
 
-        var v = document.createElement("canvas");
+        var v = document.createElement("canvas") as any;
         var t = v.getContext("2d");
         m = m ? m * c : 0;
         var z = Math.floor(c * f);
@@ -2676,6 +2721,7 @@ export function start(ModdedStarving) {
         v.text = g;
         return v;
     }
+
     function create_stone(c, g, f) {
         g = document.createElement("canvas");
         var d = g.getContext("2d");
@@ -2698,6 +2744,7 @@ export function start(ModdedStarving) {
         fill_path(d, f[2]);
         return g;
     }
+
     function create_gold(c, g, f) {
         g = document.createElement("canvas");
         var d = g.getContext("2d");
@@ -2743,6 +2790,7 @@ export function start(ModdedStarving) {
         d.restore();
         return g;
     }
+
     function create_diamond(c, g, f) {
         g = document.createElement("canvas");
         var d = g.getContext("2d");
@@ -2831,6 +2879,7 @@ export function start(ModdedStarving) {
         fill_path(d, f[2]);
         return g;
     }
+
     function create_plant(c, g, f) {
         var d = document.createElement("canvas");
         var e = d.getContext("2d");
@@ -2882,6 +2931,7 @@ export function start(ModdedStarving) {
         fill_path(e, f[1], f[2], p);
         return d;
     }
+
     function create_fruit(c, g, f) {
         g = document.createElement("canvas");
         var d = g.getContext("2d");
@@ -2903,6 +2953,7 @@ export function start(ModdedStarving) {
         d.restore();
         return g;
     }
+
     function create_herb(c, g, f, d) {
         g = document.createElement("canvas");
         var e = g.getContext("2d");
@@ -2949,6 +3000,7 @@ export function start(ModdedStarving) {
         }
         return g;
     }
+
     function create_flake(c, g, f) {
         var d = document.createElement("canvas");
         var e = d.getContext("2d");
@@ -2957,10 +3009,11 @@ export function start(ModdedStarving) {
         d.width = m;
         d.height = p;
         e.translate(m / 2, p / 2);
-        circle(e, 0, 0, g * c, 0);
+        circle(e, 0, 0, g * c);
         fill_path(e, f);
         return d;
     }
+
     function create_wall(c, g, f) {
         var d = document.createElement("canvas");
         var e = d.getContext("2d");
@@ -2974,7 +3027,7 @@ export function start(ModdedStarving) {
         fill_path(e, f[0]);
         e.translate(0, -7 * c);
         e.globalAlpha = 1;
-        circle(e, 0, 0, 60 * c, 0);
+        circle(e, 0, 0, 60 * c);
         fill_path(e, f[1], f[2], 4 * c);
         circle(e, 0, 0, 40 * c);
         fill_path(e, f[3]);
@@ -2982,6 +3035,7 @@ export function start(ModdedStarving) {
         fill_path(e, f[4], f[5], 8 * c);
         return d;
     }
+
     function create_wall_diamond(c, g, f) {
         var d = document.createElement("canvas");
         var e = d.getContext("2d");
@@ -3009,6 +3063,7 @@ export function start(ModdedStarving) {
         e.restore();
         return d;
     }
+
     function create_wall_stone(c, g, f) {
         var d = document.createElement("canvas");
         var e = d.getContext("2d");
@@ -3036,6 +3091,7 @@ export function start(ModdedStarving) {
         fill_path(e, f[5]);
         return d;
     }
+
     function create_wall_gold(c, g, f) {
         var d = document.createElement("canvas");
         var e = d.getContext("2d");
@@ -3063,6 +3119,7 @@ export function start(ModdedStarving) {
         e.restore();
         return d;
     }
+
     function create_door_wood(c, g, f) {
         var d = document.createElement("canvas");
         var e = d.getContext("2d");
@@ -3098,6 +3155,7 @@ export function start(ModdedStarving) {
         fill_path(e, f[5]);
         return d;
     }
+
     function create_door_stone(c, g, f) {
         var d = document.createElement("canvas");
         var e = d.getContext("2d");
@@ -3143,6 +3201,7 @@ export function start(ModdedStarving) {
         fill_path(e, f[5]);
         return d;
     }
+
     function create_door_gold(c, g, f) {
         var d = document.createElement("canvas");
         var e = d.getContext("2d");
@@ -3190,6 +3249,7 @@ export function start(ModdedStarving) {
         fill_path(e, f[5]);
         return d;
     }
+
     function create_furnace_on(c, g, f) {
         var d = document.createElement("canvas");
         var e = d.getContext("2d");
@@ -3250,6 +3310,7 @@ export function start(ModdedStarving) {
         fill_path(e, void 0, f[2], 8 * c);
         return d;
     }
+
     function create_furnace_off(c, g, f) {
         var d = document.createElement("canvas");
         var e = d.getContext("2d");
@@ -3324,6 +3385,7 @@ export function start(ModdedStarving) {
         fill_path(e, void 0, f[2], 8 * c);
         return d;
     }
+
     function create_furnace_slot(c, g, f) {
         g = document.createElement("canvas");
         var d = g.getContext("2d");
@@ -3336,6 +3398,7 @@ export function start(ModdedStarving) {
         fill_path(d, f[0], f[1], 4);
         return g;
     }
+
     function create_door_diamond(c, g, f) {
         var d = document.createElement("canvas");
         var e = d.getContext("2d");
@@ -3383,6 +3446,7 @@ export function start(ModdedStarving) {
         fill_path(e, f[5]);
         return d;
     }
+
     function create_coat(c, g, f) {
         g = document.createElement("canvas");
         var d = g.getContext("2d");
@@ -3430,6 +3494,7 @@ export function start(ModdedStarving) {
         fill_path(d, f[2], f[3], 7 * c);
         return g;
     }
+
     function create_spear(c, g, f) {
         var d = document.createElement("canvas");
         var e = d.getContext("2d");
@@ -3474,6 +3539,7 @@ export function start(ModdedStarving) {
         fill_path(e, f[3], f[4], 6 * c);
         return d;
     }
+
     function create_plus_chest(c, g, f) {
         g = document.createElement("canvas");
         var d = g.getContext("2d");
@@ -3491,6 +3557,7 @@ export function start(ModdedStarving) {
         fill_path(d, f[0]);
         return g;
     }
+
     function create_chest_slot(c, g, f) {
         g = document.createElement("canvas");
         var d = g.getContext("2d");
@@ -3511,6 +3578,7 @@ export function start(ModdedStarving) {
         fill_path(d, f[2]);
         return g;
     }
+
     function create_chest(c, g, f) {
         g = document.createElement("canvas");
         var d = g.getContext("2d");
@@ -3576,6 +3644,7 @@ export function start(ModdedStarving) {
         fill_path(d, f[8]);
         return g;
     }
+
     function create_bag(c, g, f) {
         g = document.createElement("canvas");
         var d = g.getContext("2d");
@@ -3604,6 +3673,7 @@ export function start(ModdedStarving) {
         fill_path(d, f[0], f[1], 4);
         return g;
     }
+
     function create_fur(c, g, f) {
         g = document.createElement("canvas");
         var d = g.getContext("2d");
@@ -3627,6 +3697,7 @@ export function start(ModdedStarving) {
         fill_path(d, f[0], f[1], 4);
         return g;
     }
+
     function create_earmuff(c, g, f) {
         g = document.createElement("canvas");
         var d = g.getContext("2d");
@@ -3670,6 +3741,7 @@ export function start(ModdedStarving) {
         fill_path(d, f[0], f[1], 4);
         return g;
     }
+
     function create_cap_scarf(c, g, f) {
         var d = document.createElement("canvas");
         var e = d.getContext("2d");
@@ -3757,6 +3829,7 @@ export function start(ModdedStarving) {
         fill_path(e, f[3], f[4], 4 * c);
         return d;
     }
+
     function create_spike(c, g, f) {
         var d = document.createElement("canvas");
         var e = d.getContext("2d");
@@ -3780,7 +3853,7 @@ export function start(ModdedStarving) {
             e.restore();
         }
         e.restore();
-        circle(e, 0, 0, 60 * c, 0);
+        circle(e, 0, 0, 60 * c);
         fill_path(e, f[3], f[4], 4 * c);
         circle(e, 0, 0, 40 * c);
         fill_path(e, f[5]);
@@ -3788,6 +3861,7 @@ export function start(ModdedStarving) {
         fill_path(e, f[6], f[7], 8 * c);
         return d;
     }
+
     function create_spike_stone(c, g, f) {
         var d = document.createElement("canvas");
         var e = d.getContext("2d");
@@ -3824,6 +3898,7 @@ export function start(ModdedStarving) {
         fill_path(e, f[7]);
         return d;
     }
+
     function create_spike_gold(c, g, f) {
         var d = document.createElement("canvas");
         var e = d.getContext("2d");
@@ -3860,6 +3935,7 @@ export function start(ModdedStarving) {
         e.restore();
         return d;
     }
+
     function create_spike_diamond(c, g, f) {
         var d = document.createElement("canvas");
         var e = d.getContext("2d");
@@ -3896,6 +3972,7 @@ export function start(ModdedStarving) {
         e.restore();
         return d;
     }
+
     function create_hammer(c, g, f) {
         var d = document.createElement("canvas");
         var e = d.getContext("2d");
@@ -3945,6 +4022,7 @@ export function start(ModdedStarving) {
         fill_path(e, f[3], f[4], 3 * c);
         return d;
     }
+
     function create_fir_one(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -3966,6 +4044,7 @@ export function start(ModdedStarving) {
         fill_path(d, g[5]);
         return f;
     }
+
     function create_fir_two(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -3987,6 +4066,7 @@ export function start(ModdedStarving) {
         fill_path(d, g[5]);
         return f;
     }
+
     function create_fir_three(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -4016,6 +4096,7 @@ export function start(ModdedStarving) {
         fill_path(d, g[9]);
         return f;
     }
+
     function create_amethyst(c, g, f) {
         var d = document.createElement("canvas");
         var e = d.getContext("2d");
@@ -4136,6 +4217,7 @@ export function start(ModdedStarving) {
         fill_path(e, f[2]);
         return d;
     }
+
     function create_dragon_ground(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -4145,6 +4227,7 @@ export function start(ModdedStarving) {
         d.fillRect(0, 0, f.width, f.height);
         return f;
     }
+
     function create_snow_one(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -4162,6 +4245,7 @@ export function start(ModdedStarving) {
         fill_path(d, g[0]);
         return f;
     }
+
     function create_snow_two(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -4188,6 +4272,7 @@ export function start(ModdedStarving) {
         fill_path(d, g[0]);
         return f;
     }
+
     function create_snow_three(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -4206,6 +4291,7 @@ export function start(ModdedStarving) {
         fill_path(d, g[0]);
         return f;
     }
+
     function create_snow_four(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -4225,6 +4311,7 @@ export function start(ModdedStarving) {
         fill_path(d, g[0]);
         return f;
     }
+
     function create_snow_five(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -4241,6 +4328,7 @@ export function start(ModdedStarving) {
         fill_path(d, g[0]);
         return f;
     }
+
     function create_snow_six(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -4259,6 +4347,7 @@ export function start(ModdedStarving) {
         fill_path(d, g[0]);
         return f;
     }
+
     function create_snow_sept(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -4275,6 +4364,7 @@ export function start(ModdedStarving) {
         fill_path(d, g[0]);
         return f;
     }
+
     function create_snow_step(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -4284,6 +4374,7 @@ export function start(ModdedStarving) {
         fill_path(d, g[0]);
         return f;
     }
+
     function create_winter_fox(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -4479,6 +4570,7 @@ export function start(ModdedStarving) {
         fill_path(d, g[3]);
         return f;
     }
+
     function create_hurt_fox_winter(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -4530,6 +4622,7 @@ export function start(ModdedStarving) {
         fill_path(d, g, g, 4 * c);
         return f;
     }
+
     function create_polar_bear(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -4628,6 +4721,7 @@ export function start(ModdedStarving) {
         fill_path(d, g[6]);
         return f;
     }
+
     function create_hurt_polar_bear(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -4661,6 +4755,7 @@ export function start(ModdedStarving) {
         fill_path(d, g, g, 4 * c);
         return f;
     }
+
     function create_dragon(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -4835,6 +4930,7 @@ export function start(ModdedStarving) {
         fill_path(d, g[7]);
         return f;
     }
+
     function create_hurt_dragon(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -4856,6 +4952,7 @@ export function start(ModdedStarving) {
         fill_path(d, g, g, 4 * c);
         return f;
     }
+
     function create_wingleft(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -4917,6 +5014,7 @@ export function start(ModdedStarving) {
         fill_path(d, g[1], g[2], 4 * c);
         return f;
     }
+
     function create_hurt_wingleft(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -4936,6 +5034,7 @@ export function start(ModdedStarving) {
         fill_path(d, g, g, 4 * c);
         return f;
     }
+
     function create_wingright(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -4994,6 +5093,7 @@ export function start(ModdedStarving) {
         fill_path(d, g[1], g[2], 4 * c);
         return f;
     }
+
     function create_hurt_wingright(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -5014,6 +5114,7 @@ export function start(ModdedStarving) {
         fill_path(d, g, g, 4 * c);
         return f;
     }
+
     function create_explorer_hat(c, g, f) {
         var d = document.createElement("canvas");
         var e = d.getContext("2d");
@@ -5097,6 +5198,7 @@ export function start(ModdedStarving) {
         fill_path(e, f[5]);
         return d;
     }
+
     function create_viking_hat(c, g, f) {
         var d = document.createElement("canvas");
         var e = d.getContext("2d");
@@ -5170,6 +5272,7 @@ export function start(ModdedStarving) {
         fill_path(e, f[3], f[4], 4 * c);
         return d;
     }
+
     function create_gold_helmet(c, g, f) {
         g = document.createElement("canvas");
         var d = g.getContext("2d");
@@ -5222,6 +5325,7 @@ export function start(ModdedStarving) {
         fill_path(d, f[2], f[1], 4 * c);
         return g;
     }
+
     function create_diamond_helmet(c, g, f) {
         g = document.createElement("canvas");
         var d = g.getContext("2d");
@@ -5323,6 +5427,7 @@ export function start(ModdedStarving) {
         fill_path(d, f[6], f[7], 4 * c);
         return g;
     }
+
     function create_book(c, g, f) {
         g = document.createElement("canvas");
         var d = g.getContext("2d");
@@ -5387,6 +5492,7 @@ export function start(ModdedStarving) {
         fill_path(d, f[5]);
         return g;
     }
+
     function create_paper(c, g, f) {
         var d = document.createElement("canvas");
         var e = d.getContext("2d");
@@ -5418,6 +5524,7 @@ export function start(ModdedStarving) {
         fill_path(e, f[1], f[2], 10 * c);
         return d;
     }
+
     function create_leaderboard(c) {
         var g = document.createElement("canvas");
         var f = g.getContext("2d");
@@ -5431,10 +5538,11 @@ export function start(ModdedStarving) {
         f.globalAlpha = .8;
         fill_path(f, "#3D8075");
         f.globalAlpha = 1;
-        e = create_text(c, "Leaderboard", 25, "#FFF");
-        f.drawImage(e, (d - e.width) / 2, 5 * c);
+        const text = create_text(c, "Leaderboard", 25, "#FFF");
+        f.drawImage(text, (d - text.width) / 2, 5 * c);
         return g;
     }
+
     function create_button_background(c, g) {
         var f = document.createElement("canvas");
         var d = f.getContext("2d");
@@ -5463,6 +5571,7 @@ export function start(ModdedStarving) {
         fillMixedText(d, formatText(c.text), 0, 0);
         return f;
     }
+
     function create_button(c) {
         var g = [];
         for (var f = 0; f < c.length; f++) {
@@ -5470,10 +5579,11 @@ export function start(ModdedStarving) {
         }
         return g;
     }
+
     function create_gauges(c) {
         var g = document.createElement("canvas");
         var f = g.getContext("2d");
-        var d = 335 * c;
+        var d: any = 335 * c;
         var e = 250 * c;
         var m = 120 * c;
         var p = 20 * c;
@@ -5505,6 +5615,7 @@ export function start(ModdedStarving) {
         fill_path(f, null, "#669BB1", q);
         return g;
     }
+
     function create_images() {
         sprite[SPRITE.FLAKES] = [];
         sprite[SPRITE.FLAKES][SPRITE.DAY] = [];
@@ -5642,8 +5753,8 @@ export function start(ModdedStarving) {
         sprite[SPRITE.GROUND_FIRE] = [];
         sprite[SPRITE.GROUND_FIRE][SPRITE.DAY] = CTI(create_ground_fire(.9, false, ["#2d8f48"]));
         sprite[SPRITE.GROUND_FIRE][SPRITE.NIGHT] = CTI(create_ground_fire(.9, false, ["#0b5454"]));
-        sprite[SPRITE.GEAR] = CTI(create_gear(1, "#ffffff", 1));
-        sprite[SPRITE.GEAR2] = CTI(create_gear(1.5, "#ffffff", 1));
+        sprite[SPRITE.GEAR] = CTI(create_gear(1, "#ffffff"));
+        sprite[SPRITE.GEAR2] = CTI(create_gear(1.5, "#ffffff"));
         sprite[SPRITE.YOUR_SCORE] = CTI(create_text(1, "Your score:", 15, "#FFF"));
         sprite[SPRITE.CRAFT_SEED] = create_craft_button(1, [{
             f: function (c) {
@@ -7839,6 +7950,7 @@ export function start(ModdedStarving) {
             sprite
         });
     }
+
     function init_fake_world() {
         document.getElementById("game_body").style.backgroundColor = SPRITE.GROUND[fake_world.time];
         fake_world.items.push(new Item(ITEMS.FIRE, 0, 0, 0, 0, Math.random() * Math.PI * 2, 0, 0));
@@ -7846,6 +7958,7 @@ export function start(ModdedStarving) {
         fake_world.items.push(new Item(ITEMS.WORKBENCH, 0, 0, 0, 0, Math.PI / 4, 0, 0));
         fake_world.items.push(new Item(ITEMS.FRUIT, 0, 0, 0, 0, 0, 0, 5));
     }
+
     function draw_fake_world() {
         var c = fake_world.time;
         if (sprite[SPRITE.HERB]) {
@@ -7884,7 +7997,7 @@ export function start(ModdedStarving) {
             ctx.drawImage(sprite[SPRITE.TREE][c][2], canw2 + 830, canh2 - 520);
         }
         if (user && world) {
-            var c = user.cam.x;
+            c = user.cam.x;
             var g = user.cam.y;
             user.cam.x = canw2;
             user.cam.y = canh2;
@@ -7935,6 +8048,7 @@ export function start(ModdedStarving) {
             world.time = f;
         }
     }
+
     function draw_slot_number(c, g, f) {
         c = sprite[SPRITE.SLOT_NUMBER][c];
         var d = g.info.translate.x + 5 * scale;
@@ -7944,6 +8058,7 @@ export function start(ModdedStarving) {
         }
         ctx.drawImage(c, d, e);
     }
+
     function draw_amount(c, g) {
         if (!sprite[SPRITE.COUNTER][c]) {
             sprite[SPRITE.COUNTER][c] = create_text(scale, "x" + c, 20, "#FFF");
@@ -7956,11 +8071,12 @@ export function start(ModdedStarving) {
         }
         ctx.drawImage(f, d, e);
     }
+
     function draw_furnace_inventory() {
         user.furnace.amount = 0;
         user.furnace.open = false;
         var c = world.fast_units[user.uid];
-        var g = WORLD.DIST_FURNACE;
+        var g: any = WORLD.DIST_FURNACE;
         if (c) {
             for (var f = 0; f < world.units[ITEMS.FURNACE].length; f++) {
                 var d = world.units[ITEMS.FURNACE][f];
@@ -7987,6 +8103,7 @@ export function start(ModdedStarving) {
             }
         }
     }
+
     function draw_chest_inventory() {
         user.chest.id = -1;
         user.chest.open = false;
@@ -8015,13 +8132,13 @@ export function start(ModdedStarving) {
                 }
             }
             if (g < WORLD.DIST_CHEST) {
-                g = sprite[SPRITE.CHEST_SLOT];
+                const g = sprite[SPRITE.CHEST_SLOT];
                 c = game.chest_buttons[0];
                 ctx.drawImage(g, Math.floor(c.info.translate.x + (c.info.img[0].width - g.width) / 2), Math.floor(c.info.translate.y + (c.info.img[0].height - g.height) / 2) + 3);
                 if (0 <= user.chest.id) {
                     c = game.chest_buttons[user.chest.id];
                     c.draw(ctx);
-                    g = user.chest.amount;
+                    const g = user.chest.amount;
                     if (1 < g) {
                         draw_amount(g, c);
                     }
@@ -8029,6 +8146,7 @@ export function start(ModdedStarving) {
             }
         }
     }
+
     function draw_bigmap() {
         if (user.bigmap) {
             ctx.globalAlpha = .5;
@@ -8047,6 +8165,7 @@ export function start(ModdedStarving) {
             }
         }
     }
+
     function draw_minimap() {
         var c = game.minimap;
         ctx.globalAlpha = .8;
@@ -8059,11 +8178,13 @@ export function start(ModdedStarving) {
             ctx.fill();
         }
     }
+
     function draw_auto_feed() {
         if (user.auto_feed.enabled) {
             ctx.drawImage(sprite[SPRITE.AUTO_FEED], user.auto_feed.translate.x, user.auto_feed.translate.y);
         }
     }
+
     function draw_leaderboard() {
         var c = user.ldb;
         var g = game.leaderboard;
@@ -8100,6 +8221,7 @@ export function start(ModdedStarving) {
         }
         ctx.drawImage(g.can, g.translate.x, g.translate.y);
     }
+
     function draw_ui_crafting() {
         var c = user.craft;
         if (!c.crafting && 0 < c.preview) {
@@ -8129,7 +8251,7 @@ export function start(ModdedStarving) {
             ctx.stroke();
             ctx.restore();
             for (g = 0; g < c.can_craft.length; g++) {
-                d = c.can_craft[g];
+                const d = c.can_craft[g];
                 if (c.id == d.id) {
                     var e = 53 * scale;
                     round_rect(ctx, d.info.translate.x, d.info.translate.y + e * (1 - c.timeout.v), d.info.img[0].width, e * c.timeout.v + 17 * scale, 10 * scale);
@@ -8153,12 +8275,13 @@ export function start(ModdedStarving) {
             }
         }
     }
+
     function draw_ui_inventory() {
         var c = user.inv;
         var g = world.fast_units[user.uid];
         for (var f = 0; f < c.can_select.length; f++) {
             var d = c.can_select[f];
-            var e = false;
+            let e = false;
             if (c.id == d.id || g && g.clothe == d.id && 0 < g.clothe) {
                 e = true;
                 ctx.drawImage(d.info.img[2], d.info.translate.x, d.info.translate.y);
@@ -8172,8 +8295,8 @@ export function start(ModdedStarving) {
             if (0 < m) {
                 draw_slot_number(f, d, e);
             }
-            e = user.chest;
-            if (e.open && (0 > e.id || e.id == d.id)) {
+            const chest = user.chest;
+            if (chest.open && (0 > chest.id || chest.id == d.id)) {
                 game.plus_buttons[d.id].draw(ctx);
             }
             if (user.furnace.open && INV.WOOD == d.id) {
@@ -8190,6 +8313,7 @@ export function start(ModdedStarving) {
             }
         }
     }
+
     function draw_gauges() {
         if (.25 > user.gauges.life.x) {
             ctx.globalAlpha = user.gauges.warn_life.v;
@@ -8215,6 +8339,7 @@ export function start(ModdedStarving) {
         ctx.fillRect(this.translate.x + 66 * scale, this.translate.y + 87 * scale, 247 * user.gauges.cold.x * scale, 16 * scale);
         ctx.drawImage(this.img, this.translate.x, this.translate.y);
     }
+
     function draw_door(c) {
         ctx.save();
         ctx.translate(user.cam.x + this.x, user.cam.y + this.y);
@@ -8235,6 +8360,7 @@ export function start(ModdedStarving) {
         ctx.drawImage(c, -w / 2 + f, -h / 2 + g, w, h);
         ctx.restore();
     }
+
     function draw_simple_item(c) {
         ctx.save();
         ctx.translate(user.cam.x + this.x, user.cam.y + this.y);
@@ -8255,6 +8381,7 @@ export function start(ModdedStarving) {
         ctx.drawImage(img, -w / 2 + f, -h / 2 + g, w, h);
         ctx.restore();
     }
+
     function draw_dragon() {
         ctx.save();
         ctx.translate(user.cam.x + this.x, user.cam.y + this.y);
@@ -8262,8 +8389,8 @@ export function start(ModdedStarving) {
         this.breath.update();
         this.rotate.update();
         c = sprite[SPRITE.DRAGON][world.time];
-        w = -c.width * this.breath.v;
-        h = -c.height * this.breath.v;
+        let w = -c.width * this.breath.v;
+        let h = -c.height * this.breath.v;
         ctx.drawImage(c, -w / 2, -h / 2, w, h);
         if (this.action & STATE.HURT) {
             if (this.hit.update() && this.hit.o == 0) {
@@ -8302,14 +8429,15 @@ export function start(ModdedStarving) {
         ctx.restore();
         ctx.restore();
     }
+
     function draw_simple_mobs(c, g) {
         ctx.save();
         ctx.translate(user.cam.x + this.x, user.cam.y + this.y);
         ctx.rotate(this.angle);
         this.breath.update();
         f = sprite[c][world.time];
-        w = -f.width * this.breath.v;
-        h = -f.height * this.breath.v;
+        const w = -f.width * this.breath.v;
+        const h = -f.height * this.breath.v;
         ctx.drawImage(f, -w / 2, -h / 2, w, h);
         if (this.action & STATE.HURT) {
             if (this.hit.update() && this.hit.o == 0) {
@@ -8322,6 +8450,7 @@ export function start(ModdedStarving) {
         }
         ctx.restore();
     }
+
     function draw_breath(c) {
         ctx.save();
         ctx.translate(user.cam.x + this.x, user.cam.y + this.y);
@@ -8333,6 +8462,7 @@ export function start(ModdedStarving) {
         ctx.drawImage(img, -w / 2, -h / 2, w, h);
         ctx.restore();
     }
+
     function draw_seed() {
         if (!(10 > this.info)) {
             ctx.save();
@@ -8356,6 +8486,7 @@ export function start(ModdedStarving) {
             ctx.restore();
         }
     }
+
     function draw_plant() {
         if (!(10 < this.info)) {
             ctx.save();
@@ -8379,6 +8510,7 @@ export function start(ModdedStarving) {
             }
         }
     }
+
     function draw_furnace() {
         ctx.save();
         ctx.translate(user.cam.x + this.x, user.cam.y + this.y);
@@ -8393,10 +8525,11 @@ export function start(ModdedStarving) {
         } else {
             c = g = 0;
         }
-        img = this.action == 2 ? sprite[SPRITE.FURNACE_ON][world.time] : sprite[SPRITE.FURNACE_OFF][world.time];
+        const img = this.action == 2 ? sprite[SPRITE.FURNACE_ON][world.time] : sprite[SPRITE.FURNACE_OFF][world.time];
         ctx.drawImage(img, -img.width / 2 + g, -img.height / 2 + c);
         ctx.restore();
     }
+
     function draw_furnace_ground() {
         ctx.save();
         ctx.translate(user.cam.x + this.x, user.cam.y + this.y);
@@ -8408,6 +8541,7 @@ export function start(ModdedStarving) {
         ctx.drawImage(c, -g / 2, -f / 2, g, f);
         ctx.restore();
     }
+
     function draw_fire_ground(c) {
         ctx.save();
         ctx.translate(user.cam.x + this.x, user.cam.y + this.y);
@@ -8431,17 +8565,19 @@ export function start(ModdedStarving) {
         ctx.drawImage(g, -g.width / 2 + f, -g.height / 2 + d);
         ctx.restore();
     }
+
     function draw_furnace_halo() {
         ctx.save();
         ctx.translate(user.cam.x + this.x, user.cam.y + this.y);
         ctx.rotate(this.angle);
         this.halo.update();
-        img = sprite[SPRITE.HALO_FIRE][world.time];
-        w = -img.width * this.halo.v;
-        h = -img.height * this.halo.v;
+        const img = sprite[SPRITE.HALO_FIRE][world.time];
+        const w = -img.width * this.halo.v;
+        const h = -img.height * this.halo.v;
         ctx.drawImage(img, -w / 2, -h / 2, w, h);
         ctx.restore();
     }
+
     function draw_fire_halo() {
         ctx.save();
         ctx.translate(user.cam.x + this.x, user.cam.y + this.y);
@@ -8458,6 +8594,7 @@ export function start(ModdedStarving) {
         ctx.drawImage(img, -w / 2, -h / 2, w, h);
         ctx.restore();
     }
+
     function draw_player_right_stuff(c, g, f) {
         if (0 <= c) {
             let img;
@@ -8493,6 +8630,7 @@ export function start(ModdedStarving) {
             }
         }
     }
+
     var draw_player_clothe = function (c) {
         if (0 < c) {
             var g = sprite[c][world.time];
@@ -8524,6 +8662,7 @@ export function start(ModdedStarving) {
             });
         }
     };
+
     function draw_player() {
         ctx.save();
         ctx.translate(user.cam.x + this.x, user.cam.y + this.y);
@@ -8642,6 +8781,7 @@ export function start(ModdedStarving) {
         ctx.globalAlpha = 1;
         ctx.restore();
     }
+
     function draw_alert(c, g) {
         if (this.text) {
             ctx.globalAlpha = this.timeout.o ? 1 - this.timeout.v : 1;
@@ -8656,6 +8796,7 @@ export function start(ModdedStarving) {
             }
         }
     }
+
     function draw_chat() {
         ctx.save();
         ctx.translate(user.cam.x + this.x, user.cam.y + this.y);
@@ -8672,6 +8813,7 @@ export function start(ModdedStarving) {
         }
         ctx.restore();
     }
+
     function draw_map_objects(c, g, f, d, e, m, p, n) {
         for (n = n === void 0 ? 0 : n; p >= n; p--) {
             for (var r = c; r <= g; r++) {
@@ -8699,7 +8841,10 @@ export function start(ModdedStarving) {
             }
         }
     }
-    function draw_map_object(c, g, f, d, e, m) { }
+
+    function draw_map_object(c, g, f, d, e, m) {
+    }
+
     function draw_world() {
         var c = Math.max(Math.floor(-user.cam.x / world.dw) - 2, 0);
         var g = Math.min(Math.floor((-user.cam.x + user.cam.w) / world.dw) + 2, world.nw - 1);
@@ -8712,11 +8857,11 @@ export function start(ModdedStarving) {
         var e = world.units[ITEMS.PLAYERS];
         for (var m = 0; m < e.length; m++) {
             var p = e[m];
-            for (var n = 0; n < p.foot.length; n++) {
+            for (let n = 0; n < p.foot.length; n++) {
                 draw_foot(p.foot[n]);
             }
         }
-        n = world.units[ITEMS.FURNACE];
+        let n = world.units[ITEMS.FURNACE];
         for (m = 0; m < n.length; m++) {
             if (n[m].action == 2) {
                 draw_bg_transition(n[m]);
@@ -8958,7 +9103,8 @@ export function start(ModdedStarving) {
             }
         }
     }
-    function draw_bg_transition(c, g) {
+
+    function draw_bg_transition(c, g?) {
         if (world.transition) {
             ctx.globalAlpha = 1;
             c.draw_bg(g);
@@ -8971,7 +9117,8 @@ export function start(ModdedStarving) {
             c.draw_bg(g);
         }
     }
-    function draw_fg_transition(c, g) {
+
+    function draw_fg_transition(c, g?) {
         if (world.transition) {
             ctx.globalAlpha = 1;
             c.draw_fg(g);
@@ -8984,6 +9131,7 @@ export function start(ModdedStarving) {
             c.draw_fg(g);
         }
     }
+
     function draw_image_transition(c, g, f) {
         if (world.transition) {
             ctx.globalAlpha = 1;
@@ -8997,6 +9145,7 @@ export function start(ModdedStarving) {
             ctx.drawImage(c, g, f);
         }
     }
+
     function draw_foot(c) {
         ctx.save();
         ctx.translate(user.cam.x + c.x, user.cam.y + c.y);
@@ -9007,6 +9156,7 @@ export function start(ModdedStarving) {
         ctx.globalAlpha = 1;
         ctx.restore();
     }
+
     function draw_imgs_transition(c, g, f, d, e) {
         if (world.transition && e == 1) {
             ctx.globalAlpha = 1;
@@ -9021,7 +9171,8 @@ export function start(ModdedStarving) {
         }
         ctx.globalAlpha = 1;
     }
-    function draw_transition(c, g, f) {
+
+    function draw_transition(c, g?, f?) {
         if (world.transition) {
             ctx.globalAlpha = 1;
             c.draw(g, f);
@@ -9034,7 +9185,8 @@ export function start(ModdedStarving) {
             c.draw(g, f);
         }
     }
-    function draw_map_transition(c, g, f, d, e, m, p, n) {
+
+    function draw_map_transition(c, g, f, d, e, m, p, n, idk?) {
         if (world.transition) {
             ctx.globalAlpha = 1;
             c(g, f, d, e, m, p, n);
@@ -9047,6 +9199,7 @@ export function start(ModdedStarving) {
             c(g, f, d, e, m, p, n);
         }
     }
+
     function get_color_transition(c, g, f, d, e, m, p) {
         d = Math.floor(d * p + (1 - p) * c);
         c = "#" + (16 > d ? "0" + d.toString(16) : d.toString(16));
@@ -9055,6 +9208,7 @@ export function start(ModdedStarving) {
         d = Math.floor(m * p + (1 - p) * f);
         return c += 16 > d ? "0" + d.toString(16) : d.toString(16);
     }
+
     function draw_ground() {
         if (-user.cam.x <= SPRITE.WINTER_BIOME_Y) {
             if (world.transition) {
@@ -9085,6 +9239,7 @@ export function start(ModdedStarving) {
             }
         }
     }
+
     function draw_winter() {
         var c = user.winter;
         var g = c.flakes;
@@ -9104,6 +9259,7 @@ export function start(ModdedStarving) {
             c.add(g);
         }
     }
+
     function draw_world_with_effect() {
         if (world.transition) {
             var c = world.shade.update();
@@ -9117,6 +9273,7 @@ export function start(ModdedStarving) {
             world.shade.o = false;
         }
     }
+
     var ANIMATION_STOP = 0;
     var ANIMATION_RUN = 1;
     var FOCUS_OUT = 0;
@@ -9135,6 +9292,7 @@ export function start(ModdedStarving) {
     var BUTTON_OUT = 0;
     var BUTTON_IN = 1;
     var BUTTON_CLICK = 2;
+
     function gui_disable_antialiasing(c) {
         c.imageSmoothingEnabled = false;
         c.webkitImageSmoothingEnabled = false;
@@ -9142,6 +9300,7 @@ export function start(ModdedStarving) {
         c.msImageSmoothingEnabled = false;
         c.oImageSmoothingEnabled = false;
     }
+
     function get_mouse_pos(c, g) {
         var f = c.getBoundingClientRect();
         return {
@@ -9149,6 +9308,7 @@ export function start(ModdedStarving) {
             y: g.clientY - f.top
         };
     }
+
     function gui_create_button(c, g, f, d) {
         if (d) {
             var e = d;
@@ -9185,6 +9345,7 @@ export function start(ModdedStarving) {
             }
         };
     }
+
     function gui_create_image(c) {
         var g = {
             x: 0,
@@ -9198,6 +9359,7 @@ export function start(ModdedStarving) {
             }
         };
     }
+
     function gui_create_animation(c, g) {
         g = g === void 0 ? .033 : g;
         var f = {
@@ -9222,6 +9384,7 @@ export function start(ModdedStarving) {
             }
         };
     }
+
     function gui_add_breath_effect(c, g, f, d, e, m, p) {
         c.end = g;
         c.start = f;
@@ -9235,6 +9398,7 @@ export function start(ModdedStarving) {
             d.drawImage(c.img, 0, 0, c.img.width, c.img.height, c.translate.x, c.translate.y, c.width, c.height);
         };
     }
+
     function gui_breath_effect(c) {
         c.scale += c.breath ? delta / c.speed_start : -delta / c.speed_end;
         if (c.scale > c.end) {
@@ -9243,6 +9407,7 @@ export function start(ModdedStarving) {
             c.breath = true;
         }
     }
+
     var STATE = {
         DELETE: 1,
         HURT: 2,
@@ -9270,6 +9435,7 @@ export function start(ModdedStarving) {
         LAG_DISTANCE: 500,
         LOOSE_FOCUS: 15
     };
+
     function Client() {
         var c = this;
         this.socket = null;
@@ -9292,15 +9458,15 @@ export function start(ModdedStarving) {
             this.server_list = JSON.parse(this.xhttp.responseText);
         };
         this.update_server_list = function () {
-            var c = 0;
-            for (var f = 0; f < client.server_list.length; f++) {
-                c += client.server_list[f].players.online;
+            let players = 0;
+            for (let f = 0; f < client.server_list.length; f++) {
+                players += client.server_list[f].players.online;
             }
-            c = "<option disabled>Choose a server (" + c + " players)</option>";
-            for (f = 0; f < this.server_list.length; f++) {
+            let c = "<option disabled>Choose a server (" + players + " players)</option>";
+            for (let f = 0; f < this.server_list.length; f++) {
                 c += "<option>" + this.server_list[f].name + " [" + this.server_list[f].players.online + "/" + this.server_list[f].players.max + " players]</option>\n";
             }
-            f = document.getElementById("region_select");
+            const f = document.getElementById("region_select") as HTMLSelectElement;
             f.innerHTML = c;
             f.selectedIndex = Math.min(Math.floor(9 * Math.random() + 1), client.server_list.length);
         };
@@ -9311,7 +9477,7 @@ export function start(ModdedStarving) {
             c.socket.close();
             if (c.timeout_number > CLIENT.TIMEOUT_NUMBER) {
                 ___adsvid = 1;
-                ui.error_level = CLIENT.ERROR_REFUSED;
+                // ui.error_level = CLIENT.ERROR_REFUSED; // TODO test
                 user.alert.text = "You cannot join this server";
                 ui.waiting = false;
             } else {
@@ -9419,7 +9585,7 @@ export function start(ModdedStarving) {
         };
         this.set_cam = function (c) {
             c = new Uint16Array(c);
-            player.cam.change(c[1], c[2]);
+            user.cam.change(c[1], c[2]); // player -> user
         };
         this.recover_focus = function (c) {
             c = new Uint16Array(c);
@@ -9613,24 +9779,23 @@ export function start(ModdedStarving) {
                     world.delete_units(q);
                 } else {
                     var v = f[m + 2];
-                    var t = c[p + 2]/2;
-                    var z = c[p + 3]/2;
-                    var p = c[p + 5];
+                    var t = c[p + 2] / 2;
+                    var z = c[p + 3] / 2;
+                    var info = c[p + 5];
                     var m = f[m + 3] / 128 * Math.PI;
                     if (world.fast_units[q]) {
                         q = world.fast_units[q];
 
-                        let dis=((q.r.x-t)**2+(q.r.y-z)**2)**0.5, rdis=((q.x-t)**2+(q.y-z)**2)**0.5, fac = Math.min(1,Math.max(0,(rdis-dis)/200)),speed = ((1-fac)*dis+fac*rdis),sum=0;
+                        let dis = ((q.r.x - t) ** 2 + (q.r.y - z) ** 2) ** 0.5, rdis = ((q.x - t) ** 2 + (q.y - z) ** 2) ** 0.5, fac = Math.min(1, Math.max(0, (rdis - dis) / 200)), speed = ((1 - fac) * dis + fac * rdis), sum = 0;
                         q.ospeed = q.ospeed ? q.ospeed : [];
                         q.ospeed.push(speed);
 
-                        for (let i=1;i<=Math.min(4,q.ospeed.length);i++) {
-                            sum += q.ospeed[q.ospeed.length-i];
+                        for (let i = 1; i <= Math.min(4, q.ospeed.length); i++) {
+                            sum += q.ospeed[q.ospeed.length - i];
                         }
-                        
-                        q.speed = sum/Math.min(4,q.ospeed.length)*23;
-//                         console.log(rdis,dis)
-                        
+
+                        q.speed = sum / Math.min(4, q.ospeed.length) * 23;
+
                         q.r.x = t;
                         q.r.y = z;
                         if (n != 0 && Utils.dist(q, q.r) > CLIENT.LAG_DISTANCE) {
@@ -9642,7 +9807,7 @@ export function start(ModdedStarving) {
                             q.nangle = m;
                         }
                         q.action |= r;
-                        q.info = p;
+                        q.info = info;
                         if (q.update) {
                             q.update(r);
                         }
@@ -9794,13 +9959,13 @@ export function start(ModdedStarving) {
             this.socket.send(JSON.stringify([0, c]));
         };
         this.move_units = function (c) {
-            var f = player.select.units;
+            var f = user.select.units; // player -> user
             if (f.length != 0) {
-                var d = [2];
+                var d: any[] = [2];
                 var e = [];
                 Utils.sub_vector(c, {
-                    x: player.cam.rx,
-                    y: player.cam.ry
+                    x: user.cam.rx, // player -> user
+                    y: user.cam.ry // player -> user
                 });
                 d.push(c.x);
                 d.push(c.y);
@@ -10069,18 +10234,17 @@ export function start(ModdedStarving) {
                         }
                     }
                 }
-            }
-                ;
+            };
             this.socket.onopen = function () {
                 clearTimeout(c.timeout_handler);
                 c.socket.send(JSON.stringify([ui.nickname.input.value, CLIENT.VERSION_NUMBER, session.token, session.id]));
                 c.timeout_handler = setTimeout(c.timeout, CLIENT.TIMEOUT_TIME);
-            }
-                ;
+            };
             this.timeout_handler = setTimeout(c.timeout, CLIENT.TIMEOUT_TIME);
         };
     }
-    let MAP = {};
+
+    let MAP: any = {};
     var WORLD = {
         SPEED: 200,
         SPEED_WINTER: 160,
@@ -10088,7 +10252,7 @@ export function start(ModdedStarving) {
         SPEED_COLLIDE: 100,
         RABBIT_SPEED: 300,
         WOLF_SPEED: 210,
-        SPIDER_SPEED: 245,
+        // SPIDER_SPEED: 245, lol?
         FOX_SPEED: 220,
         BEAR_SPEED: 190,
         DRAGON_SPEED: 200,
@@ -10130,12 +10294,14 @@ export function start(ModdedStarving) {
         DRAGON: 65,
         FRUIT: 100
     };
+
     function Player(c) {
         this.nickname = this.displayName = c;
         this.ldb_label = this.label_winter = this.label = null;
         this.alive = false;
         this.score = 0;
     }
+
     function Item(c, g, f, d, e, m, p, n) {
         this.type = c;
         this.pid = g;
@@ -10200,8 +10366,7 @@ export function start(ModdedStarving) {
                         this.action -= STATE.COLD + STATE.HEAL;
                         this.action |= STATE.WEB;
                     }
-                }
-                    ;
+                };
                 this.update();
                 break;
             case ITEMS.FIRE:
@@ -10322,8 +10487,7 @@ export function start(ModdedStarving) {
             case ITEMS.CHEST:
                 this.update = function (c) {
                     this.action = c;
-                }
-                    ;
+                };
                 this.draw = draw_simple_item;
                 this.hit = {
                     anim: new Utils.LinearAnimation(false, 1, 1, 0, 10, 10),
@@ -10356,11 +10520,11 @@ export function start(ModdedStarving) {
                 };
                 this.update = function (c) {
                     this.action = c;
-                }
-                    ;
+                };
         }
     }
-    function World(c) {
+
+    function World(c?) {
         function g(c, d, f) {
             for (let k = 0; k < c[d].length; k++) {
                 for (let l = 0; l < c[d][k].length; l++) {
@@ -10371,6 +10535,7 @@ export function start(ModdedStarving) {
                 }
             }
         }
+
         this.mode = WORLD.MODE_PVP;
         this.max_units = c;
         this.players = [];
@@ -10383,7 +10548,7 @@ export function start(ModdedStarving) {
         this.units[ITEMS.BEAR] = [];
         this.units[ITEMS.DRAGON] = [];
         this.units[ITEMS.SPIDER] = [];
-        this.units[ITEMS.WORBENCH] = [];
+        this.units[ITEMS.WORKBENCH] = [];
         this.units[ITEMS.FIRE] = [];
         this.units[ITEMS.BIG_FIRE] = [];
         this.units[ITEMS.SEED] = [];
@@ -10482,11 +10647,11 @@ export function start(ModdedStarving) {
                 }
             }
         };
-        this.move_units = function (c) {
+        this.move_units = function (c, d, f, g, r) {
             for (var u = 0; u < c.length; u++) {
                 let b = c[u];
                 if (b.angle != b.nangle) {
-                    var q = 2 * Math.PI;
+                    const q = 2 * Math.PI;
                     b.angle = (b.angle + q) % q;
                     b.nangle = (b.nangle + q) % q;
                     if (b.angle != b.nangle) {
@@ -10508,8 +10673,8 @@ export function start(ModdedStarving) {
                         b.action -= STATE.IDLE;
                     }
                     b.action |= STATE.WALK;
-                    q = Utils.get_std_angle(b, b.r) + Math.PI;
-                    q = Utils.build_vector( (b.speed ? b.speed : 0)*delta , q); // TODO
+                    let q = Utils.get_std_angle(b, b.r) + Math.PI;
+                    q = Utils.build_vector((b.speed ? b.speed : 0) * delta, q); // TODO
                     if (Utils.norm(q) < Utils.norm(Utils.get_vector(b, b.r))) {
                         Utils.add_vector(b, q);
                     } else {
@@ -10521,7 +10686,7 @@ export function start(ModdedStarving) {
                     }
                 }
                 if (b.foot_enable) {
-                    q = b.foot;
+                    const q = b.foot;
                     v = q.length;
                     if (b.x > SPRITE.WINTER_BIOME_Y + 20 * scale && (v === 0 || Utils.dist(q[v - 1], b) > SPRITE.STEP_SPACE)) {
                         b.id_foot++;
@@ -10574,6 +10739,7 @@ export function start(ModdedStarving) {
             this.move_units(this.units[ITEMS.DRAGON]);
         };
     }
+
     // var CRAFT = { FIRE: 0, WORKBENCH: 1, SWORD: 2, PICK: 3, SEED: 4, PICK_GOLD: 5, PICK_DIAMOND: 6, SWORD_GOLD: 7, SWORD_DIAMOND: 8, PICK_WOOD: 9, WALL: 10, SPIKE: 11, COOKED_MEAT: 12, BIG_FIRE: 13, BANDAGE: 14, STONE_WALL: 15, GOLD_WALL: 16, DIAMOND_WALL: 17, WOOD_DOOR: 18, CHEST: 19, STONE_SPIKE: 20, GOLD_SPIKE: 21, DIAMOND_SPIKE: 22, STONE_DOOR: 23, GOLD_DOOR: 24, DIAMOND_DOOR: 25, EARMUFFS: 26, COAT: 27, SPEAR: 28, GOLD_SPEAR: 29, DIAMOND_SPEAR: 30, FURNACE: 31, EXPLORER_HAT: 32, STONE_HELMET: 33, GOLD_HELMET: 34, DIAMOND_HELMET: 35, BOOK: 36, PAPER: 37, BAG: 38, SWORD_AMETHYST: 39, PICK_AMETHYST: 40, AMETHYST_SPEAR: 41, HAMMER: 42, HAMMER_GOLD: 43, HAMMER_DIAMOND: 44, HAMMER_AMETHYST: 45, AMETHYST_WALL: 46, AMETHYST_SPIKE: 47, AMETHYST_DOOR: 48, CAP_SCARF: 49, BLUE_CORD: 50 };
     var INV = {
         SWORD: 0,
@@ -11004,6 +11170,7 @@ export function start(ModdedStarving) {
         INV,
         RECIPES
     });
+
     function Flakes(c, g, f) {
         this.id = c;
         this.speed = 8 * (c + 5);
@@ -11012,9 +11179,10 @@ export function start(ModdedStarving) {
         this.y = f;
         this.alpha = 0;
     }
+
     function User() {
-        this.init = function () { }
-            ;
+        this.init = function () {
+        };
         this.furnace = {
             amount: 0,
             pid: 1,
@@ -11363,9 +11531,11 @@ export function start(ModdedStarving) {
             }
         };
     }
+
     var LOADER = {
         SERVER_INFO_URL: "servers"
     };
+
     function Loader(c, g, f) {
         this.can = c;
         this.ctx = g;
@@ -11391,7 +11561,8 @@ export function start(ModdedStarving) {
             total: 1
         };
         var d = this;
-        var e = function () { };
+        var e = function () {
+        };
         var m = 0;
         this.quit_effect = function () {
             d.update();
@@ -11437,8 +11608,8 @@ export function start(ModdedStarving) {
                 setTimeout(u, 1e3);
             }
         };
-        g = function () { }
-            ;
+        g = function () {
+        };
         for (var v in IMAGES) {
             var t = IMAGES[v];
             IMAGES[v] = new Image;
@@ -11460,6 +11631,7 @@ export function start(ModdedStarving) {
             }
         };
     }
+
     function UI(c, g) {
         this.can = c;
         this.ctx = g;
@@ -11735,7 +11907,7 @@ export function start(ModdedStarving) {
         };
         this.trigger_mousemove = (d) => {
             d = get_mouse_pos(this.can, d);
-            var e = false;
+            var e = 0;
             if (!f.waiting) {
                 e |= f.play.trigger(f.can, d, MOUSE_MOVE);
             }
@@ -11752,6 +11924,7 @@ export function start(ModdedStarving) {
             window.removeEventListener("mousemove", this.trigger_mousemove, false);
         };
     }
+
     function Game(c, g) {
         var f = this;
         this.can = c;
@@ -12452,13 +12625,14 @@ export function start(ModdedStarving) {
             window.removeEventListener("keydown", this.trigger_keydown, false);
         };
     }
+
     var fake_world = {
         time: Math.floor(2 * Math.random()),
         items: []
     };
     init_fake_world();
     var ui;
-    var game = {
+    var game: any = {
         is_run: false
     };
     var world;
@@ -12467,8 +12641,7 @@ export function start(ModdedStarving) {
         if (game.is_run) {
             return "Are you sure you want quit starve.io ;-; ?";
         }
-    }
-        ;
+    };
     var client = new Client;
     var keyboard = new Keyboard;
     var mouse = new Mouse;
@@ -12493,7 +12666,8 @@ export function start(ModdedStarving) {
         });
     }
     );
-    function draw(c) {
+
+    function draw(c?) {
         window.requestAnimationFrame(draw);
         delta = (c - old_timestamp) / 1e3;
         old_timestamp = c;
@@ -12509,13 +12683,15 @@ export function start(ModdedStarving) {
             }
         }
     }
+
     resize_canvas();
     draw(0);
+
     function getScript(c, g) {
         var f = document.head || document.getElementsByTagName("head")[0];
-        var d = document.createElement("script");
+        var d = document.createElement("script") as any;
         var e = true;
-        d.async = "async";
+        d.async = true;
         d.type = "text/javascript";
         d.charset = "UTF-8";
         d.src = c;
@@ -12528,5 +12704,6 @@ export function start(ModdedStarving) {
         };
         f.appendChild(d);
     }
+
     var ___adsvid = 1;
 }

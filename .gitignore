@@ -1,5 +1,7 @@
 node_modules
 .history
 .yarn
+.idea
 yarn-error.log
 config.json
+web/public

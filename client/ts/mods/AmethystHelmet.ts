@@ -1,4 +1,4 @@
-import { Mod } from "../moddedstarving.mjs";
+import { Mod, ModEvent } from "../ModdedStarving";
 
 const NAME = "AMETHYST_HELMET";
 const ID = 81;
@@ -7,7 +7,7 @@ class AmethystHelmetMod extends Mod {
     name = "AmethystHelmet";
     version = "0.2";
 
-    on(event, data) {
+    on(event: ModEvent, data: any) {
         switch (event) {
             case "load":
                 console.log(`${this.name} (${this.version}) loaded`);

@@ -49,7 +49,8 @@ app.use(async (req, res, next) => {
     next();
 });
 
-app.use(express.static(__dirname + '/../../client'));
+// app.use(express.static(__dirname + '/../../client'));
+app.use(express.static('./public'));
 app.get('/servers', function (req, res) {
     res.setHeader("access-control-allow-origin", "*");
     res.setHeader("content-type", "application/json");

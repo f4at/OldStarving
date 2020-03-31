@@ -1,12 +1,12 @@
 export class ModdedStarving {
     version = "0.1";
-    mods = [];
+    mods: Mod[] = [];
 
     initialize() {
         console.log(`ModdedStarving v${this.version} initializing`);
 
         const promises = [];
-        promises.push(this.loadMod("./mods/AmethystHelmet.mjs"));
+        // promises.push(this.loadMod("./mods/AmethystHelmet"));
 
         return Promise.all(promises);
     }
@@ -19,7 +19,7 @@ export class ModdedStarving {
         this.mods.push(mod);
     }
 
-    on(event, data) {
+    on(event: ModEvent, data?: any) {
         this.mods.forEach(mod => {
             switch (event) {
                 case "start":
@@ -32,8 +32,11 @@ export class ModdedStarving {
     }
 }
 
-export class Mod {
+export type ModEvent = "start" | "load" | "registry_init" | "sprite" | "draw_clothe" | "select_inv";
 
+export abstract class Mod {
+    client: any;
+    abstract on(event: ModEvent, data?: any): void;
 }
 
 export default new ModdedStarving();

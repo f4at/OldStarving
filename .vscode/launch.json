@@ -1,4 +1,3 @@
-
 {
     // Use IntelliSense to learn about possible attributes.
     // Hover to view descriptions of existing attributes.
@@ -9,25 +8,47 @@
             "type": "node",
             "request": "launch",
             "name": "Launch server",
-            "args": ["src/index.ts"],
-            "runtimeArgs": ["-r", "ts-node/register"],
+            "args": [
+                "src/index.ts"
+            ],
+            "runtimeArgs": [
+                "-r",
+                "ts-node/register"
+            ],
             "cwd": "${workspaceRoot}/server",
             "protocol": "inspector",
             "sourceMaps": true,
             "console": "integratedTerminal",
-            "internalConsoleOptions":"neverOpen"
+            "internalConsoleOptions": "neverOpen"
         },
         {
             "type": "node",
             "request": "launch",
             "name": "Launch web",
-            "args": ["src/index.ts"],
-            "runtimeArgs": ["-r", "ts-node/register"],
+            "args": [
+                "src/index.ts"
+            ],
+            "runtimeArgs": [
+                "-r",
+                "ts-node/register"
+            ],
             "cwd": "${workspaceRoot}/web",
             "protocol": "inspector",
             "sourceMaps": true,
             "console": "integratedTerminal",
-            "internalConsoleOptions":"neverOpen"
+            "internalConsoleOptions": "neverOpen"
+        },
+        {
+            "name": "Launch Chrome",
+            "request": "launch",
+            "type": "pwa-chrome",
+            "runtimeExecutable": "canary",
+            "url": "http://localhost",
+            "webRoot": "${workspaceFolder}/web/public",
+            "sourceMaps": true,
+            "sourceMapPathOverrides": {
+                "webpack:///./*": "${workspaceFolder}/client/*",
+            }
         }
     ]
 }

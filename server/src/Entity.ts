@@ -125,6 +125,7 @@ export default class Entity implements Collider {
             world.entities[this.owner.pid].push(this);
             world.echunks[this.chunk.x][this.chunk.y][this.owner.pid].push(this);
             this.sendInfos();
+            this.init();
         }
     }
 

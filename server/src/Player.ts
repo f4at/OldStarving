@@ -26,13 +26,13 @@ export class PlayerInventory extends Inventory {
         this.player.send([26, this.size = size]);
     }
 
-    remove(id: Item, amount: number) {
-        let slot = this.items.find(e => e && e.item == id);
-        if (slot) {
-            if (slot.item == this.player.tool) {
+    remove(item: Item, amount: number) {
+        let slot = this.items.find(e => e && e.item == item);
+        if (slot && slot !== undefined) {
+            if (slot.item === this.player.tool) {
                 this.player.tool = Items.HAND;
                 this.player.updating = true;
-            } else if (slot.item == this.player.clothes) {
+            } else if (slot.item === this.player.clothes) {
                 this.player.clothes == Items.AIR;
                 this.player.updating = true;
             }
@@ -158,7 +158,8 @@ export default class Player extends Entity {
             return;
         }
         let found = false, counter = 0;
-        /*
+
+        
         while (counter < 64 && !found) {
             this.pos = { "x": 1 + Math.random() * 5000, "y": 1 + Math.random() * 5000 }; //spawn in forest biome
             this.chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
@@ -174,18 +175,18 @@ export default class Player extends Entity {
             ws.close();
             return;
         }
-        */
-        this.pos = { x: 5000, y: 5000 };
+
+        this.pos = { "x": 5000, "y": 5000 }; //spawn in forest biome
         this.chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
 
         this.bag = true;
-        this.inventory.add(Items.STONE_WALL, 10);
-        this.inventory.add(Items.PICK_WOOD, 100);
-        this.inventory.add(Items.PICK_STONE, 100);
-        this.inventory.add(Items.PICK_AMETHYST, 100);
-        this.inventory.add(Items.SWORD_GOLD, 100);
-        this.inventory.add(Items.STONE_SPEAR, 100);
-        this.inventory.add(Items.AMETHYST_SPEAR, 100);
+
+        this.inventory.add(Items.SWORD_AMETHYST, 1);
+        this.inventory.add(Items.DIAMOND_HELMET, 1);
+        this.inventory.add(Items.AMETHYST_SPEAR, 1);
+        this.inventory.add(Items.AMETHYST_SPIKE, 20);
+        this.inventory.add(Items.HAMMER_AMETHYST, 1);
+        this.inventory.add(Items.SEED, 10);
 
         world.players.push(this);
         world.chunks[this.chunk.x][this.chunk.y].push(this);
@@ -193,22 +194,27 @@ export default class Player extends Entity {
         this.updateLoop = setInterval(() => {
             this.counter += 1;
             if (this.counter % (world.tickRate * 4) == 0) {
-                let temperature = Math.max(0, Math.min(100, this.temperature + (this.moving ? 1 : 0) + (this.attacking ? 1 : 0) + (world.isDay ? -2 : -10) + (this.fire ? 12 : 0) + this.clothes.coldProtection));
-                let food = Math.max(0, this.food + (this.moving ? -3 : -1) + (this.attacking ? -2 : 0));
+                let temperature = Math.max(0, Math.min(100, this.temperature + (this.moving ? 1 : 0) + (this.attacking ? 1 : 0) + (world.isDay ? -2 : -20) +this.clothes.coldProtection + (this.fire ? 25 : 0)) );
+                let food = Math.max(0, this.food + (this.moving ? -2 : -0.5) + (this.attacking ? -2 : 0));
                 if (this.temperature == temperature && temperature == 0) {
                     this.damage(10, null, false, false);
+                    this.action |= EntityState.Cold;
                 }
                 if (this.food == food && food == 0) {
                     this.damage(15, null, false, false);
+                    this.action |= EntityState.Hunger;
                 }
-                let regen = Math.min(8, this.regen);
-                this.regen = Math.max(this.regenMin, this.regen - regen);
-                this.damage(-regen, null, false, false);
+                if (food > 25 && temperature > 25) {
+                    let regen = Math.min(15, this.regen);
+                    this.regen = Math.max(this.regenMin, this.regen - regen);
+                    this.damage(-this.regen, null, true, false);
+                }
+                
                 this.food = food;
                 this.temperature = temperature;
                 this.updateBars();
             }
-            if (this.counter % (world.tickRate * 1) == 0) {
+            if (this.counter % Math.ceil(world.tickRate/4) == 0) {
                 this.updateCrafting();
             }
             if (this.moving || this.updating || this.action) {
@@ -216,8 +222,6 @@ export default class Player extends Entity {
                     this.pos.x += this.movVector.x / world.tickRate;
                     this.pos.y += this.movVector.y / world.tickRate;
                     this.collision();
-                    this.pos.x = Math.min(Math.max(0, this.pos.x), world.mapSize.x * 1000 - 1);
-                    this.pos.y = Math.min(Math.max(0, this.pos.y), world.mapSize.y * 1000 - 1);
 
                     let chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
                     if (this.chunk.x != chunk.x || chunk.y != this.chunk.y) {
@@ -260,8 +264,8 @@ export default class Player extends Entity {
     }
 
     getMapEntitiesInRange(x: number, y: number): MapEntity[] {
-        let ymin = Math.max(-y + Math.floor(this.pos.y / 100), 0), ymax = Math.min(y + 1 + Math.floor(this.pos.y / 100), world.map.height),
-            xmin = Math.max(-x + Math.floor(this.pos.x / 100), 0), xmax = Math.min(x + 1 + Math.floor(this.pos.x / 100), world.map.width);
+        let ymin = Math.max(-y + Math.floor(this.pos.y / 100), 0), ymax = Math.min(y + 1 + Math.floor(this.pos.y / 100), Math.floor(world.map.height/100)),
+            xmin = Math.max(-x + Math.floor(this.pos.x / 100), 0), xmax = Math.min(x + 1 + Math.floor(this.pos.x / 100), Math.floor(world.map.width/100));
         let list = [];
         for (let x = xmin; x < xmax; x++) {
             for (let y = ymin; y < ymax; y++) {
@@ -298,13 +302,19 @@ export default class Player extends Entity {
                     break;
                 }
             }
+            let pos = this.pos;
+            this.pos.x = Math.min(Math.max(0, this.pos.x), world.mapSize.x * 1000 - 1);
+            this.pos.y = Math.min(Math.max(0, this.pos.y), world.mapSize.y * 1000 - 1);
+            if (pos.x != this.pos.x || pos.y != this.pos.y) {
+                collide = true;
+            }
             if (!collide || counter == 32) { break; };
         }
     }
 
     join(ws) {
         this.ws = ws;
-        this.ws.send(JSON.stringify([3, this.pid, 1024, world.leaderboard, this.pos.x, this.pos.y, 256, world.mode, world.isDay ? 0 : 1, this.sessionId, world.map.raw]));
+        this.ws.send(JSON.stringify([3, this.pid, 256, world.leaderboard, this.pos.x, this.pos.y, 256,  world.isDay ? 0 : 1, world.mode, this.sessionId, world.map.raw]));
         this.online = true;
         this.getInfos();
         this.sendInfos();
@@ -330,7 +340,7 @@ export default class Player extends Entity {
         if (to === null) {
             to = this.getEntitiesInRange(2, 2);
         }
-        this.send(new Uint8Array([0, 0].concat(...to.filter(e => e.type != EntityType.HARVESTABLE).map(e => e.infoPacket(visible, false).slice(2)))));
+        this.send(new Uint8Array([0, 0].concat(...to.filter(e => !(e instanceof MapEntity) ).map(e => e.infoPacket(visible, false).slice(2)))));
     }
 
     move(dir: number) {
@@ -354,8 +364,8 @@ export default class Player extends Entity {
     hit(angle: number) {
         this.angle = angle;
         this.attacking = true;
-        this.hit2();
         if (!this.attackLoop) {
+            this.hit2();
             this.attackLoop = setInterval(() => {
                 if (this.attacking) {
                     this.hit2();
@@ -363,7 +373,7 @@ export default class Player extends Entity {
                     clearInterval(this.attackLoop);
                     this.attackLoop = null;
                 }
-            }, 500);
+            }, 550);
         }
     }
 
@@ -382,8 +392,13 @@ export default class Player extends Entity {
         this.attacking = false;
     }
 
-    damage(dmg: number, attacker: Player = null, report: Boolean = true, protection: Boolean = true) {
-        this.health = Math.max(0, Math.min(this.maxHealth, this.health - dmg + (protection ? this.clothes.damageProtection[Player ? DamageType.PvP : DamageType.PvE] : 0)));
+    damage(dmg: number, attacker: Player = null, report: Boolean = true, protection: Boolean = true, send: Boolean = false) {
+        let ohealth = this.health;
+        if (dmg > 0) {
+            this.health = Math.max(0, Math.min(this.health, this.health - dmg + (protection ? this.clothes.damageProtection[Player ? DamageType.PvP : DamageType.PvE] : 0)));
+        } else {
+            this.health = Math.max(this.health, Math.min(this.maxHealth, this.health - dmg + (protection ? this.clothes.damageProtection[Player ? DamageType.PvP : DamageType.PvE] : 0)));
+        }
         if (this.health <= 0) {
             if (attacker) {
                 attacker.score += Math.floor(this.score / 3);
@@ -391,7 +406,14 @@ export default class Player extends Entity {
             this.die();
         }
         if (report) {
-            this.action |= EntityState.Hurt;
+            if (this.health < ohealth) {
+                this.action |= EntityState.Hurt;
+            } else if (this.health > ohealth) {
+                this.action |= EntityState.Heal;
+            }
+        }
+        if (send) {
+            this.updateBars();
         }
     }
 
@@ -406,9 +428,10 @@ export default class Player extends Entity {
         clearInterval(this.displayLoop);
         world.players = world.players.filter(e => e !== this);
         world.chunks[this.chunk.x][this.chunk.y] = world.chunks[this.chunk.x][this.chunk.y].filter(e => e !== this);
-        this.send(new Uint8Array([2]));
-        this.sendInfos(false);
+        this.send(new Uint8Array([2,this.pid]));
+        Utils.broadcastPacket(new Uint8Array([7,this.pid]));
         this.ws.close();
+        this.sendInfos(false);
     }
 
     updateChunk(chunk: Vector) {
@@ -465,14 +488,14 @@ export default class Player extends Entity {
             if (infos) {
                 let slot = infos[0], recipe = infos[1];
                 for (let element of recipe.ingredients) {
-                    this.inventory.remove(element[0], element[1]);
+                    this.inventory.remove(element.item, element.amount);
                 }
                 this.allowCrafting(item);
                 this.craftTimeout = setTimeout(() => {
                     this.inventory.add(item, 1/*, slot*/);
                     this.finishedCrafting();
                     this.craftTimeout = null;
-                }, recipe.time * 25000);
+                }, 1000/recipe.time);
             }
         }
     }
@@ -480,29 +503,40 @@ export default class Player extends Entity {
     canCraft(item: Item): [ItemStack, Recipe] {
         if (!this.craftTimeout) {
             let recipe = item.recipe;
-            recipe = recipe ? recipe : { ingredients: [], requireFire: false, requireWorkbench: false, time: 0 };
-            if ((this.workbench || !recipe.requireWorkbench) && (this.fire || !recipe.requireFire)) {
-                let slot = this.inventory.findStack(item);
-                if (slot) {
-                    let haveCraftingItems = true;
-                    for (let element of recipe.ingredients) {
-                        if (!this.inventory.findStack(element[0], element[1])) {
-                            haveCraftingItems = false;
-                            break;
+            if (recipe) {
+                if ((this.workbench || !recipe.requireWorkbench) && (this.fire || !recipe.requireFire)) {
+                    let slot = this.inventory.findStack(item);
+                    if (slot) {
+                        let haveCraftingItems = true;
+                        for (let element of recipe.ingredients) {
+                            if (!this.inventory.findStack(element[0], element[1])) {
+                                haveCraftingItems = false;
+                                break;
+                            }
                         }
-                    }
-                    if (haveCraftingItems) {
-                        return [slot, recipe];
+                        if (haveCraftingItems) {
+                            return [slot, recipe];
+                        }
                     }
                 }
             }
-
         }
     }
 
     updateCrafting() {
-        let fire = false; // TODO Check if player next to fire or workbench, needs building/structures first.
-        let workbench = false;
+        let fire:boolean = false;
+        let workbench:boolean = false;
+        for (let entity of this.getEntitiesInRange(1,1,false,true).filter(e=> Utils.distance({x:this.pos.x-e.pos.x,y:this.pos.y-e.pos.y}) < 240)) {
+            if (entity.type === EntityType.FIRE) {
+                fire = true;
+            } else if (entity.type === EntityType.WORKBENCH) {
+                workbench = true;
+                if (fire === true) {
+                    break;
+                }
+            }
+        }
+
         if (workbench != this.workbench) {
             this.workbench = workbench;
             this.send(new Uint8Array([19, workbench ? 1 : 0]));

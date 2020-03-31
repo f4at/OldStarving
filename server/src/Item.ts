@@ -45,7 +45,7 @@ export class Tool extends Item {
         this.range = range;
         this.range2 = range2;
         this.damage = damage;
-        this.tier = 0;
+        this.tier = tier;
     }
 }
 
@@ -78,7 +78,7 @@ export enum EntityType {
     HARVESTABLE = 5,
     MOB = 6,
     CHEST = 7,
-    PLAYER
+    PLAYER = 8
 }
 
 export class EntityItem extends Item { //use it to create entities later :3
@@ -119,39 +119,39 @@ export class Usable extends Item {
 
 export class Items {
     static STONE_SWORD = new Tool(0, 39, 25, { pvp: 19, pve: 6 });
-    static AIR = new Clothes(0, { pvp: 0, pve: 0 }, 0); //can't find it using .find bc 2nd (thats good), needs to share stone_sword id :/
-    static PICK_STONE = new Pickaxe(1, 31, 25, { pvp: 1, pve: 0 }, 2);
+    static AIR = new Clothes(0, { pvp: 0, pve: 0 }, 0);
+    static PICK_STONE = new Pickaxe(1, 28, 25, { pvp: 1, pve: 0 }, 2);
     static STONE = new Item(2);
     static WOOD = new Item(3);
     static PLANT = new Usable(4, 5, 0, 0, 1);
     static GOLD = new Item(5);
     static DIAMOND = new Item(6);
-    static PICK_GOLD = new Pickaxe(7, 32, 25, { pvp: 3, pve: 1 }, 3);
-    static PICK_DIAMOND = new Pickaxe(8, 32, 25, { pvp: 4, pve: 1 }, 4);
+    static PICK_GOLD = new Pickaxe(7, 29, 25, { pvp: 3, pve: 1 }, 3);
+    static PICK_DIAMOND = new Pickaxe(8, 30, 25, { pvp: 4, pve: 1 }, 4);
     static SWORD_GOLD = new Tool(9, 40, 25, { pvp: 22, pve: 7 });
     static SWORD_DIAMOND = new Tool(10, 41, 25, { pvp: 24, pve: 8 });
-    static FIRE = new EntityItem(11, 1, 0, 30, 1, 500, EntityType.FIRE, { physical: false, Lifespan: 2 });
-    static WORKBENCH = new EntityItem(12, 2, 4, 50, 1.25, 500, EntityType.WORKBENCH, { physical: true, Lifespan: 30 });
-    static SEED = new EntityItem(13, 3, 0, 20, 1, 500, EntityType.HARVESTABLE, { physical: false });
-    static HAND = new Pickaxe(14, 20, 25, { pvp: 5, pve: 1 }, 0);
-    static PICK_WOOD = new Pickaxe(15, 28, 25, { pvp: 5, pve: 1 }, 1);
-    static WOOD_WALL = new EntityItem(16, 4, 0, 50, 1, 1000, EntityType.WALL, { physical: true, Lifespan: 30, LifeUpdate: 2 });
-    static WOOD_SPIKE = new EntityItem(17, 5, 0, 50, 1, 150, EntityType.SPIKE, { physical: true, Lifespan: 15, LifeUpdate: 2, hitdmg: 2, dmg: 5 });
+    static FIRE = new EntityItem(11, 1, 0, 30, 1, 500, EntityType.FIRE, { physical: false, Lifespan: 2, dmg: 10, dmgDelay: 4000, dmgRange: 35});
+    static WORKBENCH = new EntityItem(12, 2, 4, 50, 1.25, 500, EntityType.WORKBENCH, {physical: true});
+    static SEED = new EntityItem(13, 3, 0, 20, 1, 500, EntityType.HARVESTABLE, { physical: false , inv: {item: Items.PLANT, amount:0, max:3, delay: 15, respawn:1 }, Lifespan:60, LifeDelay: 1/6});
+    static HAND = new Pickaxe(14, 10, 25, { pvp: 5, pve: 1 }, 0);
+    static PICK_WOOD = new Pickaxe(15, 25, 25, { pvp: 5, pve: 1 }, 1);
+    static WOOD_WALL = new EntityItem(16, 4, 0, 50, 1, 1000, EntityType.WALL, { physical: true});
+    static WOOD_SPIKE = new EntityItem(17, 5, 0, 50, 1, 150, EntityType.SPIKE, { physical: true, hitdmg: 2, dmg: 5 });
     static MEAT = new Usable(18, 25, 0, -10, -5);
     static COOKED_MEAT = new Usable(19, 20, 0, 0, 5);
     static BIG_FIRE = new EntityItem(20, 6, 0, 35, 1, 700, EntityType.FIRE, { physical: false, Lifespan: 5, dmg: 20 });
     static BANDAGE = new Usable(21, 25, 0, -10, -5);
     static CORD = new Item(22);
-    static STONE_WALL = new EntityItem(23, 7, 7, 50, 1, 1500, EntityType.WALL, { physical: true, tier: 1, Lifespan: 120, LifeUpdate: 5 });
-    static GOLD_WALL = new EntityItem(24, 8, 7, 50, 1, 2000, EntityType.WALL, { physical: true, tier: 2, Lifespan: 720, LifeUpdate: 30 });
+    static STONE_WALL = new EntityItem(23, 7, 7, 50, 1, 1500, EntityType.WALL, { physical: true, tier: 1});
+    static GOLD_WALL = new EntityItem(24, 8, 7, 50, 1, 2000, EntityType.WALL, { physical: true, tier: 2});
     static DIAMOND_WALL = new EntityItem(25, 9, 7, 50, 1, 2500, EntityType.WALL, { physical: true, tier: 3 });
-    static WOOD_DOOR = new EntityItem(26, 10, 0, 50, 1, 3500, EntityType.DOOR, { physical: true, Lifespan: 30, LifeUpdate: 2 });
+    static WOOD_DOOR = new EntityItem(26, 10, 0, 50, 1, 3500, EntityType.DOOR, { physical: true});
     static CHEST = new EntityItem(27, 11, 4, 25, 1.3, 300, EntityType.CHEST, { physical: true });
-    static STONE_SPIKE = new EntityItem(28, 12, 7, 50, 1, 300, EntityType.SPIKE, { physical: true, tier: 1, Lifespan: 60, LifeUpdate: 5, hitdmg: 4, dmg: 10 });
-    static GOLD_SPIKE = new EntityItem(29, 13, 7, 50, 1, 600, EntityType.SPIKE, { physical: true, tier: 2, Lifespan: 360, LifeUpdate: 30, hitdmg: 8, dmg: 20 });
-    static DIAMOND_SPIKE = new EntityItem(30, 14, 7, 50, 1, 900, EntityType.SPIKE, { physical: true, tier: 3, hitdmg: 4, dmg: 30 });
-    static STONE_DOOR = new EntityItem(31, 15, 7, 50, 1, 1500, EntityType.DOOR, { physical: true, tier: 1, Lifespan: 120, LifeUpdate: 5 });
-    static GOLD_DOOR = new EntityItem(32, 16, 7, 50, 1, 2000, EntityType.DOOR, { physical: true, tier: 2, Lifespan: 720, LifeUpdate: 30 });
+    static STONE_SPIKE = new EntityItem(28, 12, 7, 50, 1, 300, EntityType.SPIKE, { physical: true, tier: 1, hitdmg: 5, dmg: 20, dmgDelay: 1500, dmgRange: 70});
+    static GOLD_SPIKE = new EntityItem(29, 13, 7, 50, 1, 600, EntityType.SPIKE, { physical: true, tier: 2, hitdmg: 10, dmg: 30, dmgDelay: 1500, dmgRange: 70});
+    static DIAMOND_SPIKE = new EntityItem(30, 14, 7, 50, 1, 900, EntityType.SPIKE, { physical: true, tier: 3, hitdmg: 15, dmg: 40, dmgDelay: 1500, dmgRange: 70});
+    static STONE_DOOR = new EntityItem(31, 15, 7, 50, 1, 1500, EntityType.DOOR, { physical: true, tier: 1});
+    static GOLD_DOOR = new EntityItem(32, 16, 7, 50, 1, 2000, EntityType.DOOR, { physical: true, tier: 2});
     static DIAMOND_DOOR = new EntityItem(33, 17, 7, 50, 1, 2500, EntityType.DOOR, { physical: true, tier: 3 });
     static FUR = new Item(34);
     static FUR_WOLF = new Item(35);
@@ -170,15 +170,15 @@ export class Items {
     static BAG = new Clothes(48, { pvp: 0, pve: 0 }, 0);
     static AMETHYST = new Item(49);
     static SWORD_AMETHYST = new Tool(50, 42, 25, { pvp: 27, pve: 9 });
-    static PICK_AMETHYST = new Pickaxe(51, 33, 25, { pvp: 5, pve: 2 }, 5);
+    static PICK_AMETHYST = new Pickaxe(51, 31, 25, { pvp: 5, pve: 2 }, 5);
     static AMETHYST_SPEAR = new Tool(52, 55, 36, { pvp: 18, pve: 6 });
     static HAMMER_STONE = new Tool(53, 38, 25, { pvp: 2, pve: 20 }, 1);
     static HAMMER_GOLD = new Tool(54, 39, 25, { pvp: 3, pve: 30 }, 2);
     static HAMMER_DIAMOND = new Tool(55, 40, 25, { pvp: 4, pve: 40 }, 3);
     static HAMMER_AMETHYST = new Tool(56, 41, 25, { pvp: 5, pve: 50 }, 4);
-    static AMETHYST_WALL = new EntityItem(57, 18, 7, 50, 1, 3500, EntityType.WALL, { physical: true, tier: 4 });
-    static AMETHYST_SPIKE = new EntityItem(58, 19, 7, 50, 1, 1200, EntityType.SPIKE, { physical: true, tier: 4, hitdmg: 4, dmg: 50 });
-    static AMETHYST_DOOR = new EntityItem(59, 20, 7, 50, 1, 3500, EntityType.DOOR, { physical: true, tier: 4 });
+    static AMETHYST_WALL = new EntityItem(57, 19, 7, 50, 1, 3500, EntityType.WALL, { physical: true, tier: 4 });
+    static AMETHYST_SPIKE = new EntityItem(58, 20, 7, 50, 1, 1200, EntityType.SPIKE, { physical: true, tier: 4, hitdmg: 20, dmg: 50, dmgDelay: 1500, dmgRange: 70});
+    static AMETHYST_DOOR = new EntityItem(59, 21, 7, 50, 1, 3500, EntityType.DOOR, { physical: true, tier: 4 });
     static CAP_SCARF = new Clothes(60, { pvp: 0, pve: 0 }, 3);
     static FUR_WINTER = new Item(61);
     static BLUE_CORD = new Item(62);
@@ -190,7 +190,7 @@ export class Items {
     static BEAR = new EntityItem(132, 63, 0, 35, 1, 900, EntityType.MOB, { physical: false, offensive: true, dmg: 60, speed: 190 });
     static DRAGON = new EntityItem(133, 64, 0, 50, 1, 1500, EntityType.MOB, { physical: false, offensive: true, dmg: 90, speed: 250 });
 
-    static FRUIT = new EntityItem(134, 61, 0, 10, 1, 1, EntityType.HARVESTABLE, { physical: false });
+    static FRUIT = new EntityItem(134, 100, 0, 50, 1, 0, EntityType.HARVESTABLE, {physical: true , inv: {item: Items.PLANT, amount:3, maximum:5, delay: 10, respawn: 1} });
 
     static AMETHYST_HELMET = new Clothes(81, { pvp: 6, pve: 23 }, 0);
 

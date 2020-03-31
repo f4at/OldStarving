@@ -5,6 +5,7 @@ import world from "./World";
 import Player from "./Player";
 import { Items } from "./Item";
 import * as express from 'express';
+import Entity from "./Entity";
 
 export interface Vector {
     x: number;
@@ -30,11 +31,11 @@ export abstract class Utils {
     }
 
     static toRadians(angle: number) {
-        return angle / 128 * Math.PI;
+        return (angle / 128 * Math.PI)%(Math.PI*2);
     }
 
     static toBinary(angle: number) {
-        return angle * 128 / Math.PI;
+        return (angle * 128 / Math.PI)%256;
     }
 
     static angleToCoords(angle: number) {
@@ -100,10 +101,8 @@ wss.on("connection", (ws) => {
                     player = world.players.find(e => e.session == data[2] && e.sessionId == data[3]);
                     if (!player) {
                         player = new Player(data[0], data[1], data[2], data[3], ws);
-                        console.log(player.pid, 'new');
                     } else {
                         player.join(ws);
-                        console.log(player.pid, 'old');
                     }
 
                 } else {
@@ -139,7 +138,13 @@ wss.on("connection", (ws) => {
                             player.cancelCrafting(); // lose items
                             break;
                         case 12:
-                            // TODO Add wood to furnace
+                            if (player.inventory.findStack(Items.WOOD,data[1])) {
+                                player.inventory.remove(Items.WOOD,data[1]);
+                                let entity = world.entities[data[2]].find(e=> e.id = data[3]);
+                                entity.inv.amount += data[1];
+                                entity.info = entity.inv.amount;
+                                entity.sendInfos();
+                            }
                             break;
                         case 14:
                             player.stopHitting();

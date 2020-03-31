@@ -1,7 +1,7 @@
 import { EntityType, EntityItem, Pickaxe, Items } from "./Item";
 import { Vector, Utils } from ".";
 import Player from "./Player";
-import world, { MapEntityDrop } from "./World";
+import world, { MapEntityDrop, MapEntity } from "./World";
 import Item from './Item';
 
 export interface Collider {
@@ -29,10 +29,10 @@ export enum EntityState {
 export default class Entity implements Collider {
     type: EntityType;
     entityType: EntityItem;
-    owner: Player;
+    owner: Player = null;
     id: number;
+    mapID: number;
     item: Item;
-    mapId: number;
     physical: boolean;
     tier: number;
     miningTier: number;
@@ -56,8 +56,10 @@ export default class Entity implements Collider {
     XtoYfac: any;
 
     offensive: boolean;
-    dmg: 0;
-    dmgRange: 0;
+    dmg: number=0;
+    dmgDelay: number=0;
+    dmgRange: number=0;
+    sid: number=0;
 
     updateLoop: any;
     updating: boolean;
@@ -77,8 +79,9 @@ export default class Entity implements Collider {
             this.entityType = entityItem; //entity id
             this.item = Items.get(entityItem.id); //item id
             this.owner = owner;
+            let ownerId = this.owner === null ? 0 : this.owner.pid;
             for (let i = 1; i < 256 ** 2; i++) {
-                if (!world.entities[this.owner.pid].find(e => e.id == i)) {
+                if (!world.entities[ownerId].find(e => e.id == i)) {
                     this.id = i;
                     break;
                 }
@@ -108,22 +111,20 @@ export default class Entity implements Collider {
             this.eangle = special.eangle ? special.eangle : 0;
             this.tier = special.tier ? special.tier : 0;
             this.speed = special.speed ? special.speed : 0;
-            this.inv = special.inv;
+            this.inv = Object.assign({},special.inv);
             this.lifespan = special.Lifespan;
             this.hitDamage = special.hitdmg ? special.hitdmg : 0;
-            this.miningTier = special.ftier ? special.ftier : 0;
-            this.moveDelay = special.moveDelay ? special.moveDelay : 1;
+            this.miningTier = special.ftier ? special.ftier : -1;
+            this.moveDelay = special.moveDelay ? special.moveDelay : 1000;
+            this.dmgDelay = special.dmgDelay ? special.dmgDelay : 1000;
             this.regen = special.regen ? special.regen : 0;
-            this.mapId = special.mapid;
             this.stime = new Date().getTime();
-
             if (this.getEntitiesInRange(1, 1, false, true).concat(this.getMapEntitiesInRange(5, 5)).find(e => Utils.distance({ x: pos.x - e.pos.x, y: pos.y - e.pos.y }) < this.radius + e.radius)) {
                 this.error = "Can't place entity in top of other Entities";
                 return;
             }
-
-            world.entities[this.owner.pid].push(this);
-            world.echunks[this.chunk.x][this.chunk.y][this.owner.pid].push(this);
+            world.entities[ownerId].push(this);
+            world.echunks[this.chunk.x][this.chunk.y][ownerId].push(this);
             this.sendInfos();
             this.init();
         }
@@ -148,18 +149,23 @@ export default class Entity implements Collider {
 
         switch (this.type) {
             case EntityType.HARVESTABLE:
-                this.updateLoop = setInterval(() => {
-                    this.inv.amount = Math.min(this.inv.maximum, this.inv.amount + this.inv.respawn);
-                }, this.inv.delay * 1000);
+                this.info  = this.inv.amount;
+                if (this.inv.respawn > 0) {
+                    this.updateLoop = setInterval(() => {
+                        this.inv.amount = Math.min(this.inv.maximum, this.inv.amount + this.inv.respawn);
+                        this.info = this.inv.amount;
+                        this.sendInfos();
+                    }, this.inv.delay * 1000);
+                }
                 break;
             case EntityType.MOB:
                 this.updateLoop = setInterval(() => {
                     this.counter += 1;
                     let mov = (this.counter % (this.moveDelay / 200)) < 1;
-                    if ((this.counter % (this.moveDelay / 200)) < 1) { // TODO change this to attackDelay
-                        let players = this.getEntitiesInRange(1, 1, true).filter(e => Utils.distance({ x: e.x - this.pos.x, y: e.y - this.pos.y }) < e.radius + this.dmgRange);
+                    if ((this.counter % (this.dmgDelay / 200)) < 1) {
+                        let players = this.getEntitiesInRange(1, 1, true).filter(e => Utils.distance({ x: e.x - this.pos.x, y: e.y - this.pos.y }) < this.dmgRange+e.radius);
                         for (let player of players) {
-                            player.damage(this.hitDamage);
+                            player.damage(this.dmg,null,true,true,true);
                         }
                     }
                     if (this.action || mov) {
@@ -168,17 +174,23 @@ export default class Entity implements Collider {
                     }
                 }, 200);
                 break;
+            case EntityType.FIRE:
+                this.updateLoop = setInterval(() => {
+                    let players = this.getEntitiesInRange(1, 1, true,false).filter(e => Utils.distance({ x: e.pos.x - this.pos.x, y: e.pos.y - this.pos.y }) < e.radius + this.dmgRange);
+                    for (let player of players) {
+                        player.damage(this.dmg,null,true,true,true);
+                    }
+                    if (this.action) { this.sendInfos() };
+                }, this.dmgDelay);
+                break;
             case EntityType.SPIKE:
                 this.updateLoop = setInterval(() => {
-                    this.counter += 1;
-                    if ((this.counter % (this.moveDelay / 200)) < 1) { // TODO change this to attackDelay
-                        let players = this.getEntitiesInRange(1, 1, true).filter(e => Utils.distance({ x: e.x - this.pos.x, y: e.y - this.pos.y }) < e.radius + this.dmgRange);
-                        for (let player of players) {
-                            player.damage(this.hitDamage);
-                        }
+                    let players = this.getEntitiesInRange(1, 1, true,false).filter(e => Utils.distance({ x: e.pos.x - this.pos.x, y: e.pos.y - this.pos.y }) < e.radius + this.dmgRange && e !== this.owner);
+                    for (let player of players) {
+                        player.damage(this.dmg,null,true,true,true);
                     }
-                    if (this.action) { this.sendInfos(); };
-                }, 200);
+                    if (this.action) { this.sendInfos() };
+                }, this.dmgDelay);
                 break;
             default:
                 this.updateLoop = setInterval(() => {
@@ -189,32 +201,39 @@ export default class Entity implements Collider {
     }
 
     damage(dmg: number, attacker: Player = null) { // use negative values to increase hp
+        let ownerId = this.owner !== null ? this.owner.pid : 0 ;
         if (this.type == EntityType.HARVESTABLE) {
-            if (this.miningTier < 0) {
-                let amount = Math.min(this.inv.amount, 1);
-                let item = this.inv.item;
-                attacker.inventory.add(item, amount);
-                attacker.gather(item, amount);
-                this.inv.amount -= amount;
-            } else if (attacker.tool instanceof Pickaxe && this.miningTier <= attacker.tool.miningTier) {
-                let amount = Math.min(this.inv.amount, attacker.tool.miningTier - this.miningTier + 1);
-                let item = this.inv.item;
-                attacker.inventory.add(item, amount);
-                attacker.gather(item, amount);
-                this.inv.amount -= amount;
+            if (attacker) {
+                if (this.miningTier < 0) {
+                    let amount = Math.min(this.inv.amount, 1);
+                    let item = this.inv.item;
+                    attacker.inventory.add(item, amount);
+                    attacker.gather(item, amount);
+                    this.inv.amount -= amount;
+                    this.info = this.inv.amount;
+                    this.sendInfos();
+                } else if (attacker.tool instanceof Pickaxe && this.miningTier <= attacker.tool.miningTier) {
+                    let amount = Math.min(this.inv.amount, attacker.tool.miningTier - this.miningTier + 1);
+                    let item = this.inv.item;
+                    attacker.inventory.add(item, amount);
+                    attacker.gather(item, amount);
+                    this.inv.amount -= amount;
+                }
+                if (this.entityType instanceof MapEntity) {
+                    let angle = Math.round(Utils.coordsToAngle({ x: this.pos.x - attacker.pos.x, y: this.pos.y - attacker.pos.y })) % 256;
+                    this.sendToRange(new Uint16Array([9, Math.floor(this.pos.x / 100), Math.floor(this.pos.y / 100), angle, this.mapID]));
+                }
             }
-
-            let angle = Math.round(Utils.coordsToAngle({ x: this.pos.x - attacker.pos.x, y: this.pos.y - attacker.pos.y })) % 256;
-            this.sendToRange(new Uint16Array([9, Math.floor(this.pos.x / 100), Math.floor(this.pos.y / 100), angle, this.id]));
-        } else {
+        }
+    
+        if (!(this instanceof MapEntity)) {
             if (this.maxHealth > 0) {
                 let fac = 1;
                 if (attacker) {
                     let tier = attacker.tool.tier ? attacker.tool.tier : 0;
                     fac = (this.tier > tier ? 0.5 ** (this.tier - tier) : 1);
-                    if (this.hitDamage) { attacker.damage(this.hitDamage); };
                 }
-                this.health = Math.min(this.maxHealth, this.health - Math.floor(dmg / fac));
+                this.health = Math.min(this.maxHealth, this.health-dmg*fac);
                 if (this.health <= 0) {
                     return this.die(attacker ? attacker : null);
                 }
@@ -223,25 +242,29 @@ export default class Entity implements Collider {
                 switch (this.type) {
                     case EntityType.MOB:
                         this.action |= EntityState.Hurt;
+                        this.sendInfos();
                         break;
                     case EntityType.SPIKE:
-                        if (this.hitDamage) { attacker.damage(this.hitDamage); };
+                        if (attacker !== this.owner) {attacker.damage(this.hitDamage, null, true, true, true)};
                         break;
-
                 }
                 let angle;
                 switch (this.type) {
                     case EntityType.DOOR:
-                        this.info = this.info ? 0 : 1;
-                        this.physical = !this.physical;
-                        this.sendInfos();
+                        if (this.owner === attacker) {
+                            this.info = this.info ? 0 : 1;
+                            this.physical = !this.physical;
+                            this.sendInfos();
+                            break;
+                        }
                     default:
                         let id = Utils.toHex(this.id);
                         angle = Math.round(Utils.coordsToAngle({ x: this.pos.x - attacker.pos.x, y: this.pos.y - attacker.pos.y }));
-                        this.sendToRange(new Uint8Array([22, 0, id[0], id[1], this.owner.pid, angle]));
+                        this.sendToRange(new Uint8Array([22, 0, id[0], id[1], ownerId, angle]));
                         break;
                 }
             }
+
         }
 
     }
@@ -250,26 +273,29 @@ export default class Entity implements Collider {
     }
 
     die(attacker: Player = null) {
-        if (this.entityType instanceof EntityItem) {
-            if (this.updateLoop) {
-                clearInterval(this.updateLoop);
-            }
-            if (this.lifeLoop) {
-                clearInterval(this.lifeLoop);
-            }
-            if (attacker) {
-                attacker.score += 10 + this.score;
-                if (this.inv) { //give what in inv.
-                    if (this.inv.amount) {
-                        attacker.inventory.add(this.inv.item, this.inv.amount);
-                    }
+        this.sendInfos(false);
+        let ownerId = this.owner === null ? 0 : this.owner.pid;
+        world.echunks[this.chunk.x][this.chunk.y][ownerId] = world.echunks[this.chunk.x][this.chunk.y][ownerId].filter(e=> e !== e);
+        world.entities[ownerId] = world.entities[ownerId].filter(e=> e !== e);
+
+        if (this.updateLoop) {
+            clearInterval(this.updateLoop);
+        }
+        if (this.lifeLoop) {
+            clearInterval(this.lifeLoop);
+        }
+        if (attacker) {
+            attacker.score += 10 + this.score;
+            if (this.inv) {
+                if (this.inv.amount) {
+                    attacker.inventory.add(this.inv.item, this.inv.amount);
                 }
             }
         }
     }
 
     sendInfos(visible = true, to: Player[] = null) {
-        if (this.entityType instanceof EntityItem) {
+        if (!(this instanceof MapEntity)) {
             let packet = this.infoPacket(visible);
             if (to !== null) {
                 for (let player of to) {
@@ -282,22 +308,21 @@ export default class Entity implements Collider {
     }
 
     infoPacket(visible = true, uint8: boolean = true) {
-        if (this.entityType instanceof EntityItem) {
-            const ownerId = this.owner === null ? 0 : this.owner.pid;
-            let arr;
-            if (visible) {
-                let pos = { "x": Utils.toHex(this.pos.x * 2), "y": Utils.toHex(this.pos.y * 2) };
-                let id = Utils.toHex(this.id);
-                let info = Utils.toHex(this.info);
-                arr = [0, 0, ownerId, this.action, this.entityType.sid, this.angle, pos.x[0], pos.x[1], pos.y[0], pos.y[1], id[0], id[1], info[0], info[1]];
-            } else {
-                arr = [0, 0, ownerId, 1, this.entityType.sid, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-            }
-            if (uint8) {
-                return new Uint8Array(arr);
-            } else {
-                return arr;
-            }
+        const ownerId = this.owner === null ? 0 : this.owner.pid;
+        let arr;
+        if (visible) {
+            let pos = { "x": Utils.toHex(this.pos.x * 2), "y": Utils.toHex(this.pos.y * 2) };
+            let id = Utils.toHex(this.id);
+            let info = Utils.toHex(this.info);
+            arr = [0, 0, ownerId, this.action, this.entityType.sid, this.angle, pos.x[0], pos.x[1], pos.y[0], pos.y[1], id[0], id[1], info[0], info[1]];
+        } else {
+            let id = Utils.toHex(this.id);
+            arr = [0, 0, ownerId, 1, 0, 0, 0, 0, 0, 0, id[0], id[1], 0, 0];
+        }
+        if (uint8) {
+            return new Uint8Array(arr);
+        } else {
+            return arr;
         }
     }
 
@@ -326,14 +351,19 @@ export default class Entity implements Collider {
     }
 
     getMapEntitiesInRange(x: number, y: number) {
-        let ymin = Math.max(-y + Math.floor(this.pos.y / 100), 0), ymax = Math.min(y + 1 + Math.floor(this.pos.y / 100), world.map.height),
-            xmin = Math.max(-x + Math.floor(this.pos.x / 100), 0), xmax = Math.min(x + 1 + Math.floor(this.pos.x / 100), world.map.width);
-        let list = [];
-        for (let x = xmin; x < xmax; x++) {
-            for (let y = ymin; y < ymax; y++) {
-                list = list.concat(world.map.chunks[y][x]);
+        try{
+            let ymin = Math.max(-y + Math.floor(this.pos.y / 100), 0), ymax = Math.min(y + 1 + Math.floor(this.pos.y / 100), world.map.height),
+                xmin = Math.max(-x + Math.floor(this.pos.x / 100), 0), xmax = Math.min(x + 1 + Math.floor(this.pos.x / 100), world.map.width);
+            let list = [];
+            for (let x = xmin; x < xmax; x++) {
+                for (let y = ymin; y < ymax; y++) {
+                    list = list.concat(world.map.chunks[y][x]);
+                }
             }
+            return list;
+        } catch {
+            // bc entity loading before map :3 ignoring this = no harm
+            return []
         }
-        return list;
     }
 }

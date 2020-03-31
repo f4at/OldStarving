@@ -8841,8 +8841,27 @@ export function start(ModdedStarving: ModdedStarving) {
             }
         }
     }
-
-    function draw_map_object(c, g, f, d, e, m) {
+    function draw_map_object(c, g, f, d, e, m, p, n) {
+        for (var r = c; r <= g; r++) {
+            for (var u = f; u <= d; u++) {
+                var q = MAP.tiles[r][u];
+                if (q && q[m].length) {
+                    var t = q[m][0];
+                    if (t.update) {
+                        if (t.hit.update() && t.hit.o == 0) {
+                            t.update = false;
+                        }
+                        var z = (1 - t.hit.v) * delta * 600 * scale;
+                        var A = Math.cos(t.angle) * z;
+                        var z = Math.sin(t.angle) * z;
+                    } else {
+                        z = A = 0;
+                    }
+                    var B = sprite[e][world.time];
+                    ctx.drawImage(B, user.cam.x + t.x - B.width / 2 + A, user.cam.y + t.y - B.height / 2 + z);
+                }
+            }
+        }
     }
 
     function draw_world() {

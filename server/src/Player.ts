@@ -4,7 +4,7 @@ import { Vector, Utils } from '.';
 import world from "./World";
 import Entity, { Collider, EntityState } from "./Entity";
 import { MapEntity } from './World';
-import * as config from "../config.json";
+import config from "../config";
 import { threadId } from "worker_threads";
 
 // TODO Move to Entity.ts
@@ -493,7 +493,7 @@ export default class Player extends Entity {
                 }
                 this.allowCrafting(item);
                 this.craftTimeout = setTimeout(() => {
-                    this.inventory.add(null, 1 , slot);
+                    this.inventory.add(null, 1, slot);
                     this.finishedCrafting();
                     this.craftTimeout = null;
                 }, 1000 / recipe.time);
@@ -612,13 +612,18 @@ export default class Player extends Entity {
         this.send(new Uint8Array([14].concat(...this.inventory.items.filter(e => e.amount).map(e => [e.item.id, e.amount]))));
     }
 
-    gather(item: Item, amount: number = 1) { //adds + sends unlike gatherALL
+    gather(item: Item, amount: number = 1) { //adds + sends unlike gatherAll
+        let list = [14];
         this.inventory.add(item, amount);
-        this.send(new Uint8Array([14, item.id, amount]));
+        while (amount > 0) {
+            list = list.concat([item.id, amount]);
+            amount -= amount % 256;
+        }
+        return list;
     }
 
-    decreaseItem(Item: Item , amount: number = 1) {
+    decreaseItem(Item: Item, amount: number = 1) {
         this.inventory.remove(Item, amount);
-        this.send(new Uint8Array([23,Item.id,amount]));
+        this.send(new Uint8Array([23, Item.id, amount]));
     }
 }

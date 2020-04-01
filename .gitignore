@@ -3,5 +3,6 @@ node_modules
 .yarn
 .idea
 yarn-error.log
-config.json
+config.ts
 web/public
+server/data/ssl

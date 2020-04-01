@@ -11,7 +11,7 @@ const app = express();
 import btoa from 'btoa';
 import fetch from 'node-fetch';
 import DiscordBot from "./DiscordBot";
-import * as config from "../config.json";
+import config from "../config";
 import { AddressInfo } from 'net';
 import Server from './Server';
 
@@ -31,7 +31,7 @@ const sessionOptions: SessionOptions = {
 
 if (config.redis) {
     let RedisStore = connectRedis(session);
-    let redisClient = redis.createClient(null);
+    let redisClient = redis.createClient(config.redis);
     sessionOptions.store = new RedisStore({ client: redisClient });
 }
 

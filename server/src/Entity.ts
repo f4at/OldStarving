@@ -213,21 +213,18 @@ export default class Entity implements Collider {
         let ownerId = this.owner !== null ? this.owner.pid : 0 ;
         if (this.type === EntityType.HARVESTABLE) {
             if (attacker) {
-                if (this.miningTier < 0) {
-                    let amount = Math.min(this.inv.amount, 1);
-                    let item = this.inv.item;
-                    attacker.inventory.add(item, amount);
-                    attacker.gather(item, amount);
-                    this.inv.amount -= amount;
-                    if (this.entityType === Items.FRUIT) {
-                        this.info = this.inv.amount;
-                        this.sendInfos();
+                if (this.miningTier < 0 ) {
+                    if (this.inv.item !== null && this.inv.amount > 0 && attacker.inventory.findStack(this.inv.item,0)) {
+                        attacker.gather(this.inv.item,1);
+                        this.inv.amount -= 1;
+                        if (this.entityType === Items.FRUIT) {
+                            this.info = this.inv.amount;
+                            this.sendInfos();
+                        }
                     }
                 } else if (attacker.tool instanceof Pickaxe && this.miningTier <= attacker.tool.miningTier) {
                     let amount = Math.min(this.inv.amount, attacker.tool.miningTier - this.miningTier + 1);
-                    let item = this.inv.item;
-                    attacker.inventory.add(item, amount);
-                    attacker.gather(item, amount);
+                    attacker.gather(this.inv.item, amount);
                     this.inv.amount -= amount;
                 }
                 if (this instanceof MapEntity) {

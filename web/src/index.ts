@@ -73,8 +73,8 @@ app.use(express.static('./public'));
 
 const servers: Server[] = [];
 
-if (config.debug) {
-    servers.push({ id: "0", name: "Test Server", players: { online: 0, max: 0 }, ip: "localhost", port: 8080, ssl: true, joiningPlayers: new Map() });
+if (config.debugServer) {
+    servers.push(config.debugServer);
 }
 
 app.get('/servers', function (req, res) {

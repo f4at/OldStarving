@@ -18,10 +18,15 @@ export default class DiscordBot {
     async checkUser(id: string | number) {
         const guild = this.client.guilds.resolve(config.guildId);
         if (!guild)
+            throw new Error("Guild " + config.guildId + " not found!");
+        try {
+            const member = await guild.members.fetch(id.toString());
+            if (!member)
+                return false;
+            return member.roles.cache.has(config.roleId);
+        } catch (error) {
+            console.error("User " + id + " isn't in guild!");
             return false;
-        const member = await guild.members.fetch(id.toString());
-        if (!member)
-            return false;
-        return member.roles.cache.has(config.roleId);
+        }
     }
 };

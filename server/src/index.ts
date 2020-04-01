@@ -2,12 +2,13 @@ import * as WebSocket from "ws";
 import * as https from "https";
 import * as fs from "fs";
 import world from "./World";
-import Player from "./Player";
-import { Items } from "./Item";
+import Player, { Inventory } from "./Player";
+import { Items, EntityItem } from "./Item";
 import * as express from 'express';
-import Entity from "./Entity";
+import Entity, { EntityState } from "./Entity";
 import fetch from 'node-fetch';
 import * as config from "../config.json";
+import { cpus } from "os";
 
 export interface Vector {
     x: number;
@@ -142,21 +143,49 @@ wss.on("connection", (ws) => {
                             player.craft(Items.get(data[1]));
                             break;
                         case 8:
-                            // TODO put in chest
+                            let item = Items.get(data[1]);
+                            let stack = player.inventory.findStack(item, 1);
+                            if (stack) {
+                                let entity = world.entities[data[3]].find(e => e.id === data[4]);
+                                if (entity && (entity.inv.item === item || entity.inv.item === null) && Utils.distance({x:entity.pos.x-player.pos.x,y:entity.pos.y-player.pos.y}) < 250) {
+                                    entity.inv.item = item;
+                                    let amount = Math.min(stack.amount,data[2]);
+                                    player.decreaseItem(item, amount);
+                                    entity.inv.amount += amount;
+                                    entity.info = entity.inv.amount;
+                                    entity.action = (data[1]+1)*2;
+                                    entity.sendInfos();
+                                }
+                            }
                             break;
                         case 9:
-                            // TODO take from chest
+                            let entity = world.entities[data[1]].find(e => e.id === data[2]);
+                            if (entity && entity.inv.item && Utils.distance({x:entity.pos.x-this.pos.x,y:player.pos.y-player.pos.y}) < 250) {
+                                if (player.inventory.findStack(item, 0)) {
+                                    player.gather(entity.inv.item,entity.inv.amount);
+                                    entity.id = null;
+                                    entity.inv.amount = 0;
+                                    entity.info = 0;
+                                    entity.action = 0;
+                                    entity.sendInfos();
+                                }
+                            }
                             break;
                         case 10:
-                            player.cancelCrafting(); // lose items
+                            player.cancelCrafting();
                             break;
                         case 12:
-                            if (player.inventory.findStack(Items.WOOD, data[1])) {
-                                player.inventory.remove(Items.WOOD, data[1]);
-                                let entity = world.entities[data[2]].find(e => e.id = data[3]);
-                                entity.inv.amount += data[1];
-                                entity.info = entity.inv.amount;
-                                entity.sendInfos();
+                            let stack3 = player.inventory.findStack(Items.WOOD, 1);
+                            if (stack3) {
+                                let entity = world.entities[data[2]].find(e => e.id === data[3]);
+                                if (entity && Utils.distance({x:entity.pos.x-player.pos.x,y:entity.pos.y-player.pos.y}) < 250) {
+                                    let amount = Math.min(stack3.amount,data[1]);
+                                    player.decreaseItem(Items.WOOD, amount);
+                                    entity.inv.amount += amount;
+                                    entity.info = entity.inv.amount;
+                                    entity.action = EntityState.Hurt;
+                                    entity.sendInfos();
+                                }
                             }
                             break;
                         case 14:

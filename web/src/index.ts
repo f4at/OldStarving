@@ -31,7 +31,7 @@ const sessionOptions: SessionOptions = {
 
 if (config.redis) {
     let RedisStore = connectRedis(session);
-    let redisClient = redis.createClient(config.redis);
+    let redisClient = redis.createClient(null);
     sessionOptions.store = new RedisStore({ client: redisClient });
 }
 

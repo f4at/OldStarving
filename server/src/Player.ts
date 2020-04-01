@@ -5,6 +5,7 @@ import world from "./World";
 import Entity, { Collider, EntityState } from "./Entity";
 import { MapEntity } from './World';
 import * as config from "../config.json";
+import { threadId } from "worker_threads";
 
 // TODO Move to Entity.ts
 export abstract class Inventory {
@@ -158,7 +159,6 @@ export default class Player extends Entity {
         }
         let found = false, counter = 0;
 
-
         while (counter < 64 && !found) {
             this.pos = { "x": 1 + Math.random() * 10000, "y": 1 + Math.random() * 10000 }; //spawn in forest biome
             this.chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
@@ -183,13 +183,17 @@ export default class Player extends Entity {
         this.inventory.add(Items.AMETHYST_SPIKE, 20);
         this.inventory.add(Items.HAMMER_AMETHYST, 1);
         this.inventory.add(Items.SEED, 10);
+        this.inventory.add(Items.CHEST, 10);
+        this.inventory.add(Items.FURNACE, 10);
+        this.inventory.add(Items.WOOD, 100);
+        this.inventory.add(Items.FIRE, 100);
 
         world.players.push(this);
         world.chunks[this.chunk.x][this.chunk.y].push(this);
         this.join(ws);
         this.updateLoop = setInterval(() => {
             this.counter += 1;
-            if (this.counter % (world.tickRate * 4) == 0) {
+            if (this.counter % (world.tickRate * 5) == 0) {
                 let temperature = Math.max(0, Math.min(100, this.temperature + (this.moving ? 1 : 0) + (this.attacking ? 1 : 0) + (world.isDay ? -2 : -20) + this.clothes.coldProtection + (this.fire ? 25 : 0)));
                 let food = Math.max(0, this.food + (this.moving ? -2 : -0.5) + (this.attacking ? -2 : 0));
                 if (this.temperature == temperature && temperature == 0) {
@@ -203,9 +207,8 @@ export default class Player extends Entity {
                 if (food > 25 && temperature > 25) {
                     let regen = Math.min(15, this.regen);
                     this.regen = Math.max(this.regenMin, this.regen - regen);
-                    this.damage(-this.regen, null, true, false);
+                    this.damage(-regen, null, true, false);
                 }
-
                 this.food = food;
                 this.temperature = temperature;
                 this.updateBars();
@@ -312,7 +315,7 @@ export default class Player extends Entity {
 
     join(ws) {
         this.ws = ws;
-        this.ws.send(JSON.stringify([3, this.pid, 1024, world.leaderboard, this.pos.x, this.pos.y, 256, world.mode, world.isDay ? 0 : 1, world.map.raw]));
+        this.ws.send(JSON.stringify([3, this.pid, 1024, world.leaderboard, this.pos.x, this.pos.y, 256, world.isDay ? 0 : 1, world.mode, world.map.raw]));
         this.online = true;
         this.getInfos();
         this.sendInfos();
@@ -490,7 +493,7 @@ export default class Player extends Entity {
                 }
                 this.allowCrafting(item);
                 this.craftTimeout = setTimeout(() => {
-                    this.inventory.add(item, 1/*, slot*/);
+                    this.inventory.add(null, 1 , slot);
                     this.finishedCrafting();
                     this.craftTimeout = null;
                 }, 1000 / recipe.time);
@@ -582,6 +585,7 @@ export default class Player extends Entity {
                     this.regen += Math.max(0, usable.regeneration);
                     this.inventory.remove(item, 1);
                     this.acceptUsing(id);
+                    this.updateBars();
                     break;
                 case EntityItem:
                     let coords = Utils.angleToCoords(this.angle);
@@ -608,7 +612,13 @@ export default class Player extends Entity {
         this.send(new Uint8Array([14].concat(...this.inventory.items.filter(e => e.amount).map(e => [e.item.id, e.amount]))));
     }
 
-    gather(item: Item, amount: number = 1) {
+    gather(item: Item, amount: number = 1) { //adds + sends unlike gatherALL
+        this.inventory.add(item, amount);
         this.send(new Uint8Array([14, item.id, amount]));
+    }
+
+    decreaseItem(Item: Item , amount: number = 1) {
+        this.inventory.remove(Item, amount);
+        this.send(new Uint8Array([23,Item.id,amount]));
     }
 }

@@ -9815,7 +9815,7 @@ export function start(ModdedStarving: ModdedStarving) {
                             q.update(r);
                         }
                     } else {
-                        n = new Item(v, n, u, t, z, m, r, p);
+                        n = new Item(v, n, u, t, z, m, r, info);
                         world.fast_units[q] = n;
                         world.units[v].push(n);
                     }

@@ -1,4 +1,4 @@
-import { EntityType, EntityItem, Pickaxe, Items } from "./Item";
+import { EntityType, EntityItem, Pickaxe, Items, ItemStack } from "./Item";
 import { Vector, Utils } from ".";
 import Player from "./Player";
 import world, { MapEntityDrop, MapEntity } from "./World";
@@ -132,7 +132,7 @@ export default class Entity implements Collider {
 
     init() {
         if (this.lifespan) {
-            if (this.type == EntityType.MOB) {
+            if (this.type === EntityType.MOB) {
                 this.lifeLoop = setInterval(() => {
                     if (new Date().getTime() - this.stime > this.lifeUpdate * 60000) {
                         this.die();
@@ -146,15 +146,16 @@ export default class Entity implements Collider {
                 }, this.lifeUpdate);
             }
         }
-
         switch (this.type) {
             case EntityType.HARVESTABLE:
                 this.info  = this.inv.amount;
                 if (this.inv.respawn > 0) {
                     this.updateLoop = setInterval(() => {
                         this.inv.amount = Math.min(this.inv.maximum, this.inv.amount + this.inv.respawn);
-                        this.info = this.inv.amount;
-                        this.sendInfos();
+                        if (this.entityType === Items.FRUIT) {
+                            this.info = this.inv.amount;
+                            this.sendInfos();
+                        }
                     }, this.inv.delay * 1000);
                 }
                 break;
@@ -180,7 +181,16 @@ export default class Entity implements Collider {
                     for (let player of players) {
                         player.damage(this.dmg,null,true,true,true);
                     }
-                    if (this.action) { this.sendInfos() };
+                    if (this.entityType === Items.FURNACE && this.inv.amount > 0) {
+                        this.inv.amount -= 1;
+                        this.info = this.inv.amount;
+                        if (this.inv.amount > 0) {
+                            this.action = EntityState.Hurt;
+                        } else {
+                            this.action = EntityState.None;
+                        }
+                        this.sendInfos();
+                    }
                 }, this.dmgDelay);
                 break;
             case EntityType.SPIKE:
@@ -189,7 +199,6 @@ export default class Entity implements Collider {
                     for (let player of players) {
                         player.damage(this.dmg,null,true,true,true);
                     }
-                    if (this.action) { this.sendInfos() };
                 }, this.dmgDelay);
                 break;
             default:
@@ -202,7 +211,7 @@ export default class Entity implements Collider {
 
     damage(dmg: number, attacker: Player = null) { // use negative values to increase hp
         let ownerId = this.owner !== null ? this.owner.pid : 0 ;
-        if (this.type == EntityType.HARVESTABLE) {
+        if (this.type === EntityType.HARVESTABLE) {
             if (attacker) {
                 if (this.miningTier < 0) {
                     let amount = Math.min(this.inv.amount, 1);
@@ -210,8 +219,10 @@ export default class Entity implements Collider {
                     attacker.inventory.add(item, amount);
                     attacker.gather(item, amount);
                     this.inv.amount -= amount;
-                    this.info = this.inv.amount;
-                    this.sendInfos();
+                    if (this.entityType === Items.FRUIT) {
+                        this.info = this.inv.amount;
+                        this.sendInfos();
+                    }
                 } else if (attacker.tool instanceof Pickaxe && this.miningTier <= attacker.tool.miningTier) {
                     let amount = Math.min(this.inv.amount, attacker.tool.miningTier - this.miningTier + 1);
                     let item = this.inv.item;
@@ -219,7 +230,7 @@ export default class Entity implements Collider {
                     attacker.gather(item, amount);
                     this.inv.amount -= amount;
                 }
-                if (this.entityType instanceof MapEntity) {
+                if (this instanceof MapEntity) {
                     let angle = Math.round(Utils.coordsToAngle({ x: this.pos.x - attacker.pos.x, y: this.pos.y - attacker.pos.y })) % 256;
                     this.sendToRange(new Uint16Array([9, Math.floor(this.pos.x / 100), Math.floor(this.pos.y / 100), angle, this.mapID]));
                 }
@@ -314,6 +325,7 @@ export default class Entity implements Collider {
             let pos = { "x": Utils.toHex(this.pos.x * 2), "y": Utils.toHex(this.pos.y * 2) };
             let id = Utils.toHex(this.id);
             let info = Utils.toHex(this.info);
+            //console.log(info);
             arr = [0, 0, ownerId, this.action, this.entityType.sid, this.angle, pos.x[0], pos.x[1], pos.y[0], pos.y[1], id[0], id[1], info[0], info[1]];
         } else {
             let id = Utils.toHex(this.id);

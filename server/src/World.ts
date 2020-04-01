@@ -35,7 +35,7 @@ export class MapEntityType extends EntityItem {
 export class MapEntityTypes {
     static HERB = new MapEntityType(null, "h", false);
 
-    static BUSH = new MapEntityType(0, "p", true, 0, 50, 1, [1], 0, { item: Items.PLANT, amount: 0, maximum: 0, delay: 10, respawn: 0 }, -1);
+    static BUSH = new MapEntityType(0, "p", true, 0, 60, 1, [1], 0, { item: Items.PLANT, amount: 0, maximum: 0, delay: 10, respawn: 0 }, -1);
     static STONES = new MapEntityType(1, "s", true, 7, 57, 1, [1.78, 1.43, 1], 21, { item: Items.STONE, amount: 10, maximum: 20, delay: 4, respawn: 2 }, 1);
     static TREE = new MapEntityType(4, "t", true, 4, 80, 1.1, [1.5, 1.5, 1.25, 1.25, 1, 1], 0, { item: Items.WOOD, amount: 15, maximum: 30, delay: 3, respawn: 2 }, 0);
     static GOLD = new MapEntityType(10, "g", true, 8, 64, 1, [1.35, 1.18, 1], 27, { item: Items.GOLD, amount: 10, maximum: 20, delay: 5, respawn: 1 }, 2);
@@ -45,7 +45,7 @@ export class MapEntityTypes {
     static STONES_WINTER = new MapEntityType(23, "sw", true, 7, 57, 1,[1.78, 1.43, 1], 21, { item: Items.STONE, amount: 10, maximum: 20, delay: 4, respawn: 1 }, 1);
     static GOLD_WINTER = new MapEntityType(26, "gw", true, 8, 64, 1, [1.35, 1.18, 1], 27, { item: Items.GOLD, amount: 10, maximum: 20, delay: 5, respawn: 1 }, 2);
     static DIAMOND_WINTER = new MapEntityType(29, "dw", true, 3, 65, 1, [1.55, 1.25, 1], 53, { item: Items.DIAMOND, amount: 7, maximum: 15, delay: 6, respawn: 1 }, 3);
-    static AMETHYST = new MapEntityType(32, "a", true, 0, 30, 1, [1, 1, 1], 0, { item: Items.AMETHYST, amount: 5, maximum: 10, delay: 7, respawn: 1 }, 4);
+    static AMETHYST = new MapEntityType(32, "a", true, 0, 50, 1, [1, 1, 1], 0, { item: Items.AMETHYST, amount: 5, maximum: 10, delay: 7, respawn: 1 }, 4);
 
     static DRAGON_GROUND = new MapEntityType(null, "dg", false, 4, 72, 1, [1,], 0);
     static SNOW = new MapEntityType(null, "so", false, 4, 72, 1, [1,], 0);

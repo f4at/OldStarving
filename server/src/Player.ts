@@ -609,17 +609,20 @@ export default class Player extends Entity {
     }
 
     gatherAll() {
-        this.send(new Uint8Array([14].concat(...this.inventory.items.filter(e => e.amount).map(e => [e.item.id, e.amount]))));
+        this.send(new Uint8Array([14].concat(...this.inventory.items.filter(e => e.amount).map(e => this.gather(e.item, e.amount, true)))));
     }
 
-    gather(item: Item, amount: number = 1) { //adds + sends unlike gatherAll
-        let list = [14];
-        this.inventory.add(item, amount);
+    gather(item: Item, amount: number = 1, ret: boolean = false) {
+        let list = [];
         while (amount > 0) {
             list = list.concat([item.id, amount]);
             amount -= amount % 256;
         }
-        return list;
+        if (ret) {
+            this.inventory.add(item, amount);
+            return list;
+        }
+        this.send([14].concat(list));
     }
 
     decreaseItem(Item: Item, amount: number = 1) {

@@ -92,6 +92,14 @@ const server = https.createServer({
 
 const wss = new WebSocket.Server({ server });
 
+
+setInterval(()=>{
+    let list = [].concat(...world.players.map(e=> e.compressedScore()));
+    for (let player of world.players) {
+        player.send(new Uint8Array([6,player.compressedScore()].concat(list)));
+    }
+},2000);
+
 wss.on("connection", (ws) => {
     let player: Player;
 

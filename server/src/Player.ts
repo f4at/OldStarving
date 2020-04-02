@@ -140,6 +140,9 @@ export default class Player extends Entity {
     regen: number = 50;
     regenMin: number = 2;
 
+    days: number = 0;
+    kills: number =0;
+
     constructor(nick: string, version: number, accountId: string, ws: WebSocket) {
         super(null, null, null, null);
         this.nick = nick;
@@ -212,6 +215,10 @@ export default class Player extends Entity {
                 this.food = food;
                 this.temperature = temperature;
                 this.updateBars();
+                if (this.counter % (world.tickRate * 480) == 0) {
+                    this.days += 1;
+                    this.send(new Uint8Array([15])); // TODO ADD NUMBER OF DAYS TO THIS PACKET(client side) INCASE PLAYER LEFT SERVER AND REJOINED.
+                }
             }
             if (this.counter % Math.ceil(world.tickRate / 4) == 0) {
                 this.updateCrafting();
@@ -403,6 +410,7 @@ export default class Player extends Entity {
         if (this.health <= 0) {
             if (attacker) {
                 attacker.score += Math.floor(this.score / 3);
+                attacker.kills += 1;
             }
             this.die();
         }
@@ -629,5 +637,9 @@ export default class Player extends Entity {
     decreaseItem(Item: Item, amount: number = 1) {
         this.inventory.remove(Item, amount);
         this.send(new Uint8Array([23, Item.id, amount]));
+    }
+
+    compressedScore() {
+        return this.score < 10000 ? this.score : this.score < 1000000 ? this.score/100+10000 : this.score/1000+20000;
     }
 }

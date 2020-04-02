@@ -94,7 +94,7 @@ const wss = new WebSocket.Server({ server });
 
 
 setInterval(()=>{
-    let list = [].concat(...world.players.map(e=> e.compressedScore()));
+    let list = [].concat(...world.players.map(e=> e.compressedScore())).sort(function(a, b){return a - b}).slice(0,10);
     for (let player of world.players) {
         player.send(new Uint8Array([6,player.compressedScore()].concat(list)));
     }

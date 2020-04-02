@@ -216,8 +216,7 @@ export default class Player extends Entity {
                 this.temperature = temperature;
                 this.updateBars();
                 if (this.counter % (world.tickRate * 480) == 0) {
-                    this.days += 1;
-                    this.send(new Uint8Array([15])); // TODO ADD NUMBER OF DAYS TO THIS PACKET(client side) INCASE PLAYER LEFT SERVER AND REJOINED.
+                    this.survive();
                 }
             }
             if (this.counter % Math.ceil(world.tickRate / 4) == 0) {
@@ -637,6 +636,12 @@ export default class Player extends Entity {
     decreaseItem(Item: Item, amount: number = 1) {
         this.inventory.remove(Item, amount);
         this.send(new Uint8Array([23, Item.id, amount]));
+    }
+
+    survive() {
+        this.days += 1;
+        this.send(new Uint8Array([15])); // TODO ADD NUMBER OF DAYS TO THIS PACKET(client side) INCASE PLAYER LEFT SERVER AND REJOINED.
+        this.score += 500;
     }
 
     compressedScore() {

@@ -48,7 +48,6 @@ export default class Entity implements Collider {
     counter: number;
     inv: MapEntityDrop;
     hitDamage: number;
-    score: number; //score given when player destroy it
     regen: number = 0;
 
     numberOfSides: number;
@@ -73,6 +72,8 @@ export default class Entity implements Collider {
     lifeUpdate: number;
     lifeLoop: any;
 
+    fscore: number = 0; // TODO SET fscore/kscore for entites/mapentities
+    kscore: number = 0; 
     constructor(pos: Vector, angle: number, owner: Player, entityItem: EntityItem) {
         if (entityItem !== null) {
             this.type = entityItem.type; //enitity type
@@ -215,6 +216,7 @@ export default class Entity implements Collider {
             if (attacker) {
                 if (this.miningTier < 0 ) {
                     if (this.inv.item !== null && this.inv.amount > 0 && attacker.inventory.findStack(this.inv.item,0)) {
+                        attacker.score += this.fscore;
                         attacker.gather(this.inv.item,1);
                         this.inv.amount -= 1;
                         if (this.entityType === Items.FRUIT) {
@@ -224,6 +226,7 @@ export default class Entity implements Collider {
                     }
                 } else if (attacker.tool instanceof Pickaxe && this.miningTier <= attacker.tool.miningTier) {
                     let amount = Math.min(this.inv.amount, attacker.tool.miningTier - this.miningTier + 1);
+                    attacker.score += amount*this.fscore;
                     attacker.gather(this.inv.item, amount);
                     this.inv.amount -= amount;
                 }
@@ -293,7 +296,7 @@ export default class Entity implements Collider {
             clearInterval(this.lifeLoop);
         }
         if (attacker) {
-            attacker.score += 10 + this.score;
+            attacker.score += 10+this.kscore;
             if (this.inv) {
                 if (this.inv.amount) {
                     attacker.inventory.add(this.inv.item, this.inv.amount);

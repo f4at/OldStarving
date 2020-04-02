@@ -14,6 +14,81 @@ export function start(ModdedStarving: ModdedStarving) {
             return eval(name.toString() + "=JSON.parse('" + JSON.stringify(value) + "')");
         }
     });
+    const gameConsole = new class GameConsole {
+        private _open: boolean = false;
+
+        get open() {
+            return this._open;
+        }
+
+        set open(value: boolean) {
+            this._open = value;
+            (document.querySelector(".console") as HTMLDivElement).style.display = this.open ? "block" : "none";
+            if (this.open) {
+                document.getElementById("input").focus();
+            }
+        }
+
+        addMessage(message: string) {
+            let output = document.createElement("div");
+            output.classList.add("output");
+            output.innerHTML = message;
+
+            const scroll = document.querySelector(".console_scroll");
+            scroll.appendChild(output);
+            scroll.scrollTop = scroll.scrollHeight;
+        };
+
+        clientCommands = {
+            "clear": () => {
+                for (const node of document.querySelectorAll('.output')) {
+                    node.remove();
+                }
+            }
+        };
+
+        constructor() {
+            const input = document.querySelector("#input") as HTMLInputElement;
+            input.addEventListener("keydown", function (event) {
+                if (event.keyCode === 192) {
+                    event.preventDefault();
+                }
+            });
+            input.addEventListener("keyup", function (event) {
+                if (event.keyCode === 192) {
+                    event.preventDefault();
+                } else if (event.keyCode === 13) {
+                    event.preventDefault();
+
+                    if (this.value !== "") {
+                        const clientCommand = gameConsole.clientCommands[this.value];
+                        if (clientCommand) {
+                            clientCommand();
+                        } else {
+                            if (client && client.socket && client.socket.readyState === WebSocket.OPEN) {
+                                client.socket.send(JSON.stringify([1, this.value]));
+                            } else {
+                                gameConsole.addMessage(`<span style='color: red;'>You have to be connected to server!</span>`);
+                            }
+                        }
+                        this.value = "";
+                    }
+                }
+            });
+            document.addEventListener("keyup", function (event) {
+                if (event.keyCode === 192) {
+                    event.preventDefault();
+
+                    gameConsole.open = !gameConsole.open;
+                } else if (event.keyCode == 27) {
+                    gameConsole.open = false;
+                }
+                if (gameConsole.open) {
+                    event.preventDefault();
+                }
+            });
+        };
+    };
     ModdedStarving.on("start", proxy);
     const Utils = {
         open_in_new_tab: function (c) {
@@ -9518,12 +9593,12 @@ export function start(ModdedStarving: ModdedStarving) {
             user.auto_feed.delay = 0;
             user.craft.do_craft(c);
         };
-        this.survive = function () {
-            user.alert.text = user.day == 0 ? "You survived 1 day" : "You survived " + (user.day + 1) + " days";
+        this.survive = function (day) {
+            user.day = day;
+            user.alert.text = user.day == 1 ? "You survived 1 day" : "You survived " + user.day + " days";
             user.alert.label = null;
             user.alert.timeout.o = false;
             user.alert.timeout.v = user.alert.timeout.max;
-            user.day++;
         };
         this.full = function () {
             ___adsvid = 1;
@@ -10153,6 +10228,10 @@ export function start(ModdedStarving: ModdedStarving) {
                                 break;
                             case 3:
                                 c.handshake(f);
+                                break
+                            case 4:
+                                gameConsole.addMessage(f[1]);
+                                break;
                         }
                     } else {
                         var d = new Uint8Array(f.data);
@@ -10203,7 +10282,7 @@ export function start(ModdedStarving: ModdedStarving) {
                                 c.gather(d);
                                 break;
                             case 15:
-                                c.survive();
+                                c.survive(d[1]);
                                 break;
                             case 16:
                                 c.build_ok(d[1]);
@@ -10234,8 +10313,10 @@ export function start(ModdedStarving: ModdedStarving) {
                                 break;
                             case 25:
                                 c.cancel_craft();
+                                break;
                             case 26:
                                 c.set_inventory_size(d[1]);
+                                break;
                         }
                     }
                 }
@@ -11267,7 +11348,7 @@ export function start(ModdedStarving: ModdedStarving) {
                         this.angle = g;
                     }
                 }
-                if (!user.chat.open) {
+                if (!user.chat.open && !gameConsole.open) {
                     c = 0;
                     if (keyboard.is_left()) {
                         c |= 1;
@@ -12489,6 +12570,9 @@ export function start(ModdedStarving: ModdedStarving) {
             this.draw_UI();
         };
         this.trigger_keyup = function (c) {
+            if (gameConsole.open)
+                return;
+
             if (user.chat.open && c.keyCode == 27) {
                 user.chat.quit();
             } else if (c.keyCode == 13) {
@@ -12511,12 +12595,18 @@ export function start(ModdedStarving: ModdedStarving) {
             keyboard.up(c);
         };
         this.trigger_keydown = function (c) {
+            if (gameConsole.open)
+                return;
+
             keyboard.down(c);
             if (c.keyCode == 8 && !user.chat.open) {
                 c.preventDefault();
             }
         };
         this.trigger_mousedown = (c) => {
+            if (gameConsole.open)
+                return;
+
             mouse.pos = get_mouse_pos(this.can, c);
             c = false;
             var d = user.chest;
@@ -12547,6 +12637,9 @@ export function start(ModdedStarving: ModdedStarving) {
             }
         };
         this.trigger_mouseup = (c) => {
+            if (gameConsole.open)
+                return;
+
             mouse.pos = get_mouse_pos(this.can, c);
             mouse.up();
             var d = user.chest;

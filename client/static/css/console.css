@@ -1,0 +1,89 @@
+.console {
+    width: 50%;
+    margin: auto;
+    min-height: 80%;
+    top: 10%;
+    /* cursor: url(../img/cursor0.png), auto; */
+    position: relative;
+    background: #3A2A0D;
+    border: 6px #513810 solid;
+    box-shadow: 0px 6px 0px #221605;
+    box-sizing: border-box;
+    border-radius: 14px;
+    font-size: 20px;
+    font-weight: normal;
+    text-shadow: 0px 2px 0px #281806;
+    text-align: center;
+    color: #FFFFFF;
+    font-family: "Baloo Paaji";
+    padding-top: 50px;
+    padding-bottom: 5px;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    display: none;
+}
+
+.console:before {
+    content: "CONSOLE";
+    background: #443110;
+    border: 5px #513810 solid;
+    box-shadow: 0px 6px 0px #221605;
+    border-radius: 14px;
+    color: #745018;
+    width: 200px;
+    height: 35px;
+    display: block;
+    position: absolute;
+    top: -18px;
+    left: 65%;
+    margin-left: -220px;
+}
+
+.console_scroll {
+    margin-left: 0px;
+    margin-top: 5px;
+    overflow-y: scroll;
+    height: 65%;
+    background: #30220B;
+    word-break: break-word;
+}
+
+.console_scroll::-webkit-scrollbar {
+    max-width: 20px;
+}
+
+.console_scroll::-webkit-scrollbar-track {
+    background-color: #513810;
+    border-radius: 50px;
+}
+
+.console_scroll::-webkit-scrollbar-thumb {
+    background-color: #805819;
+    border: 5px solid #513810;
+    border-radius: 50px;
+}
+
+.output {
+    margin-left: 10px;
+    padding-left: 20px;
+    font-size: 15px;
+    text-align: center;
+    height: 25px;
+    margin-right: 10px;
+    padding-bottom: 10px;
+    text-align: left;
+    /* overflow: unset; */
+    /* word-break: unset; */
+}
+
+#input {
+    width: 100%;
+    background: #30220B;
+    outline: none;
+    border: none;
+    color: white;
+}

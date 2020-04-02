@@ -63,6 +63,10 @@ app.use(async (req, res, next) => {
             res.cookie('starve_nickname', `${req.session.displayName}`, { maxAge: 900000 });
             res.cookie('account_id', `${req.session.user.id}`, { maxAge: 900000 });
             res.cookie('session_id', `${req.session.id}`, { maxAge: 900000 });
+
+            if (req.url == "/") {
+                console.log(`${req.session.displayName} (${req.session.user.id}) logged from ${req.ip}`);
+            }
         }
     }
     next();
@@ -103,6 +107,7 @@ app.post("/api/join", async (req, res) => {
 
     const server = servers.find(x => x.id == req.body.server);
     server.joiningPlayers.set(req.session.user.id, new Date());
+    console.log(`${req.session.displayName} (${req.session.user.id}) is joining server #${req.body.server}`);
     res.status(200).send();
 });
 
@@ -114,7 +119,7 @@ app.post("/api/verify", async (req, res) => {
     }
 
     const time = new Date().getTime() - server.joiningPlayers.get(req.body.accountId).getTime();
-    console.log(time);
+    console.log(`Server #${req.body.server} verified player ${req.body.accountId} (${time}ms)`);
     res.status(time < 5000 ? 200 : 401).send();
 });
 

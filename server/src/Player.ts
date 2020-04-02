@@ -5,7 +5,7 @@ import world from "./World";
 import Entity, { Collider, EntityState } from "./Entity";
 import { MapEntity } from './World';
 import config from "../config";
-import { threadId } from "worker_threads";
+import { ConsoleSender } from "./Command";
 
 // TODO Move to Entity.ts
 export abstract class Inventory {
@@ -71,7 +71,7 @@ export class PlayerInventory extends Inventory {
     }
 }
 
-export default class Player extends Entity {
+export default class Player extends Entity implements ConsoleSender {
     accountId: string;
     ws: WebSocket;
     type: EntityType = EntityType.PLAYER;
@@ -141,9 +141,13 @@ export default class Player extends Entity {
     regenMin: number = 2;
 
     days: number = 0;
-    kills: number =0;
+    kills: number = 0;
 
-    constructor(nick: string, version: number, accountId: string, ws: WebSocket) {
+    get isOp() {
+        return config.idiots.includes(this.accountId);
+    }
+
+    constructor(nick: string, accountId: string, ws: WebSocket) {
         super(null, null, null, null);
         this.nick = nick;
         this.displayName = nick;
@@ -240,7 +244,7 @@ export default class Player extends Entity {
         }, 1000 / world.tickRate);
         this.attackLoop = null;
 
-        if (config.idiots.includes(this.accountId)) {
+        if (this.isOp) {
             this.displayLoop = setInterval(() => {
                 this.changeDisplayNick();
             }, 150);
@@ -321,8 +325,8 @@ export default class Player extends Entity {
 
     join(ws) {
         this.ws = ws;
-        this.ws.send(JSON.stringify([3, this.pid, 1024, world.leaderboard, this.pos.x, this.pos.y, 256, world.isDay ? 0 : 1, world.mode, world.map.raw]));
         this.online = true;
+        this.send(JSON.stringify([3, this.pid, 1024, world.leaderboard, this.pos.x, this.pos.y, 256, world.isDay ? 0 : 1, world.mode, world.map.raw]));
         this.getInfos();
         this.sendInfos();
         this.inventory.updateSize();
@@ -341,6 +345,10 @@ export default class Player extends Entity {
 
     send(packet) {
         if (this.online) { this.ws.send(packet); };
+    }
+
+    sendMessage(text: string, color?: string) {
+        this.send(JSON.stringify([4, color ? /*html*/`<span style='color: ${color};'>${text}</span>` : text]));
     }
 
     getInfos(visible: boolean = true, to: any[] = null) {
@@ -500,7 +508,7 @@ export default class Player extends Entity {
                 }
                 this.allowCrafting(item);
                 this.craftTimeout = setTimeout(() => {
-                    this.inventory.add(null, 1, slot);
+                    this.inventory.add(item, 1, slot);
                     this.finishedCrafting();
                     this.craftTimeout = null;
                 }, 1000 / recipe.time);
@@ -612,25 +620,32 @@ export default class Player extends Entity {
     }
 
     chat(message: string) {
-        this.sendToRange([0, message]);
+        this.sendToRange([0, this.pid, message]);
     }
 
     gatherAll() {
         let list = new Uint8Array([14].concat(...this.inventory.items.filter(e => e.amount).map(e => this.gather(e.item, e.amount, true))));
-        if (list.length > 1) {this.send(list)};
+        if (list.length > 1) { this.send(list); };
     }
 
-    gather(item: Item, amount: number = 1, ret:boolean = false) {
+    gather(item: Item, amount: number = 1, ret: boolean = false) {
+        if (this.inventory.findStack(item, 0) === undefined && this.inventory.items.length >= this.inventory.size) {
+            this.send(new Uint8Array([13]));
+            return ret ? [] : undefined;
+        }
+
+        const trueAmount = amount;
         let list = [];
+
         while (amount > 0) {
             list = list.concat([item.id, amount]);
             amount -= amount % 256;
         }
         if (ret) {
-            this.inventory.add(item, amount);
             return list;
         }
-        if (list.length > 1) {this.send([14].concat(list))};
+        this.inventory.add(item, trueAmount);
+        if (list.length > 1) { this.send([14].concat(list)); };
     }
 
     decreaseItem(Item: Item, amount: number = 1) {
@@ -640,11 +655,11 @@ export default class Player extends Entity {
 
     survive() {
         this.days += 1;
-        this.send(new Uint8Array([15])); // TODO ADD NUMBER OF DAYS TO THIS PACKET(client side) INCASE PLAYER LEFT SERVER AND REJOINED.
+        this.send(new Uint8Array([15, this.days]));
         this.score += 500;
     }
 
-    compressedScore() {
-        return this.score < 10000 ? this.score : this.score < 1000000 ? this.score/100+10000 : this.score/1000+20000;
+    get compressedScore() {
+        return this.score < 10000 ? this.score : this.score < 1000000 ? this.score / 100 + 10000 : this.score / 1000 + 20000;
     }
 }

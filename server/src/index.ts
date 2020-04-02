@@ -9,6 +9,7 @@ import fetch from 'node-fetch';
 import config from "../config";
 import { AddressInfo } from "net";
 import * as fs from "fs";
+import { Commands } from "./Command";
 
 export interface Vector {
     x: number;
@@ -92,15 +93,15 @@ const server = https.createServer({
 
 const wss = new WebSocket.Server({ server });
 
-
-setInterval(()=>{
-    let list = [].concat(...world.players.map(e=> e.compressedScore())).sort(function(a, b){return a - b}).slice(0,10);
+setInterval(() => {
+    const leaderboard = world.players.sort(function (a, b) { return a.compressedScore - b.compressedScore; }).slice(0, 10);
+    const list = leaderboard.flatMap(player => [player.pid, player.compressedScore]);
     for (let player of world.players) {
-        player.send(new Uint8Array([6,player.compressedScore()].concat(list)));
+        player.send(new Uint16Array([6, player.compressedScore].concat(list)));
     }
-},2000);
+}, 2000);
 
-wss.on("connection", (ws) => {
+wss.on("connection", (ws, req) => {
     let player: Player;
 
     ws.binaryType = "arraybuffer";
@@ -121,18 +122,21 @@ wss.on("connection", (ws) => {
                         }
 
                         player = world.players.find(e => e.accountId == data[2]);
-                        if (!player) {
-                            player = new Player(data[0], data[1], data[2], ws);
-                            console.log(player.pid, 'new');
+                        let rejoin = player !== undefined;
+                        if (!rejoin) {
+                            player = new Player(data[0], data[2], ws);
                         } else {
                             player.join(ws);
-                            console.log(player.pid, 'old');
                         }
+                        console.log(`Player ${player.nick} (${player.pid}) ${rejoin ? "rejoined" : "joined"} server from ${req.connection.remoteAddress}`);
                     }
                 } else {
                     switch (data[0]) {
                         case 0:
                             player.chat(data[1]);
+                            break;
+                        case 1:
+                            Commands.process(player, data[1]);
                             break;
                         case 2:
                             player.move(data[1]);
@@ -199,7 +203,6 @@ wss.on("connection", (ws) => {
                         case 14:
                             player.stopHitting();
                             break;
-
                     }
                 }
             }

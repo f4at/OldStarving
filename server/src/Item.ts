@@ -1,4 +1,5 @@
 export default class Item {
+    name: string;
     id: number;
     recipe: Recipe;
 
@@ -130,28 +131,28 @@ export class Items {
     static PICK_DIAMOND = new Pickaxe(8, 30, 25, { pvp: 4, pve: 1 }, 4);
     static SWORD_GOLD = new Tool(9, 40, 25, { pvp: 22, pve: 7 });
     static SWORD_DIAMOND = new Tool(10, 41, 25, { pvp: 24, pve: 8 });
-    static FIRE = new EntityItem(11, 1, 0, 40, 1, 500, EntityType.FIRE, { physical: false, Lifespan: 2, dmg: 10, dmgDelay: 4000, dmgRange: 35});
-    static WORKBENCH = new EntityItem(12, 2, 4, 50, 1.25, 500, EntityType.WORKBENCH, {physical: true});
-    static SEED = new EntityItem(13, 3, 0, 40, 1, 500, EntityType.HARVESTABLE, { physical: false , inv: {item: Items.PLANT, amount:0, max:3, delay: 15, respawn:1 }, Lifespan:60, LifeDelay: 1/6});
+    static FIRE = new EntityItem(11, 1, 0, 40, 1, 500, EntityType.FIRE, { physical: false, Lifespan: 2, dmg: 10, dmgDelay: 4000, dmgRange: 35 });
+    static WORKBENCH = new EntityItem(12, 2, 4, 50, 1.25, 500, EntityType.WORKBENCH, { physical: true });
+    static SEED = new EntityItem(13, 3, 0, 40, 1, 500, EntityType.HARVESTABLE, { physical: false, inv: { item: Items.PLANT, amount: 0, max: 3, delay: 15, respawn: 1 }, Lifespan: 60, LifeDelay: 1 / 6 });
     static HAND = new Pickaxe(14, 10, 25, { pvp: 5, pve: 1 }, 0);
     static PICK_WOOD = new Pickaxe(15, 25, 25, { pvp: 5, pve: 1 }, 1);
-    static WOOD_WALL = new EntityItem(16, 4, 0, 50, 1, 1000, EntityType.WALL, { physical: true});
+    static WOOD_WALL = new EntityItem(16, 4, 0, 50, 1, 1000, EntityType.WALL, { physical: true });
     static WOOD_SPIKE = new EntityItem(17, 5, 0, 50, 1, 150, EntityType.SPIKE, { physical: true, hitdmg: 2, dmg: 5 });
     static MEAT = new Usable(18, 25, 0, -10, -5);
     static COOKED_MEAT = new Usable(19, 20, 0, 0, 5);
     static BIG_FIRE = new EntityItem(20, 6, 0, 35, 1, 700, EntityType.FIRE, { physical: false, Lifespan: 5, dmg: 20, dmgDelay: 4000, dmgRange: 40 });
     static BANDAGE = new Usable(21, 25, 0, -10, -5);
     static CORD = new Item(22);
-    static STONE_WALL = new EntityItem(23, 7, 7, 50, 1, 1500, EntityType.WALL, { physical: true, tier: 1});
-    static GOLD_WALL = new EntityItem(24, 8, 7, 50, 1, 2000, EntityType.WALL, { physical: true, tier: 2});
+    static STONE_WALL = new EntityItem(23, 7, 7, 50, 1, 1500, EntityType.WALL, { physical: true, tier: 1 });
+    static GOLD_WALL = new EntityItem(24, 8, 7, 50, 1, 2000, EntityType.WALL, { physical: true, tier: 2 });
     static DIAMOND_WALL = new EntityItem(25, 9, 7, 50, 1, 2500, EntityType.WALL, { physical: true, tier: 3 });
-    static WOOD_DOOR = new EntityItem(26, 10, 0, 50, 1, 3500, EntityType.DOOR, { physical: true});
-    static CHEST = new EntityItem(27, 11, 4, 25, 1.3, 300, EntityType.CHEST, { physical: true , inv:{item: null, amount:0}});
-    static STONE_SPIKE = new EntityItem(28, 12, 7, 50, 1, 300, EntityType.SPIKE, { physical: true, tier: 1, hitdmg: 5, dmg: 20, dmgDelay: 1500, dmgRange: 70});
-    static GOLD_SPIKE = new EntityItem(29, 13, 7, 50, 1, 600, EntityType.SPIKE, { physical: true, tier: 2, hitdmg: 10, dmg: 30, dmgDelay: 1500, dmgRange: 70});
-    static DIAMOND_SPIKE = new EntityItem(30, 14, 7, 50, 1, 900, EntityType.SPIKE, { physical: true, tier: 3, hitdmg: 15, dmg: 40, dmgDelay: 1500, dmgRange: 70});
-    static STONE_DOOR = new EntityItem(31, 15, 7, 50, 1, 1500, EntityType.DOOR, { physical: true, tier: 1});
-    static GOLD_DOOR = new EntityItem(32, 16, 7, 50, 1, 2000, EntityType.DOOR, { physical: true, tier: 2});
+    static WOOD_DOOR = new EntityItem(26, 10, 0, 50, 1, 3500, EntityType.DOOR, { physical: true });
+    static CHEST = new EntityItem(27, 11, 4, 25, 1.3, 300, EntityType.CHEST, { physical: true, inv: { item: null, amount: 0 } });
+    static STONE_SPIKE = new EntityItem(28, 12, 7, 50, 1, 300, EntityType.SPIKE, { physical: true, tier: 1, hitdmg: 5, dmg: 20, dmgDelay: 1500, dmgRange: 70 });
+    static GOLD_SPIKE = new EntityItem(29, 13, 7, 50, 1, 600, EntityType.SPIKE, { physical: true, tier: 2, hitdmg: 10, dmg: 30, dmgDelay: 1500, dmgRange: 70 });
+    static DIAMOND_SPIKE = new EntityItem(30, 14, 7, 50, 1, 900, EntityType.SPIKE, { physical: true, tier: 3, hitdmg: 15, dmg: 40, dmgDelay: 1500, dmgRange: 70 });
+    static STONE_DOOR = new EntityItem(31, 15, 7, 50, 1, 1500, EntityType.DOOR, { physical: true, tier: 1 });
+    static GOLD_DOOR = new EntityItem(32, 16, 7, 50, 1, 2000, EntityType.DOOR, { physical: true, tier: 2 });
     static DIAMOND_DOOR = new EntityItem(33, 17, 7, 50, 1, 2500, EntityType.DOOR, { physical: true, tier: 3 });
     static FUR = new Item(34);
     static FUR_WOLF = new Item(35);
@@ -160,7 +161,7 @@ export class Items {
     static STONE_SPEAR = new Tool(38, 54, 34, { pvp: 14, pve: 4 });
     static GOLD_SPEAR = new Tool(39, 54, 35, { pvp: 15, pve: 5 });
     static DIAMOND_SPEAR = new Tool(40, 55, 35, { pvp: 17, pve: 5 });
-    static FURNACE = new EntityItem(41, 18, 0, 60, 1, 700, EntityType.FIRE, { physical: true, dmg: 25, dmgDelay: 6000, dmgRange: 30, inv: {item: Items.WOOD, amount:0} });
+    static FURNACE = new EntityItem(41, 18, 0, 60, 1, 700, EntityType.FIRE, { physical: true, dmg: 25, dmgDelay: 6000, dmgRange: 30, inv: { item: Items.WOOD, amount: 0 } });
     static EXPLORER_HAT = new Clothes(42, { pvp: 0, pve: 4 }, 0);
     static STONE_HELMET = new Clothes(43, { pvp: 2, pve: 8 }, 0);
     static GOLD_HELMET = new Clothes(44, { pvp: 4, pve: 13 }, 0);
@@ -177,7 +178,7 @@ export class Items {
     static HAMMER_DIAMOND = new Tool(55, 40, 25, { pvp: 4, pve: 40 }, 3);
     static HAMMER_AMETHYST = new Tool(56, 41, 25, { pvp: 5, pve: 50 }, 4);
     static AMETHYST_WALL = new EntityItem(57, 19, 7, 50, 1, 3500, EntityType.WALL, { physical: true, tier: 4 });
-    static AMETHYST_SPIKE = new EntityItem(58, 20, 7, 50, 1, 1200, EntityType.SPIKE, { physical: true, tier: 4, hitdmg: 20, dmg: 50, dmgDelay: 1500, dmgRange: 70});
+    static AMETHYST_SPIKE = new EntityItem(58, 20, 7, 50, 1, 1200, EntityType.SPIKE, { physical: true, tier: 4, hitdmg: 20, dmg: 50, dmgDelay: 1500, dmgRange: 70 });
     static AMETHYST_DOOR = new EntityItem(59, 21, 7, 50, 1, 3500, EntityType.DOOR, { physical: true, tier: 4 });
     static CAP_SCARF = new Clothes(60, { pvp: 0, pve: 0 }, 3);
     static FUR_WINTER = new Item(61);
@@ -190,7 +191,7 @@ export class Items {
     static BEAR = new EntityItem(132, 63, 0, 35, 1, 900, EntityType.MOB, { physical: false, offensive: true, dmg: 60, speed: 190 });
     static DRAGON = new EntityItem(133, 64, 0, 50, 1, 1500, EntityType.MOB, { physical: false, offensive: true, dmg: 90, speed: 250 });
 
-    static FRUIT = new EntityItem(134, 100, 0, 55, 1, 0, EntityType.HARVESTABLE, {physical: false , inv: {item: Items.PLANT, amount:3, maximum:5, delay: 10, respawn: 1} });
+    static FRUIT = new EntityItem(134, 100, 0, 55, 1, 0, EntityType.HARVESTABLE, { physical: false, inv: { item: Items.PLANT, amount: 3, maximum: 5, delay: 10, respawn: 1 } });
 
     static AMETHYST_HELMET = new Clothes(81, { pvp: 6, pve: 23 }, 0);
 
@@ -204,7 +205,12 @@ export class Items {
 }
 
 for (let name in Items) {
-    Items.ITEMS.set(name, Items[name]);
+    const item = Items[name];
+
+    if (item) {
+        item.name = name;
+        Items.ITEMS.set(name, item);
+    }
 }
 
 const RECIPES = [{ r: [[3, 30], [2, 5]], w: 0, f: 0, result: Items.FIRE, time: .1 }, { r: [[3, 40], [2, 20]], w: 0, f: 0, result: Items.WORKBENCH, time: 1 / 15 }, { r: [[3, 60], [2, 30]], w: 1, f: 0, result: Items.STONE_SWORD, time: 1 / 15 }, { r: [[15, 1], [3, 60], [2, 20]], w: 1, f: 0, result: Items.PICK_STONE, time: 1 / 15 }, { r: [[4, 3], [3, 20]], w: 0, f: 1, result: Items.SEED, time: .1 }, { r: [[3, 60], [5, 30], [2, 40], [1, 1]], w: 1, f: 0, result: Items.PICK_GOLD, time: .05 }, { r: [[6, 30], [5, 60], [2, 100], [7, 1]], w: 1, f: 0, result: Items.PICK_DIAMOND, time: 1 / 30 }, { r: [[3, 80], [5, 50], [2, 60], [0, 1]], w: 1, f: 0, result: Items.SWORD_GOLD, time: .05 }, { r: [[6, 50], [5, 80], [2, 100], [9, 1]], w: 1, f: 0, result: Items.SWORD_DIAMOND, time: 1 / 30 }, { r: [[3, 15]], w: 0, f: 0, result: Items.PICK_WOOD, time: .2 }, { r: [[3, 20]], w: 1, f: 0, result: Items.WOOD_WALL, time: .2 }, { r: [[16, 1], [3, 20], [2, 15]], w: 1, f: 0, result: Items.STONE_SPIKE, time: .05 }, { r: [[18, 1]], w: 0, f: 1, result: Items.COOKED_MEAT, time: .1 }, { r: [[11, 1], [3, 40], [2, 10]], w: 0, f: 0, result: Items.BIG_FIRE, time: .1 }, { r: [[22, 3]], w: 1, f: 0, result: Items.BANDAGE, time: .2 }, { r: [[16, 1], [2, 20]], w: 1, f: 0, result: Items.STONE_WALL, time: .2 }, { r: [[23, 1], [5, 20]], w: 1, f: 0, result: Items.GOLD_WALL, time: .2 }, { r: [[24, 1], [6, 20]], w: 1, f: 0, result: Items.DIAMOND_WALL, time: .2 }, { r: [[3, 60]], w: 1, f: 0, result: Items.WOOD_DOOR, time: .125 }, { r: [[3, 60], [2, 20], [5, 10]], w: 1, f: 0, result: Items.CHEST, time: .05 }, { r: [[23, 1], [2, 35]], w: 1, f: 0, result: Items.STONE_SPIKE, time: .05 }, { r: [[24, 1], [5, 20], [2, 15]], w: 1, f: 0, result: Items.GOLD_SPIKE, time: .05 }, { r: [[25, 1], [6, 20], [2, 15]], w: 1, f: 0, result: Items.DIAMOND_SPIKE, time: .05 }, { r: [[26, 1], [2, 60]], w: 1, f: 0, result: Items.STONE_DOOR, time: .125 }, { r: [[31, 1], [5, 60]], w: 1, f: 0, result: Items.GOLD_DOOR, time: .125 }, { r: [[32, 1], [6, 60]], w: 1, f: 0, result: Items.DIAMOND_DOOR, time: .125 }, { r: [[34, 8], [22, 4]], w: 1, f: 0, result: Items.EARMUFFS, time: 1 / 15 }, { r: [[36, 1], [34, 5], [35, 10], [22, 6]], w: 1, f: 0, result: Items.COAT, time: .04 }, { r: [[3, 80], [2, 20]], w: 1, f: 0, result: Items.STONE_SPEAR, time: 1 / 15 }, { r: [[3, 120], [5, 40], [2, 50], [38, 1]], w: 1, f: 0, result: Items.GOLD_SPEAR, time: .05 }, { r: [[3, 250], [6, 50], [5, 80], [39, 1]], w: 1, f: 0, result: Items.DIAMOND_SPEAR, time: 1 / 30 }, { r: [[3, 150], [2, 100], [5, 50]], w: 1, f: 0, result: Items.FURNACE, time: .05 }, { r: [[47, 3], [34, 2]], w: 1, f: 0, result: Items.EXPLORER_HAT, time: 1 / 15 }, { r: [[2, 150], [3, 100]], w: 1, f: 0, result: Items.STONE_HELMET, time: .05 }, { r: [[2, 180], [3, 120], [5, 100], [43, 1]], w: 1, f: 0, result: Items.GOLD_HELMET, time: .025 }, { r: [[2, 200], [5, 100], [6, 160], [44, 1]], w: 1, f: 0, result: Items.DIAMOND_HELMET, time: 1 / 60 }, { r: [[47, 5], [22, 5], [35, 5]], w: 1, f: 0, result: Items.BOOK, time: 1 / 30 }, { r: [[3, 30]], w: 0, f: 1, result: Items.PAPER, time: 1 / 3 }, { r: [[22, 10], [35, 5]], w: 1, f: 0, result: Items.BAG, time: .05 }, { r: [[6, 80], [5, 130], [49, 50], [10, 1]], w: 1, f: 0, result: Items.SWORD_AMETHYST, time: .025 }, { r: [[6, 60], [5, 90], [49, 30], [8, 1]], w: 1, f: 0, result: Items.PICK_AMETHYST, time: .025 }, { r: [[49, 50], [6, 100], [5, 120], [40, 1]], w: 1, f: 0, result: Items.AMETHYST_SPEAR, time: .025 }, { r: [[3, 120], [2, 60]], w: 1, f: 0, result: Items.HAMMER_STONE, time: 1 / 15 }, { r: [[3, 160], [2, 120], [5, 80], [53, 1]], w: 1, f: 0, result: Items.HAMMER_GOLD, time: .05 }, { r: [[6, 80], [2, 200], [5, 150], [54, 1]], w: 1, f: 0, result: Items.HAMMER_DIAMOND, time: 1 / 30 }, { r: [[6, 160], [49, 60], [5, 250], [55, 1]], w: 1, f: 0, result: Items.HAMMER_AMETHYST, time: .025 }, { r: [[25, 1], [49, 20]], w: 1, f: 0, result: Items.AMETHYST_WALL, time: .2 }, { r: [[57, 1], [49, 20], [2, 15]], w: 1, f: 0, result: Items.AMETHYST_SPIKE, time: .05 }, { r: [[33, 1], [49, 60]], w: 1, f: 0, result: Items.AMETHYST_DOOR, time: .125 }, { r: [[37, 1], [61, 20], [62, 10]], w: 1, f: 0, result: Items.CAP_SCARF, time: 1 / 60 }, { r: [[6, 1], [22, 1]], w: 1, f: 0, result: Items.BLUE_CORD, time: 1 / 3 }];

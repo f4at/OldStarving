@@ -61,6 +61,11 @@ export abstract class Utils {
         return (vector.x ** 2 + vector.y ** 2) ** 0.5;
     }
 
+    static remap(oldValue,oldMin,oldMax,newMin,newMax,scale=false) {
+        let newValue = (((oldValue - oldMin) * (newMax - newMin)) / (oldMax - oldMin)) + newMin;
+        return scale ? Math.max(newMin,Math.min(newMax,newValue)) : newValue;
+    }
+
     static randomString(length: number) {
         let dict = '0123456789abcedfghejklmnopqrstuvwyzABCDEFGHEJKLMNEPQRSTUVWYZ';
         let id;

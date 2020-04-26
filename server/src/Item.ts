@@ -184,12 +184,12 @@ export class Items {
     static FUR_WINTER = new Item(61);
     static BLUE_CORD = new Item(62);
 
-    static RABBIT = new EntityItem(128, 60, 0, 20, 1, 60, EntityType.MOB, { physical: false, speed: 300 });
-    static WOLF = new EntityItem(129, 61, 0, 30, 1, 300, EntityType.MOB, { physical: false, offensive: true, dmg: 40, speed: 250 });
-    static SPIDER = new EntityItem(130, 62, 0, 32, 1, 120, EntityType.MOB, { physical: false, offensive: true, dmg: 20, speed: 150 });
-    static FOX = new EntityItem(131, 63, 0, 30, 1, 300, EntityType.MOB, { physical: false, offensive: true, dmg: 25, speed: 230 });
-    static BEAR = new EntityItem(132, 63, 0, 35, 1, 900, EntityType.MOB, { physical: false, offensive: true, dmg: 60, speed: 190 });
-    static DRAGON = new EntityItem(133, 64, 0, 50, 1, 1500, EntityType.MOB, { physical: false, offensive: true, dmg: 90, speed: 250 });
+    static RABBIT = new EntityItem(128, 60, 0, 20, 1, 60, EntityType.MOB, { physical: false, speed: 300, genes: [0.05, 0, 300, 50, -200, 200, 2, 0.5, 0.2, 1, 0, 0.9, 0.99, 8, 2]});
+    static WOLF = new EntityItem(129, 61, 0, 30, 1, 300, EntityType.MOB, { physical: false, offensive: true, dmg: 40, speed: 250, genes: [0.1, 0.4, 300, 300, -200, 200, 3, 0.5, 0.2, 1, 0.5, 0.9, 0.99, 8, 2]});
+    static SPIDER = new EntityItem(130, 62, 0, 32, 1, 120, EntityType.MOB, { physical: false, offensive: true, dmg: 20, speed: 150, genes: [0.1, 0.6, 150, 250, -200, 200, 2, 0.5, 0.2, 1, 0.5, 0.9, 0.99, 8, 2]});
+    static FOX = new EntityItem(131, 63, 0, 30, 1, 300, EntityType.MOB, { physical: false, offensive: true, dmg: 25, speed: 230, genes: [0.1, 0.5, 300, 300, -200, 200, 3, 0.5, 0.2, 1, 0.5, 0.9, 0.99, 8, 2]});
+    static BEAR = new EntityItem(132, 63, 0, 35, 1, 900, EntityType.MOB, { physical: false, offensive: true, dmg: 60, speed: 190 , genes: [0.05, 0.4, 200, 300, -200, 200, 3, 0.5, 0.2, 1, 0.5, 0.9, 0.99, 8, 2] });
+    static DRAGON = new EntityItem(133, 64, 0, 50, 1, 1500, EntityType.MOB, { physical: false, offensive: true, dmg: 90, speed: 250 ,genes: [0.1, 0.3, 400, 400, -200, 200, 3, 0.5, 0.2, 1, 0.5, 0.9, 0.99, 8, 2] });
 
     static FRUIT = new EntityItem(134, 100, 0, 55, 1, 0, EntityType.HARVESTABLE, { physical: false, inv: { item: Items.PLANT, amount: 3, maximum: 5, delay: 10, respawn: 1 } });
 
@@ -203,6 +203,7 @@ export class Items {
         return Array.from(this.ITEMS.values()).find(item => item.id === key);
     }
 }
+
 
 for (let name in Items) {
     const item = Items[name];

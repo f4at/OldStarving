@@ -1,15 +1,16 @@
-import * as WebSocket from "ws";
+import WebSocket from "ws";
 import * as https from "https";
 import world from "./World";
 import Player from "./Player";
 import { Items } from "./Item";
-import * as express from 'express';
+import express from 'express';
 import { EntityState } from "./Entity";
 import fetch from 'node-fetch';
 import config from "../config";
 import { AddressInfo } from "net";
 import * as fs from "fs";
-import { Commands } from "./Command";
+import { Commands, ConsoleSender } from './Command';
+import * as readline from 'readline';
 
 export interface Vector {
     x: number;
@@ -224,4 +225,18 @@ wss.on("connection", (ws, req) => {
 
 wss.on("listening", () => {
     console.log("Started WebSocket server");
+
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+
+    (async function () {
+        process.stdout.write("> ");
+        for await (const line of rl) {
+            Commands.process(ConsoleSender.instance, line);
+            process.stdout.write("> ");
+        }
+        rl.close();
+    })();
 });

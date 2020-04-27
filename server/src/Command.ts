@@ -1,6 +1,9 @@
 import { Items } from "./Item";
 import Player from "./Player";
 import world from "./World";
+import chalk from "chalk";
+import Entity, { EntityTypes } from "./Entity";
+import { Vector } from './index';
 
 export interface CommandSender {
     sendMessage(text: string, color?: string): void;
@@ -11,7 +14,7 @@ export class ConsoleSender implements CommandSender {
     static instance = new ConsoleSender();
 
     sendMessage(text: string, color?: string) {
-        console.log(text);
+        console.log(color ? chalk.keyword(color)(text) : text);
     }
 
     get isOp() {
@@ -41,7 +44,7 @@ export abstract class Command {
 
 export class Commands {
     static commands: Map<string, Command> = new Map([
-        ["help", new class HelpCommand extends Command {
+        ["help", new class extends Command {
             invoke(sender: CommandSender, args: string[]) {
                 sender.sendMessage(/*html*/`Click <a href="/register" target="_blank" style="color: lightblue;">here</a> for commands`);
             }
@@ -50,7 +53,7 @@ export class Commands {
                 return true;
             }
         }],
-        ["list", new class ListCommand extends Command {
+        ["list", new class extends Command {
             invoke(sender: CommandSender, args: string[]) {
                 sender.sendMessage(`Players (${world.players.length}): ${world.players.map(x => `${x.nick} (${x.pid})`).join(", ")}`);
             }
@@ -59,7 +62,12 @@ export class Commands {
                 return true;
             }
         }],
-        ["give", new class GiveCommand extends Command {
+        ["stop", new class extends Command {
+            invoke(sender: CommandSender, args: string[]) {
+                process.exit();
+            }
+        }],
+        ["give", new class extends Command {
             invoke(sender: CommandSender, args: string[]) {
                 if (args.length < 3 || args.length > 4)
                     throw new SyntaxError();
@@ -102,6 +110,33 @@ export class Commands {
                         target.sendInfos();
                     }
                     sender.sendMessage(`Teleported ${targets.length} players to x ${x}, y ${y}`);
+                } else {
+                    sender.sendMessage("Invalid destination!", "red");
+                }
+            }
+        }],
+        ["summon", new class extends Command {
+            invoke(sender: CommandSender, args: string[]) {
+                if (args.length < 2 || args.length > 4)
+                    throw new SyntaxError();
+
+                let pos: Vector;
+                if (args.length < 4) {
+                    if (sender instanceof Player) {
+                        pos = sender.pos;
+                    } else {
+                        throw new SyntaxError();
+                    }
+                } else {
+                    pos = { x: Number(args[2]) * 100, y: Number(args[3]) * 100 };
+                }
+
+                if (!isNaN(pos.x) && !isNaN(pos.y)) {
+                    let id = Number(args[1]);
+                    let entityType = EntityTypes.get(isNaN(id) ? args[1].toUpperCase() : id);
+                    new Entity(pos, 0, sender instanceof Player ? sender : null, entityType);
+
+                    sender.sendMessage(`Summoned ${entityType.name}!`);
                 } else {
                     sender.sendMessage("Invalid destination!", "red");
                 }

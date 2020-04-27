@@ -1,6 +1,6 @@
 import Player from "./Player";
-import Entity from "./Entity";
-import { EntityType, ItemStack, Items, EntityItem } from './Item';
+import Entity, { EntityType, EntityTypes, EntityItemType } from "./Entity";
+import { ItemStack, Items } from './Item';
 import { Vector, Utils } from ".";
 import * as fs from "fs";
 
@@ -11,9 +11,9 @@ export class MapEntityDrop extends ItemStack {
     maximum?: number = 0;
 }
 
-export class MapEntityType extends EntityItem {
+export class MapEntityType extends EntityType {
     id: number;
-    type = EntityType.HARVESTABLE;
+    type = EntityItemType.HARVESTABLE;
     mType: string;
     physical: boolean;
     sizes: number[];
@@ -22,7 +22,7 @@ export class MapEntityType extends EntityItem {
     miningTier: number;
 
     constructor(id: number, type: string, physical: boolean = false, numberOfSides: number = 0, radius: number = 0, XtoYfactor: number = 1, sizes: number[] = [1], angle = 0, drop: MapEntityDrop = new MapEntityDrop(undefined), miningTier: number = -1) {
-        super(id, -1, numberOfSides, radius, XtoYfactor, -1, EntityType.HARVESTABLE, null);
+        super(id, numberOfSides, radius, XtoYfactor, -1, EntityItemType.HARVESTABLE, null);
         this.mType = type;
         this.physical = physical;
         this.sizes = sizes;
@@ -42,7 +42,7 @@ export class MapEntityTypes {
     static DIAMOND = new MapEntityType(13, "d", true, 3, 65, 1, [1.55, 1.25, 1], 53, { item: Items.DIAMOND, amount: 7, maximum: 15, delay: 6, respawn: 1 }, 3);
     static TREE_BRANCH = new MapEntityType(16, "b", true, 4, 80, 1.1, [1.5, 1.5, 1.25, 1.25], 0, { item: Items.WOOD, amount: 20, maximum: 40, delay: 3, respawn: 1 }, 0);
     static FIR = new MapEntityType(20, "f", true, 7, 80, 1, [1, 1, 1], 0, { item: Items.WOOD, amount: 15, maximum: 30, delay: 3, respawn: 1 }, 0);
-    static STONES_WINTER = new MapEntityType(23, "sw", true, 7, 57, 1,[1.78, 1.43, 1], 21, { item: Items.STONE, amount: 10, maximum: 20, delay: 4, respawn: 1 }, 1);
+    static STONES_WINTER = new MapEntityType(23, "sw", true, 7, 57, 1, [1.78, 1.43, 1], 21, { item: Items.STONE, amount: 10, maximum: 20, delay: 4, respawn: 1 }, 1);
     static GOLD_WINTER = new MapEntityType(26, "gw", true, 8, 64, 1, [1.35, 1.18, 1], 27, { item: Items.GOLD, amount: 10, maximum: 20, delay: 5, respawn: 1 }, 2);
     static DIAMOND_WINTER = new MapEntityType(29, "dw", true, 3, 65, 1, [1.55, 1.25, 1], 53, { item: Items.DIAMOND, amount: 7, maximum: 15, delay: 6, respawn: 1 }, 3);
     static AMETHYST = new MapEntityType(32, "a", true, 0, 50, 1, [1, 1, 1], 0, { item: Items.AMETHYST, amount: 5, maximum: 10, delay: 7, respawn: 1 }, 4);
@@ -72,8 +72,8 @@ export class MapEntity extends Entity {
         this.eangle = type.eangle;
 
         this.inv = Object.assign({}, type.drop);
-        this.inv.maximum = Math.ceil(this.inv.maximum * type.sizes[size] ** 2/5)*5;
-        this.inv.amount = Math.ceil(this.inv.amount * type.sizes[size] ** 2/5)*5;
+        this.inv.maximum = Math.ceil(this.inv.maximum * type.sizes[size] ** 2 / 5) * 5;
+        this.inv.amount = Math.ceil(this.inv.amount * type.sizes[size] ** 2 / 5) * 5;
         this.pos = position;
         this.angle = 0;
         this.chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
@@ -85,7 +85,7 @@ export class MapEntity extends Entity {
         this.miningTier = type.miningTier;
         this.physical = type.physical;
 
-        this.type = EntityType.HARVESTABLE;
+        this.type = EntityItemType.HARVESTABLE;
         this.init();
     }
 }
@@ -111,20 +111,20 @@ export class GameMap {
                 this.chunks[y][x] = [];
                 for (const typeName in row) {
                     let s = 0;
-                    if (typeName==='p' && row.p.length) {
+                    if (typeName === 'p' && row.p.length) {
                         mapEntitiesCounter++;
                         let type = MapEntityTypes.get(typeName);
-                        let fruit = new Entity( {x: row.p[0].x,y: row.p[0].y},0,null,Items.FRUIT);
-                        this.chunks[y][x].push(new MapEntity(type ,  {x: row.p[0].x,y: row.p[0].y}, s, mapEntitiesCounter));
+                        let fruit = new Entity({ x: row.p[0].x, y: row.p[0].y }, 0, null, EntityTypes.FRUIT);
+                        this.chunks[y][x].push(new MapEntity(type, { x: row.p[0].x, y: row.p[0].y }, s, mapEntitiesCounter));
                     } else {
                         for (const mapEntity of row[typeName]) {
                             if (mapEntity.length) {
                                 mapEntitiesCounter++;
                                 let type = MapEntityTypes.get(typeName);
-                                if (type.physical === true) { 
-                                    this.chunks[y][x].push(new MapEntity(type ,  {x: mapEntity[0].x, y: mapEntity[0].y}, s, mapEntitiesCounter));
+                                if (type.physical === true) {
+                                    this.chunks[y][x].push(new MapEntity(type, { x: mapEntity[0].x, y: mapEntity[0].y }, s, mapEntitiesCounter));
                                 }
-        
+
                             }
                             s++;
                         }
@@ -169,12 +169,12 @@ export class World {
             }
         }
         let otime = this.isDay;
-        setInterval(()=>{
+        setInterval(() => {
             if (this.isDay != otime) {
                 otime = this.isDay;
-                Utils.broadcastPacket(new Uint8Array([10,this.isDay ? 0 : 1]));
+                Utils.broadcastPacket(new Uint8Array([10, this.isDay ? 0 : 1]));
             }
-        },100);
+        }, 100);
     }
 
     get time() {

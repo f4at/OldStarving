@@ -9611,7 +9611,7 @@ export function start(ModdedStarving: ModdedStarving) {
             var d = world.players;
             if (d[f]) {
                 d[f].nickname = c[2];
-                d[f].displayName = c[3];
+                d[f].displayName = c[3] || d[f].nickname;
                 d[f].score = d[f].score || 0;
                 d[f].ldb_label = null;
                 d[f].label = null;

@@ -1,8 +1,8 @@
-import * as WebSocket from "ws";
-import Item, { Clothes, Tool, Items, DamageType, Usable, Recipe, ItemStack, EntityType, Pickaxe, EntityItem } from './Item';
+import WebSocket from "ws";
+import Item, { Clothes, Tool, Items, DamageType, Usable, Recipe, ItemStack, Pickaxe, EntityItem } from './Item';
 import { Vector, Utils } from '.';
 import world from "./World";
-import Entity, { Collider, EntityState } from "./Entity";
+import Entity, { Collider, EntityState, EntityItemType } from "./Entity";
 import { MapEntity } from './World';
 import config from "../config";
 import { ConsoleSender } from "./Command";
@@ -74,7 +74,7 @@ export class PlayerInventory extends Inventory {
 export default class Player extends Entity implements ConsoleSender {
     accountId: string;
     ws: WebSocket;
-    type: EntityType = EntityType.PLAYER;
+    type: EntityItemType = EntityItemType.PLAYER;
     sid: number;
     pid: number;
     id: number;
@@ -169,7 +169,7 @@ export default class Player extends Entity implements ConsoleSender {
         while (counter < 64 && !found) {
             this.pos = { "x": 1 + Math.random() * 10000, "y": 1 + Math.random() * 10000 }; //spawn in forest biome
             this.chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
-            if (this.getEntitiesInRange(1, 1, false, true).find(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < this.radius + e.radius + (e.type == EntityType.WALL || e.type == EntityType.SPIKE || e.type == EntityType.DOOR ? 500 : 0))) {
+            if (this.getEntitiesInRange(1, 1, false, true).find(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < this.radius + e.radius + (e.type == EntityItemType.WALL || e.type == EntityItemType.SPIKE || e.type == EntityItemType.DOOR ? 500 : 0))) {
                 counter += 1;
             } else {
                 found = true;
@@ -259,6 +259,11 @@ export default class Player extends Entity implements ConsoleSender {
         this.sendInfos();
         this.inventory.updateSize();
         this.gatherAll();
+        this.broadcastJoin();
+    }
+
+    broadcastJoin() {
+        Utils.broadcastPacket(JSON.stringify([2, this.pid, this.nick, this.displayName]));
     }
 
     changeDisplayNick() {
@@ -267,7 +272,7 @@ export default class Player extends Entity implements ConsoleSender {
             const currentColor = this.color + i;
             this.displayName += '\u00a7' + this.colors[currentColor > this.colors.length - 1 ? currentColor - this.colors.length : currentColor] + this.nick.charAt(i);
         }
-        Utils.broadcastPacket(JSON.stringify([2, this.pid, this.nick, this.displayName]));
+        this.broadcastJoin();
         this.color = (this.color + 1) % (this.colors.length + 1);
     }
 
@@ -327,7 +332,7 @@ export default class Player extends Entity implements ConsoleSender {
 
         let entities = (this.getEntitiesInRange(1, 1, true, true) as any[]).concat(this.getMapEntitiesInRange(4, 4)).filter(e => Utils.distance({ x: center.x - e.pos.x, y: center.y - e.pos.y }) < this.tool.range + e.radius && e !== this);
         for (let entity of entities) {
-            entity.damage(entity.type === EntityType.PLAYER ? this.tool.damage.pvp : this.tool.damage.pve, this);
+            entity.damage(entity.type === EntityItemType.PLAYER ? this.tool.damage.pvp : this.tool.damage.pve, this);
         }
     }
 
@@ -335,8 +340,8 @@ export default class Player extends Entity implements ConsoleSender {
         this.attacking = false;
     }
 
-    damage(dmg: number, attacker?: Player): void
-    damage(dmg: number, attacker?: Player, report?: Boolean, protection?: Boolean, send?: Boolean): void
+    damage(dmg: number, attacker?: Player): void;
+    damage(dmg: number, attacker?: Player, report?: Boolean, protection?: Boolean, send?: Boolean): void;
     damage(dmg: number, attacker: Player = null, report: Boolean = true, protection: Boolean = true, send: Boolean = false) {
         let ohealth = this.health;
         if (dmg > 0) {
@@ -473,9 +478,9 @@ export default class Player extends Entity implements ConsoleSender {
         let fire: boolean = false;
         let workbench: boolean = false;
         for (let entity of this.getEntitiesInRange(1, 1, false, true).filter(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < 240)) {
-            if (entity.type === EntityType.FIRE) {
+            if (entity.type === EntityItemType.FIRE) {
                 fire = true;
-            } else if (entity.type === EntityType.WORKBENCH) {
+            } else if (entity.type === EntityItemType.WORKBENCH) {
                 workbench = true;
                 if (fire === true) {
                     break;
@@ -535,7 +540,7 @@ export default class Player extends Entity implements ConsoleSender {
                 case EntityItem:
                     let coords = Utils.angleToCoords(this.angle);
                     let pos = { x: this.pos.x + coords.x * 120, y: this.pos.y + coords.y * 120 };
-                    let entity = new Entity(pos, this.angle, this, item as EntityItem);
+                    let entity = new Entity(pos, this.angle, this, (item as EntityItem).entityType);
                     if (!entity.error) {
                         this.inventory.remove(item, 1);
                         this.acceptUsing(id);

@@ -1,9 +1,8 @@
 import { EntityType, EntityItem, Pickaxe, Items, ItemStack } from "./Item";
 import { Vector, Utils } from ".";
-import Player from "./Player";
+//import Player from "./Player";
 import world, { MapEntityDrop, MapEntity } from "./World";
 import Item from './Item';
-import { createRequireFromPath } from "module";
 
 export interface Collider {
     physical: boolean;
@@ -30,7 +29,7 @@ export enum EntityState {
 export default class Entity implements Collider {
     type: EntityType;
     entityType: EntityItem;
-    owner: Player = null;
+    owner: any = null;
     id: number;
     mapID: number;
     item: Item;
@@ -79,7 +78,7 @@ export default class Entity implements Collider {
     memory: any;
     genes: any;
 
-    constructor(pos: Vector, angle: number, owner: Player, entityItem: EntityItem, genes = null) {
+    constructor(pos: Vector, angle: number, owner: any, entityItem: EntityItem, genes = null) {
         if (entityItem !== null) {
             this.type = entityItem.type; //enitity type
             this.entityType = entityItem; //entity id
@@ -241,7 +240,7 @@ export default class Entity implements Collider {
         }
     }
 
-    damage(dmg: number, attacker: Player = null) { // use negative values to increase hp
+    damage(dmg: number, attacker: any = null) { // use negative values to increase hp
         let ownerId = this.owner !== null ? this.owner.pid : 0;
         if (this.type === EntityType.HARVESTABLE) {
             if (attacker) {
@@ -311,7 +310,7 @@ export default class Entity implements Collider {
 
     }
 
-    die(attacker: Player = null) {
+    die(attacker: any = null) {
         this.sendInfos(false);
         let ownerId = this.owner === null ? 0 : this.owner.pid;
         world.echunks[this.chunk.x][this.chunk.y][ownerId] = world.echunks[this.chunk.x][this.chunk.y][ownerId].filter(e => e !== e);
@@ -333,7 +332,7 @@ export default class Entity implements Collider {
         }
     }
 
-    sendInfos(visible = true, to: Player[] = null) {
+    sendInfos(visible = true, to: any[] = null) {
         if (!(this instanceof MapEntity)) {
             let packet = this.infoPacket(visible);
             if (to !== null) {
@@ -369,10 +368,6 @@ export default class Entity implements Collider {
     sendToRange(packet) {
         let players = this.getEntitiesInRange(2, 2, true, false);
         for (let player of players) { player.send(packet); };
-    }
-
-    getPlayersInRange(x: number, y: number): Player[] {
-        return this.getEntitiesInRange(x, y).filter(x => x instanceof Player) as Player[];
     }
 
     getEntitiesInRange(x: number, y: number, player: boolean = true, entity: boolean = true) {
@@ -413,20 +408,6 @@ export default class Entity implements Collider {
 
     moveAI() {
         let v = this.genes;
-
-        //wolf genes
-        //[0.1, 0.4, 300, 300, -200, 200, 3, 0.5, 0.2, 1, 0.5, 0.9, 0.99, 8, 2]
-        //fox genes
-        //[0.1, 0.5, 300, 300, -200, 200, 3, 0.5, 0.2, 1, 0.5, 0.9, 0.99, 8, 2]
-        //rabbit genes
-        //[0.05, 0, 300, 50, -200, 200, 2, 0.5, 0.2, 1, 0, 0.9, 0.99, 8, 2]
-        //Bear genes
-        //[0.05, 0.4, 200, 300, -200, 200, 3, 0.5, 0.2, 1, 0.5, 0.9, 0.99, 8, 2]
-        //Dragon Genes?
-        //[0.1, 0.3, 400, 400, -200, 200, 3, 0.5, 0.2, 1, 0.5, 0.9, 0.99, 8, 2]
-        //Spider genes
-        //[0.1, 0.6, 150, 250, -200, 200, 2, 0.5, 0.2, 1, 0.5, 0.9, 0.99, 8, 2]
-
         let scores = [];
         let vectors = [];
         let players = this.getEntitiesInRange(1,1,true,false);
@@ -509,11 +490,9 @@ export default class Entity implements Collider {
     }
 
     updateChunk(chunk: Vector) {
-        let list = this.getPlayersInRange(2, 2).filter(e => Math.abs(e.chunk.x - chunk.x) > 2 || Math.abs(e.chunk.y - chunk.y) > 2);
+        let list = this.getEntitiesInRange(2, 2, true, false).filter(e => Math.abs(e.chunk.x - chunk.x) > 2 || Math.abs(e.chunk.y - chunk.y) > 2);
         this.sendInfos(false, list);
-
         world.chunks[this.chunk.x][this.chunk.y] = world.chunks[this.chunk.x][this.chunk.y].filter(e => e != this);
-        let echunk = this.chunk;
         this.chunk = chunk;
         world.chunks[this.chunk.x][this.chunk.y].push(this);
     }

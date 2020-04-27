@@ -148,7 +148,7 @@ export default class Player extends Entity implements ConsoleSender {
     }
 
     constructor(nick: string, accountId: string, ws: WebSocket) {
-        super(null, null, null, null);
+        super(null, null, null, null, null);
         this.nick = nick;
         this.displayName = nick;
         this.accountId = accountId;
@@ -251,78 +251,6 @@ export default class Player extends Entity implements ConsoleSender {
         }
     }
 
-    getEntitiesInRange(x: number, y: number, player: boolean = true, entity: boolean = true): Entity[] {
-        let ymin = Math.max(-y + this.chunk.y, 0), ymax = Math.min(y + 1 + this.chunk.y, world.mapSize.y),
-            xmin = Math.max(-x + this.chunk.x, 0), xmax = Math.min(x + 1 + this.chunk.x, world.mapSize.x);
-        let list = [];
-        for (let x = xmin; x < xmax; x++) {
-            for (let y = ymin; y < ymax; y++) {
-                if (player) {
-                    list = list.concat(world.chunks[x][y]);
-                }
-                if (entity) {
-                    for (let i = 0; i < 128; i++) {
-                        list = list.concat(world.echunks[x][y][i]);
-                    }
-                }
-            }
-        }
-        return list;
-    }
-
-    getPlayersInRange(x: number, y: number): Player[] {
-        return this.getEntitiesInRange(x, y).filter(x => x instanceof Player) as Player[];
-    }
-
-    getMapEntitiesInRange(x: number, y: number): MapEntity[] {
-        let ymin = Math.max(-y + Math.floor(this.pos.y / 100), 0), ymax = Math.min(y + 1 + Math.floor(this.pos.y / 100), Math.floor(world.map.height / 100)),
-            xmin = Math.max(-x + Math.floor(this.pos.x / 100), 0), xmax = Math.min(x + 1 + Math.floor(this.pos.x / 100), Math.floor(world.map.width / 100));
-        let list = [];
-        for (let x = xmin; x < xmax; x++) {
-            for (let y = ymin; y < ymax; y++) {
-                list = list.concat(world.map.chunks[y][x]);
-            }
-        }
-        return list;
-    }
-
-    collision() {
-        //collision version 1(not real collision just simulation to save time and ressources will make real one later)
-        // VERY HARD
-        // let entities = this.getEntitiesInRange(1, 1, false, true);
-        // let mapEntities = this.getMapEntitiesInRange(3, 3);
-        let colliders: Collider[] = (this.getMapEntitiesInRange(3, 3) as Collider[]).concat(this.getEntitiesInRange(1, 1, false, true));
-        let dis: number, vec: Vector, angle: number, angle2: number, collide: boolean, counter = 0;
-        while (true) {
-            collide = false;
-            counter += 1;
-            for (let collider of colliders.filter(e => e.physical)) {
-                vec = { x: this.pos.x - collider.pos.x, y: this.pos.y - collider.pos.y };
-                if (collider.numberOfSides === 0) {
-                    dis = collider.radius + this.radius - Utils.distance(vec);
-                } else {
-                    angle = Utils.toRadians(Utils.coordsToAngle(vec) - collider.angle - collider.eangle);
-                    angle2 = Math.PI / collider.numberOfSides;
-                    dis = Utils.distance({ x: Math.cos(angle2), y: Math.sin(angle2 - Math.abs(angle2 - angle % (2 * angle2))) }) * collider.radius + this.radius - Utils.distance(vec);
-                }
-                if (dis > 1e-4) {
-                    vec = Utils.angleToCoords(collider.numberOfSides === 0 ? Utils.coordsToAngle(vec) : Utils.toBinary(Math.round(angle / (2 * angle2)) * 2 * angle2) + collider.angle + collider.eangle);
-                    this.pos.x += vec.x * dis;
-                    this.pos.y += vec.y * dis;
-                    collide = true;
-                    break;
-                }
-            }
-            let pos = this.pos;
-            this.pos.x = Math.min(Math.max(0, this.pos.x), world.mapSize.x * 1000 - 1);
-            this.pos.y = Math.min(Math.max(0, this.pos.y), world.mapSize.y * 1000 - 1);
-            if (pos.x != this.pos.x || pos.y != this.pos.y) {
-                collide = true;
-            }
-            if (!collide || counter == 32) { break; };
-        }
-    }
-
     join(ws) {
         this.ws = ws;
         this.online = true;
@@ -407,6 +335,8 @@ export default class Player extends Entity implements ConsoleSender {
         this.attacking = false;
     }
 
+    damage(dmg: number, attacker?: Player): void
+    damage(dmg: number, attacker?: Player, report?: Boolean, protection?: Boolean, send?: Boolean): void
     damage(dmg: number, attacker: Player = null, report: Boolean = true, protection: Boolean = true, send: Boolean = false) {
         let ohealth = this.health;
         if (dmg > 0) {

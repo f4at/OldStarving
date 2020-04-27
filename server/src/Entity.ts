@@ -1,9 +1,8 @@
-import { EntityType, EntityItem, Pickaxe, Items, ItemStack } from "./Item";
+import { EntityType, EntityItem, Pickaxe, Items } from "./Item";
 import { Vector, Utils } from ".";
-import Player from "./Player";
+import Player from './Player';
 import world, { MapEntityDrop, MapEntity } from "./World";
 import Item from './Item';
-import { createRequireFromPath } from "module";
 
 export interface Collider {
     physical: boolean;
@@ -129,10 +128,10 @@ export default class Entity implements Collider {
             this.genes = genes ? genes : special.genes ? special.defaultGenes : null;
 
             if (this.genes) {
-                for (let i=0;i<this.genes.length;i++) {
-                    let fac = Utils.remap(Math.random(),0,1,this.genes[11],this.genes[12]);
-                    this.genes[i] *= Math.random() > 0.5 ? 1/fac : fac;
-                    this.genes[i] += Utils.remap(Math.random()**this.genes[13]*this.genes[14],0,1,-1,1) ;
+                for (let i = 0; i < this.genes.length; i++) {
+                    let fac = Utils.remap(Math.random(), 0, 1, this.genes[11], this.genes[12]);
+                    this.genes[i] *= Math.random() > 0.5 ? 1 / fac : fac;
+                    this.genes[i] += Utils.remap(Math.random() ** this.genes[13] * this.genes[14], 0, 1, -1, 1);
                 }
             }
 
@@ -177,26 +176,26 @@ export default class Entity implements Collider {
                 }
                 break;
             case EntityType.MOB:
-                let movement = {vec:{x:0,y:0},time:0.5}
-                let loopDuration = (this.moveDelay*world.tickRate/1000);
+                let movement = { vec: { x: 0, y: 0 }, time: 0.5 };
+                let loopDuration = (this.moveDelay * world.tickRate / 1000);
                 this.updateLoop = setInterval(() => {
                     this.counter += 1;
                     let mov = (this.counter % loopDuration);
                     if ((this.counter % (this.dmgDelay / 200)) < 1) {
-                        let players = this.getEntitiesInRange(1, 1, true).filter(e => Utils.distance({ x: e.x - this.pos.x, y: e.y - this.pos.y }) < this.dmgRange + e.radius);
+                        let players = this.getPlayersInRange(1, 1).filter(e => Utils.distance({ x: e.pos.x - this.pos.x, y: e.pos.y - this.pos.y }) < this.dmgRange + e.radius);
                         for (let player of players) {
-                            player.damage(this.dmg, null, true, true, true);
+                            player.damage(this.dmg, null);
                         }
                     }
-                    if (mov < 1) { 
+                    if (mov < 1) {
                         movement = this.moveAI(); //ai
                     };
-                    if (mov < movement.time*loopDuration)  {
+                    if (mov < movement.time * loopDuration) {
 
                         this.pos.x += movement.vec.x / world.tickRate;
                         this.pos.y += movement.vec.y / world.tickRate;
                         this.collision();
-    
+
                         let chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
                         if (this.chunk.x != chunk.x || chunk.y != this.chunk.y) {
                             this.updateChunk(chunk);
@@ -205,13 +204,13 @@ export default class Entity implements Collider {
                         this.action = 0;
                         this.updating = false;
                     }
-                }, 1000/world.tickRate);
+                }, 1000 / world.tickRate);
                 break;
             case EntityType.FIRE:
                 this.updateLoop = setInterval(() => {
-                    let players = this.getEntitiesInRange(1, 1, true, false).filter(e => Utils.distance({ x: e.pos.x - this.pos.x, y: e.pos.y - this.pos.y }) < e.radius + this.dmgRange);
+                    let players = this.getEntitiesInRange(1, 1).filter(e => Utils.distance({ x: e.pos.x - this.pos.x, y: e.pos.y - this.pos.y }) < e.radius + this.dmgRange);
                     for (let player of players) {
-                        player.damage(this.dmg, null, true, true, true);
+                        player.damage(this.dmg, null);
                     }
                     if (this.entityType === Items.FURNACE && this.inv.amount > 0) {
                         this.inv.amount -= 1;
@@ -227,9 +226,9 @@ export default class Entity implements Collider {
                 break;
             case EntityType.SPIKE:
                 this.updateLoop = setInterval(() => {
-                    let players = this.getEntitiesInRange(1, 1, true, false).filter(e => Utils.distance({ x: e.pos.x - this.pos.x, y: e.pos.y - this.pos.y }) < e.radius + this.dmgRange && e !== this.owner);
+                    let players = this.getEntitiesInRange(1, 1).filter(e => Utils.distance({ x: e.pos.x - this.pos.x, y: e.pos.y - this.pos.y }) < e.radius + this.dmgRange && e !== this.owner);
                     for (let player of players) {
-                        player.damage(this.dmg, null, true, true, true);
+                        player.damage(this.dmg, null);
                     }
                 }, this.dmgDelay);
                 break;
@@ -287,7 +286,7 @@ export default class Entity implements Collider {
                         this.sendInfos();
                         break;
                     case EntityType.SPIKE:
-                        if (attacker !== this.owner) { attacker.damage(this.hitDamage, null, true, true, true); };
+                        if (attacker !== this.owner) { attacker.damage(this.hitDamage, null); };
                         break;
                 }
                 let angle;
@@ -367,15 +366,15 @@ export default class Entity implements Collider {
     }
 
     sendToRange(packet) {
-        let players = this.getEntitiesInRange(2, 2, true, false);
+        let players = this.getPlayersInRange(2, 2);
         for (let player of players) { player.send(packet); };
     }
 
     getPlayersInRange(x: number, y: number): Player[] {
-        return this.getEntitiesInRange(x, y).filter(x => x instanceof Player) as Player[];
+        return this.getEntitiesInRange(x, y, true, false) as Player[]; // .filter(x => x instanceof Player) as Player[];
     }
 
-    getEntitiesInRange(x: number, y: number, player: boolean = true, entity: boolean = true) {
+    getEntitiesInRange(x: number, y: number, player: boolean = true, entity: boolean = true): Entity[] {
         let ymin = Math.max(-y + this.chunk.y, 0), ymax = Math.min(y + 1 + this.chunk.y, world.mapSize.y),
             xmin = Math.max(-x + this.chunk.x, 0), xmax = Math.min(x + 1 + this.chunk.x, world.mapSize.x);
         let list = [];
@@ -429,19 +428,19 @@ export default class Entity implements Collider {
 
         let scores = [];
         let vectors = [];
-        let players = this.getEntitiesInRange(1,1,true,false);
+        let players = this.getPlayersInRange(1, 1);
         for (let player of players) {
-            let memory = this.memory.find(e=> e.player === player);
+            let memory = this.memory.find(e => e.player === player);
             if (!memory) {
-                memory = {player:player, score:0, dmg: 0, edmg: 0};
+                memory = { player: player, score: 0, dmg: 0, edmg: 0 };
                 this.memory.push(memory);
             };
-            let s = Utils.remap(v[1]*this.health-player.health-v[9]*memory.dmg/this.maxHealth+v[10]*memory.edmg/200,v[4],v[5],-1,1,true);
-            let distance = Utils.distance({x:this.pos.x-player.pos.x,y:this.pos.y-player.pos.y});
-            memory.score = (memory.score+s*( 1-Utils.remap(distance,0,Utils.remap(s,-1,1,v[2],v[3]),0,1,true)))/2;
-            memory.score = Math.abs(memory.score) > v[0] ? memory.score : 0; 
+            let s = Utils.remap(v[1] * this.health - player.health - v[9] * memory.dmg / this.maxHealth + v[10] * memory.edmg / 200, v[4], v[5], -1, 1, true);
+            let distance = Utils.distance({ x: this.pos.x - player.pos.x, y: this.pos.y - player.pos.y });
+            memory.score = (memory.score + s * (1 - Utils.remap(distance, 0, Utils.remap(s, -1, 1, v[2], v[3]), 0, 1, true))) / 2;
+            memory.score = Math.abs(memory.score) > v[0] ? memory.score : 0;
             scores.push(memory.score);
-            let vector = {x:this.pos.y-player.pos.x,y:this.pos.y-player.pos.y};
+            let vector = { x: this.pos.y - player.pos.x, y: this.pos.y - player.pos.y };
             let vecDistance = Utils.distance(vector);
             vecDistance = vecDistance == 0 ? 1 : vecDistance;
             vector.x /= vecDistance;
@@ -451,24 +450,23 @@ export default class Entity implements Collider {
         this.memory = this.memory.filter(e => players.includes(e.player));
         let min = Math.min(...scores);
         if (Math.max(...scores) > v[0]) {
-            scores = scores.map(e=> (e-min*v[7])**v[6]-min*v[8]);
-            let fvector = {x:0,y:0};
-            for (let i=0;i<scores.length;i++) {
-                fvector.x += vectors[i].x*scores[i];
-                fvector.y += vectors[i].y*scores[i];
+            scores = scores.map(e => (e - min * v[7]) ** v[6] - min * v[8]);
+            let fvector = { x: 0, y: 0 };
+            for (let i = 0; i < scores.length; i++) {
+                fvector.x += vectors[i].x * scores[i];
+                fvector.y += vectors[i].y * scores[i];
             }
             let fvecDistance = Utils.distance(fvector);
             fvecDistance = fvecDistance == 0 ? 1 : fvecDistance;
-            fvector.x /= fvecDistance*this.speed;
-            fvector.y /= fvecDistance*this.speed;
-            return {vec:fvector,time:1};
+            fvector.x /= fvecDistance * this.speed;
+            fvector.y /= fvecDistance * this.speed;
+            return { vec: fvector, time: 1 };
         } else {
-            let fvector = Utils.angleToCoords(Math.random()*256);
-            fvector.x *= this.speed*0.7;
-            fvector.y *= this.speed*0.7;
-            return {vec:fvector,time:0.8};
+            let fvector = Utils.angleToCoords(Math.random() * 256);
+            fvector.x *= this.speed * 0.7;
+            fvector.y *= this.speed * 0.7;
+            return { vec: fvector, time: 0.8 };
         }
-
     }
 
     collision() {
@@ -513,7 +511,6 @@ export default class Entity implements Collider {
         this.sendInfos(false, list);
 
         world.chunks[this.chunk.x][this.chunk.y] = world.chunks[this.chunk.x][this.chunk.y].filter(e => e != this);
-        let echunk = this.chunk;
         this.chunk = chunk;
         world.chunks[this.chunk.x][this.chunk.y].push(this);
     }

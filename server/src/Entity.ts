@@ -322,7 +322,7 @@ export default class Entity implements Collider {
         }
     }
 
-    damage(dmg: number, attacker: any = null) { // use negative values to increase hp
+    damage(dmg: number, attacker: Player = null) { // use negative values to increase hp
         let ownerId = this.owner !== null ? this.owner.pid : 0;
         if (this.type === EntityItemType.HARVESTABLE) {
             if (attacker) {
@@ -392,7 +392,7 @@ export default class Entity implements Collider {
 
     }
 
-    die(attacker: any = null) {
+    die(attacker: Player = null) {
         this.sendInfos(false);
         let ownerId = this.owner === null ? 0 : this.owner.pid;
         world.echunks[this.chunk.x][this.chunk.y][ownerId] = world.echunks[this.chunk.x][this.chunk.y][ownerId].filter(e => e !== e);
@@ -414,7 +414,7 @@ export default class Entity implements Collider {
         }
     }
 
-    sendInfos(visible = true, to: any[] = null) {
+    sendInfos(visible = true, to: Player[] = null) {
         if (!(this instanceof MapEntity)) {
             let packet = this.infoPacket(visible);
             if (to !== null) {
@@ -575,7 +575,7 @@ export default class Entity implements Collider {
     }
 
     updateChunk(chunk: Vector) {
-        let list = this.getEntitiesInRange(2, 2, true, false).filter(e => Math.abs(e.chunk.x - chunk.x) > 2 || Math.abs(e.chunk.y - chunk.y) > 2);
+        let list = this.getPlayersInRange(2, 2).filter(e => Math.abs(e.chunk.x - chunk.x) > 2 || Math.abs(e.chunk.y - chunk.y) > 2);
         this.sendInfos(false, list);
         world.chunks[this.chunk.x][this.chunk.y] = world.chunks[this.chunk.x][this.chunk.y].filter(e => e != this);
         this.chunk = chunk;

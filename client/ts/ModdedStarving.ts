@@ -6,7 +6,7 @@ export class ModdedStarving {
         console.log(`ModdedStarving v${this.version} initializing`);
 
         const promises = [];
-        promises.push(this.loadMod(await import("./mods/AmethystHelmet")));
+        // promises.push(this.loadMod(await import("./mods/AmethystHelmet")));
 
         return Promise.all(promises);
     }

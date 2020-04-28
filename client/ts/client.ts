@@ -258,14 +258,24 @@ export function start(ModdedStarving: ModdedStarving) {
         ease_out_quad: function (c) {
             return c * (2 - c);
         },
-        LinearAnimation: function (c, g, f, d, e, m): void {
-            this.o = c;
-            this.v = g;
-            this.max = f;
-            this.min = d;
-            this.max_speed = e;
-            this.min_speed = m;
-            this.update = function (): boolean {
+        LinearAnimation: class {
+            o: boolean;
+            v: number;
+            max: number;
+            min: number;
+            max_speed: number;
+            min_speed: number;
+
+            constructor(c, g, f, d, e, m) {
+                this.o = c;
+                this.v = g;
+                this.max = f;
+                this.min = d;
+                this.max_speed = e;
+                this.min_speed = m;
+            }
+
+            update(): boolean {
                 if (this.o) {
                     var c = this.v + delta * this.max_speed;
                     if (c > this.max) {
@@ -284,7 +294,6 @@ export function start(ModdedStarving: ModdedStarving) {
                     }
                 }
             };
-            return;// false;
         },
         Ease: function (c, g, f, d, e, m) {
             this.fun = c;
@@ -9677,7 +9686,7 @@ export function start(ModdedStarving: ModdedStarving) {
                 var n = world.fast_units[c[4 + 4 * m] * world.max_units + d[1 + 2 * m]];
                 if (n && n.hit) {
                     n.hit.angle = p;
-                    n.hit.update = p;
+                    // n.hit.update = p;
                 }
             }
         };
@@ -10228,7 +10237,7 @@ export function start(ModdedStarving: ModdedStarving) {
                                 break;
                             case 3:
                                 c.handshake(f);
-                                break
+                                break;
                             case 4:
                                 gameConsole.addMessage(f[1]);
                                 break;

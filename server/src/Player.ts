@@ -89,7 +89,6 @@ export default class Player extends Entity implements ConsoleSender {
     displayName: string;
     pos: Vector;
     angle: number;
-    action: EntityState = EntityState.None;
     chunk: Vector;
     speed: number = 200;
     tool: Tool = Items.HAND;
@@ -332,7 +331,7 @@ export default class Player extends Entity implements ConsoleSender {
 
         let entities = (this.getEntitiesInRange(1, 1, true, true) as any[]).concat(this.getMapEntitiesInRange(4, 4)).filter(e => Utils.distance({ x: center.x - e.pos.x, y: center.y - e.pos.y }) < this.tool.range + e.radius && e !== this);
         for (let entity of entities) {
-            entity.damage(entity.type === EntityItemType.PLAYER || entity.type === EntityItemType.MOB   ? this.tool.damage.pvp : this.tool.damage.pve, this);
+            entity.damage(entity.type === EntityItemType.PLAYER || entity.type === EntityItemType.MOB ? this.tool.damage.pvp : this.tool.damage.pve, this);
         }
     }
 

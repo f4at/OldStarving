@@ -9686,7 +9686,9 @@ export function start(ModdedStarving: ModdedStarving) {
                 var n = world.fast_units[c[4 + 4 * m] * world.max_units + d[1 + 2 * m]];
                 if (n && n.hit) {
                     n.hit.angle = p;
-                    // n.hit.update = p;
+                    if (typeof n.hit.update !== "function") {
+                        n.hit.update = p;
+                    }
                 }
             }
         };

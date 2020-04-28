@@ -134,7 +134,7 @@ export class Commands {
                 if (!isNaN(pos.x) && !isNaN(pos.y)) {
                     let id = Number(args[1]);
                     let entityType = EntityTypes.get(isNaN(id) ? args[1].toUpperCase() : id);
-                    new Entity(pos, 0, sender instanceof Player ? sender : null, entityType);
+                    new Entity(Object.assign({},pos), 0, null, entityType);
 
                     sender.sendMessage(`Summoned ${entityType.name}!`);
                 } else {

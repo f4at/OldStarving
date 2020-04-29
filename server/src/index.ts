@@ -111,7 +111,7 @@ setInterval(() => {
     let entities = [{ e: EntityTypes.WOLF, m: 50, p: 1 }, { e: EntityTypes.RABBIT, m: 25, p: 0.5 }, { e: EntityTypes.SPIDER, m: 40, p: 1.5 }, { e: EntityTypes.FOX, m: 75, p: 0.5 }, { e: EntityTypes.BEAR, m: 25, p: 1 }, { e: EntityTypes.DRAGON, m: 8, p: 0.1 }];
     for (let entity of entities) {
         let r = world.entities[0].filter(e => e.entityType == entity.e).length;
-        let c = Math.floor(Math.min((entity.m + entity.p * world.players.length) / 10, (entity.m + entity.p * world.players.length - r) / 2));
+        let c = Math.floor(Math.min(Math.max(2, (entity.m + entity.p * world.players.length) / 10), (entity.m + entity.p * world.players.length - r) / 2));
         for (let i = 0; i < c; i++) {
             new Entity(null, 0, null, entity.e, false);
         }

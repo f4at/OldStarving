@@ -166,7 +166,7 @@ export default class Player extends Entity implements ConsoleSender {
         }
         let found = false, counter = 0;
         while (counter < 64 && !found) {
-            this.pos = { "x": 1 + Math.random() * 10000, "y": 1 + Math.random() * 10000 }; //spawn in forest biome
+            this.pos = { "x": Math.random() * 9999, "y": 1 + Math.random() * 9999 }; //spawn in forest biome
             this.chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
             if (this.getEntitiesInRange(1, 1, true, true).concat(this.getMapEntitiesInRange(5, 5)).find(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < this.radius + e.radius + (e.type == EntityItemType.WALL || e.type == EntityItemType.SPIKE || e.type == EntityItemType.DOOR ? 500 : 0))) {
                 counter += 1;

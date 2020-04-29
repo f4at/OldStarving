@@ -62,9 +62,9 @@ export class EntityTypes {
     static RABBIT = new EntityType(60, 0, 23, 1, 60, EntityItemType.MOB, { drops: [{ item: Items.FUR, amount: 1 }, { item: Items.MEAT, amount: 2 }], kscore: 60, physical: false, speed: 260, dmg: 0, genes: [0.05, 0, 300, 200, -200, 200, 2, 0.7, 0.2, 1, 0, 0.9, 0.99, 8, 2, 30, 0.1, 0.2, 0.01, 0.5, 300, 0.4, 1.5] });
     static WOLF = new EntityType(61, 0, 50, 1, 300, EntityItemType.MOB, { drops: [{ item: Items.FUR_WOLF, amount: 1 }, { item: Items.MEAT, amount: 2 }], kscore: 60, physical: false, offensive: true, dmg: 40, dmgRange: 32, speed: 160, genes: [0.05, 3, 200, 300, -200, 200, 3, 0.7, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 20, 0.1, 0.05, 0.01, 0.25, 300, 0.2, 2] });
     static SPIDER = new EntityType(62, 0, 65, 1, 120, EntityItemType.MOB, { drops: [{ item: Items.CORD, amount: 2 }], kscore: 100, physical: false, offensive: true, dmg: 20, speed: 160, dmgRange: 30, genes: [0.05, 5, 150, 250, -200, 200, 2, 0.7, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 5, 0.1, 0.05, 0.01, 0.5, 300, 0.2, 2] });
-    static FOX = new EntityType(63, 0, 50, 1, 300, EntityItemType.MOB, { drops: [{ item: Items.FUR_WINTER, amount: 1 }, { item: Items.MEAT, amount: 2 }], kscore: 60, physical: false, offensive: true, dmg: 25, speed: 140, dmgRange: 32, genes: [0.05, 4, 150, 300, -200, 200, 3, 0.7, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 15, 0.1, 0.05, 0.01, 0.5, 300, 0.2, 2] });
-    static BEAR = new EntityType(64, 0, 50, 1, 900, EntityItemType.MOB, { drops: [{ item: Items.FUR_WINTER, amount: 2 }, { item: Items.MEAT, amount: 3 }], kscore: 90, physical: false, offensive: true, dmg: 60, speed: 140, dmgRange: 32, genes: [0.1, 3, 200, 300, -200, 200, 3, 0.7, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 20, 0.1, 0.05, 0.01, 0.5, 300, 0.2, 2] });
-    static DRAGON = new EntityType(65, 0, 80, 1, 1500, EntityItemType.MOB, { drops: [{ item: Items.MEAT, amount: 5 }], kscore: 1000, physical: false, offensive: true, dmg: 90, speed: 160, dmgRange: 50, genes: [0.05, 3, 200, 350, -200, 200, 3, 0.7, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 5, 0.1, 0.1, 0.01, 0.5, 300, 0.2, 2] });
+    static FOX = new EntityType(63, 0, 50, 1, 300, EntityItemType.MOB, { drops: [{ item: Items.FUR_WINTER, amount: 1 }, { item: Items.MEAT, amount: 2 }], kscore: 60, physical: false, offensive: true, dmg: 25, speed: 130, dmgRange: 32, genes: [0.05, 4, 150, 300, -200, 200, 3, 0.7, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 15, 0.1, 0.05, 0.01, 0.5, 300, 0.2, 2] });
+    static BEAR = new EntityType(64, 0, 50, 1, 900, EntityItemType.MOB, { drops: [{ item: Items.FUR_WINTER, amount: 2 }, { item: Items.MEAT, amount: 3 }], kscore: 90, physical: false, offensive: true, dmg: 60, speed: 13, dmgRange: 32, genes: [0.1, 3, 200, 300, -200, 200, 3, 0.7, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 20, 0.1, 0.05, 0.01, 0.5, 300, 0.2, 2] });
+    static DRAGON = new EntityType(65, 0, 80, 1, 1500, EntityItemType.MOB, { drops: [{ item: Items.MEAT, amount: 5 }], kscore: 1000, physical: false, offensive: true, dmg: 90, speed: 150, dmgRange: 50, genes: [0.05, 3, 200, 350, -200, 200, 3, 0.7, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 5, 0.1, 0.1, 0.01, 0.5, 300, 0.2, 2] });
 
     static FRUIT = new EntityType(100, 0, 65, 1, 0, EntityItemType.HARVESTABLE, { fscore: 2, physical: false, inv: { item: Items.PLANT, amount: 3, maximum: 5, delay: 10, respawn: 1 } });
 
@@ -189,14 +189,14 @@ export default class Entity implements Collider {
                         case EntityTypes.WOLF:
                         case EntityTypes.SPIDER:
                         case EntityTypes.RABBIT:
-                            this.pos = { x: Math.random() * 10400, y: Math.random() * 10000 };
+                            this.pos = { x: Math.random() * 10400, y: Math.random() * 9999 };
                             break;
                         case EntityTypes.FOX:
                         case EntityTypes.BEAR:
-                            this.pos = { x: 10400 + Math.random() * 19600, y: Math.random() * 10000 };
+                            this.pos = { x: 10400 + Math.random() * 19599, y: Math.random() * 9999 };
                             break;
                         case EntityTypes.DRAGON:
-                            this.pos = { x: 28500 + Math.random() * 1500, y: 4500 + Math.random() * 1500 };
+                            this.pos = { x: 28500 + Math.random() * 1499, y: 4500 + Math.random() * 1200 };
                             break;
                     }
                     this.chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
@@ -658,7 +658,7 @@ export default class Entity implements Collider {
                     break;
                 case EntityTypes.DRAGON:
                     this.pos.x = Math.min(Math.max(28500, this.pos.x), world.mapSize.x * 1000 - 1);
-                    this.pos.y = Math.min(Math.max(4500, this.pos.y), 6000);
+                    this.pos.y = Math.min(Math.max(4300, this.pos.y), 5900);
                     break;
                 default:
                     this.pos.x = Math.min(Math.max(0, this.pos.x), world.mapSize.x * 1000 - 1);

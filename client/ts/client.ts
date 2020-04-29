@@ -9883,7 +9883,7 @@ export function start(ModdedStarving: ModdedStarving) {
                             sum += q.ospeed[q.ospeed.length - i];
                         }
 
-                        q.speed = sum / Math.min(4, q.ospeed.length) * 23;
+                        q.speed = v ? sum / Math.min(4, q.ospeed.length) * 7.67 : sum / Math.min(4, q.ospeed.length) * 23;
 
                         q.r.x = t;
                         q.r.y = z;

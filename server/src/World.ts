@@ -41,11 +41,11 @@ export class MapEntityTypes {
     static GOLD = new MapEntityType(10, "g", true, 8, 64, 1, [1.35, 1.18, 1], 27, { item: Items.GOLD, amount: 10, maximum: 20, delay: 5, respawn: 1 }, 2);
     static DIAMOND = new MapEntityType(13, "d", true, 3, 65, 1, [1.55, 1.25, 1], 53, { item: Items.DIAMOND, amount: 7, maximum: 15, delay: 6, respawn: 1 }, 3);
     static TREE_BRANCH = new MapEntityType(16, "b", true, 4, 80, 1.1, [1.5, 1.5, 1.25, 1.25], 0, { item: Items.WOOD, amount: 20, maximum: 40, delay: 3, respawn: 1 }, 0);
-    static FIR = new MapEntityType(20, "f", true, 7, 80, 1, [1, 1, 1], 0, { item: Items.WOOD, amount: 15, maximum: 30, delay: 3, respawn: 1 }, 0);
+    static FIR = new MapEntityType(20, "f", true, 0, 100, 1, [1.5, 1.2, 1], 0, { item: Items.WOOD, amount: 15, maximum: 30, delay: 3, respawn: 1 }, 0);
     static STONES_WINTER = new MapEntityType(23, "sw", true, 7, 57, 1, [1.78, 1.43, 1], 21, { item: Items.STONE, amount: 10, maximum: 20, delay: 4, respawn: 1 }, 1);
     static GOLD_WINTER = new MapEntityType(26, "gw", true, 8, 64, 1, [1.35, 1.18, 1], 27, { item: Items.GOLD, amount: 10, maximum: 20, delay: 5, respawn: 1 }, 2);
     static DIAMOND_WINTER = new MapEntityType(29, "dw", true, 3, 65, 1, [1.55, 1.25, 1], 53, { item: Items.DIAMOND, amount: 7, maximum: 15, delay: 6, respawn: 1 }, 3);
-    static AMETHYST = new MapEntityType(32, "a", true, 0, 50, 1, [1, 1, 1], 0, { item: Items.AMETHYST, amount: 5, maximum: 10, delay: 7, respawn: 1 }, 4);
+    static AMETHYST = new MapEntityType(32, "a", true, 0, 66, 1, [1, 1, 1], 0, { item: Items.AMETHYST, amount: 5, maximum: 10, delay: 7, respawn: 1 }, 4);
 
     static DRAGON_GROUND = new MapEntityType(null, "dg", false, 4, 72, 1, [1,], 0);
     static SNOW = new MapEntityType(null, "so", false, 4, 72, 1, [1,], 0);
@@ -83,6 +83,7 @@ export class MapEntity extends Entity {
         this.XtoYfac = type.XtoYfactor;
         this.stime = new Date().getTime();
         this.miningTier = type.miningTier;
+        this.fscore = this.miningTier + 1;
         this.physical = type.physical;
 
         this.type = EntityItemType.HARVESTABLE;
@@ -151,6 +152,7 @@ export class World {
     chunks: Entity[][][] = new Array(this.mapSize.x);
     echunks: Entity[][][][] = new Array(this.mapSize.x);
     tickRate: number = 24;
+    mobtickRate: number = 8;
     stime: number = new Date().getTime();
     mode: number = 0; //id of mode, probably useless for the moment.
     map: GameMap = new GameMap();

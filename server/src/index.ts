@@ -4,7 +4,7 @@ import world from "./World";
 import Player from "./Player";
 import { Items } from "./Item";
 import express from 'express';
-import { EntityState } from "./Entity";
+import Entity, { EntityState, EntityTypes, EntityType } from "./Entity";
 import fetch from 'node-fetch';
 import config from "../config";
 import { AddressInfo } from "net";
@@ -62,9 +62,9 @@ export abstract class Utils {
         return (vector.x ** 2 + vector.y ** 2) ** 0.5;
     }
 
-    static remap(oldValue,oldMin,oldMax,newMin,newMax,scale=false) {
+    static remap(oldValue, oldMin, oldMax, newMin, newMax, scale = false) {
         let newValue = (((oldValue - oldMin) * (newMax - newMin)) / (oldMax - oldMin)) + newMin;
-        return scale ? Math.max(newMin,Math.min(newMax,newValue)) : newValue;
+        return scale ? Math.max(newMin, Math.min(newMax, newValue)) : newValue;
     }
 
     static randomString(length: number) {
@@ -106,6 +106,17 @@ setInterval(() => {
         player.send(new Uint16Array([6, player.compressedScore].concat(list)));
     }
 }, 2000);
+
+setInterval(() => {
+    let entities = [{ e: EntityTypes.WOLF, m: 50, p: 1 }, { e: EntityTypes.RABBIT, m: 25, p: 0.5 }, { e: EntityTypes.SPIDER, m: 40, p: 1.5 }, { e: EntityTypes.FOX, m: 75, p: 0.5 }, { e: EntityTypes.BEAR, m: 25, p: 1 }, { e: EntityTypes.DRAGON, m: 8, p: 0.1 }];
+    for (let entity of entities) {
+        let r = world.entities[0].filter(e => e.entityType == entity.e).length;
+        let c = Math.floor(Math.min((entity.m + entity.p * world.players.length) / 10, (entity.m + entity.p * world.players.length - r) / 2));
+        for (let i = 0; i < c; i++) {
+            new Entity(null, 0, null, entity.e, false);
+        }
+    }
+}, 15000)
 
 wss.on("connection", (ws, req) => {
     let player: Player;
@@ -157,7 +168,7 @@ wss.on("connection", (ws, req) => {
                             player.use(data[1]);
                             break;
                         case 6:
-                            player.inventory.remove(data[1], data[2]);
+                            player.inventory.remove(Items.get(data[1]));
                             break;
                         case 7:
                             player.craft(Items.get(data[1]));

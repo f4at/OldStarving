@@ -2,7 +2,7 @@ import WebSocket from "ws";
 import Item, { Clothes, Tool, Items, DamageType, Usable, Recipe, ItemStack, Pickaxe, EntityItem } from './Item';
 import { Vector, Utils } from '.';
 import world from "./World";
-import Entity, { Collider, EntityState, EntityItemType } from "./Entity";
+import Entity, { Collider, EntityState, EntityItemType, EntityTypes } from "./Entity";
 import { MapEntity } from './World';
 import config from "../config";
 import { ConsoleSender } from "./Command";
@@ -28,7 +28,7 @@ export class PlayerInventory extends Inventory {
         this.player.send([26, this.size = size]);
     }
 
-    remove(item: Item, amount: number) {
+    remove(item: Item, amount: number = 0) {
         let slot = this.items.find(e => e && e.item == item);
         if (slot && slot !== undefined) {
             if (slot.item === this.player.tool) {
@@ -38,7 +38,7 @@ export class PlayerInventory extends Inventory {
                 this.player.clothes == Items.AIR;
                 this.player.updating = true;
             }
-            if (!amount || slot.amount <= amount) { //amount = 0 then delete all   
+            if (!amount || slot.amount <= amount) {
                 this.items.splice(this.items.indexOf(slot), 1);
             } else {
                 slot.amount -= amount;
@@ -90,7 +90,7 @@ export default class Player extends Entity implements ConsoleSender {
     pos: Vector;
     angle: number;
     chunk: Vector;
-    speed: number = 200;
+    speed: number = 210;
     tool: Tool = Items.HAND;
     clothes: Clothes = Items.AIR;
 
@@ -102,7 +102,7 @@ export default class Player extends Entity implements ConsoleSender {
 
     set bag(bag) {
         if (bag != this.bag) {
-            this.inventory.updateSize(bag ? 11 : 8);
+            this.inventory.updateSize(bag ? 13 : 9);
             this._bag = bag;
         }
     }
@@ -142,6 +142,7 @@ export default class Player extends Entity implements ConsoleSender {
     days: number = 0;
     kills: number = 0;
 
+    webed: number = 0;
     get isOp() {
         return config.idiots.includes(this.accountId);
     }
@@ -164,11 +165,10 @@ export default class Player extends Entity implements ConsoleSender {
             return;
         }
         let found = false, counter = 0;
-
         while (counter < 64 && !found) {
             this.pos = { "x": 1 + Math.random() * 10000, "y": 1 + Math.random() * 10000 }; //spawn in forest biome
             this.chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
-            if (this.getEntitiesInRange(1, 1, false, true).find(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < this.radius + e.radius + (e.type == EntityItemType.WALL || e.type == EntityItemType.SPIKE || e.type == EntityItemType.DOOR ? 500 : 0))) {
+            if (this.getEntitiesInRange(1, 1, true, true).concat(this.getMapEntitiesInRange(5, 5)).find(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < this.radius + e.radius + (e.type == EntityItemType.WALL || e.type == EntityItemType.SPIKE || e.type == EntityItemType.DOOR ? 500 : 0))) {
                 counter += 1;
             } else {
                 found = true;
@@ -181,8 +181,9 @@ export default class Player extends Entity implements ConsoleSender {
             return;
         }
 
-        this.bag = true;
+        this.bag = false;
 
+        /*
         this.inventory.add(Items.SWORD_AMETHYST, 1);
         this.inventory.add(Items.DIAMOND_HELMET, 1);
         this.inventory.add(Items.AMETHYST_SPEAR, 1);
@@ -193,6 +194,7 @@ export default class Player extends Entity implements ConsoleSender {
         this.inventory.add(Items.FURNACE, 10);
         this.inventory.add(Items.WOOD, 100);
         this.inventory.add(Items.FIRE, 100);
+        */
 
         world.players.push(this);
         world.chunks[this.chunk.x][this.chunk.y].push(this);
@@ -200,8 +202,8 @@ export default class Player extends Entity implements ConsoleSender {
         this.updateLoop = setInterval(() => {
             this.counter += 1;
             if (this.counter % (world.tickRate * 5) == 0) {
-                let temperature = Math.max(0, Math.min(100, this.temperature + (this.moving ? 1 : 0) + (this.attacking ? 1 : 0) + (world.isDay ? -2 : -20) + this.clothes.coldProtection + (this.fire ? 25 : 0)));
-                let food = Math.max(0, this.food + (this.moving ? -2 : -0.5) + (this.attacking ? -2 : 0));
+                let temperature = Math.max(0, Math.min(100, this.temperature + (this.moving ? 1 : 0) + (this.attacking ? 1 : 0) + (world.isDay ? -3 : -20) * this.clothes.coldProtection + (this.fire ? (world.isDay ? 25 : 35) : 0)));
+                let food = Math.max(0, this.food + (this.moving ? -5 : -2.5) + (this.attacking ? -2.5 : 0));
                 if (this.temperature == temperature && temperature == 0) {
                     this.damage(10, null, false, false);
                     this.action |= EntityState.Cold;
@@ -211,9 +213,12 @@ export default class Player extends Entity implements ConsoleSender {
                     this.action |= EntityState.Hunger;
                 }
                 if (food > 25 && temperature > 25) {
-                    let regen = Math.min(15, this.regen);
-                    this.regen = Math.max(this.regenMin, this.regen - regen);
-                    this.damage(-regen, null, true, false);
+                    if (this.regen > 0) {
+                        this.regen -= 1;
+                        this.damage(-30, null, true, false);
+                    } else {
+                        this.damage(-10, null, true, false);
+                    }
                 }
                 this.food = food;
                 this.temperature = temperature;
@@ -227,8 +232,9 @@ export default class Player extends Entity implements ConsoleSender {
             }
             if (this.moving || this.updating || this.action) {
                 if (this.moving) {
-                    this.pos.x += this.movVector.x / world.tickRate;
-                    this.pos.y += this.movVector.y / world.tickRate;
+                    let fac = this.webed ? 0 : ((this.attackLoop ? 0.8 : 1) * (this.pos.x < 10400 ? 1 : 0.85) * (this.tool.tier ? 1 : 0.85));
+                    this.pos.x += this.movVector.x / world.tickRate * fac;
+                    this.pos.y += this.movVector.y / world.tickRate * fac;
                     this.collision();
 
                     let chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
@@ -325,13 +331,15 @@ export default class Player extends Entity implements ConsoleSender {
     }
 
     hit2() {
-        this.action |= EntityState.Attack;
-        let agCoords = Utils.angleToCoords(this.angle);
-        let center = { "x": agCoords.x * (this.tool.range + this.tool.range2) + this.pos.x, "y": agCoords.y * (this.tool.range + this.tool.range2) + this.pos.y };
+        if (!this.craftTimeout) {
+            this.action |= EntityState.Attack;
+            let agCoords = Utils.angleToCoords(this.angle);
+            let center = { "x": agCoords.x * (this.tool.range + this.tool.range2) + this.pos.x, "y": agCoords.y * (this.tool.range + this.tool.range2) + this.pos.y };
 
-        let entities = (this.getEntitiesInRange(1, 1, true, true) as any[]).concat(this.getMapEntitiesInRange(4, 4)).filter(e => Utils.distance({ x: center.x - e.pos.x, y: center.y - e.pos.y }) < this.tool.range + e.radius && e !== this);
-        for (let entity of entities) {
-            entity.damage(entity.type === EntityItemType.PLAYER || entity.type === EntityItemType.MOB ? this.tool.damage.pvp : this.tool.damage.pve, this);
+            let entities = (this.getEntitiesInRange(1, 1, true, true) as any[]).concat(this.getMapEntitiesInRange(4, 4)).filter(e => Utils.distance({ x: center.x - e.pos.x, y: center.y - e.pos.y }) < this.tool.range + e.radius && e !== this);
+            for (let entity of entities) {
+                entity.damage((entity.type === EntityItemType.PLAYER || entity.type === EntityItemType.MOB) ? this.tool.damage.pvp : this.tool.damage.pve, this);
+            }
         }
     }
 
@@ -339,17 +347,17 @@ export default class Player extends Entity implements ConsoleSender {
         this.attacking = false;
     }
 
-    damage(dmg: number, attacker?: Player): void;
-    damage(dmg: number, attacker?: Player, report?: Boolean, protection?: Boolean, send?: Boolean): void;
-    damage(dmg: number, attacker: Player = null, report: Boolean = true, protection: Boolean = true, send: Boolean = false) {
+    damage(dmg: number, attacker?: Entity): void;
+    damage(dmg: number, attacker?: Entity, report?: Boolean, protection?: Boolean, send?: Boolean): void;
+    damage(dmg: number, attacker: Entity = null, report: Boolean = true, protection: Boolean = true, send: Boolean = false) {
         let ohealth = this.health;
         if (dmg > 0) {
-            this.health = Math.max(0, Math.min(this.health, this.health - dmg + (protection ? this.clothes.damageProtection[Player ? DamageType.PvP : DamageType.PvE] : 0)));
+            this.health = Math.max(0, Math.min(this.health, this.health - dmg + (protection ? this.clothes.damageProtection[attacker instanceof Player ? DamageType.PvP : DamageType.PvE] : 0)));
         } else {
-            this.health = Math.max(this.health, Math.min(this.maxHealth, this.health - dmg + (protection ? this.clothes.damageProtection[Player ? DamageType.PvP : DamageType.PvE] : 0)));
+            this.health = Math.max(this.health, Math.min(this.maxHealth, this.health - dmg + (protection ? this.clothes.damageProtection[attacker instanceof Player ? DamageType.PvP : DamageType.PvE] : 0)));
         }
         if (this.health <= 0) {
-            if (attacker) {
+            if (attacker instanceof Player) {
                 attacker.score += Math.floor(this.score / 3);
                 attacker.kills += 1;
             }
@@ -364,6 +372,14 @@ export default class Player extends Entity implements ConsoleSender {
         }
         if (send) {
             this.updateBars();
+        }
+        if (attacker && attacker.type === EntityItemType.MOB) {
+            let memory = attacker.memory.find(e => e.player === this);
+            if (memory) {
+                memory.edmg += dmg;
+            } else {
+                attacker.memory.push({ player: this, score: 0, dmg: 0, edmg: dmg });
+            }
         }
     }
 
@@ -442,10 +458,14 @@ export default class Player extends Entity implements ConsoleSender {
                 }
                 this.allowCrafting(item);
                 this.craftTimeout = setTimeout(() => {
-                    this.inventory.add(item, 1, slot);
+                    if (item === Items.BAG) {
+                        this.bag = true;
+                    } else {
+                        this.inventory.add(item, 1, slot);
+                    }
                     this.finishedCrafting();
                     this.craftTimeout = null;
-                }, 1000 / recipe.time);
+                }, 1000 / (this.tool === Items.BOOK ? recipe.time / 3 : recipe.time));
             }
         }
     }
@@ -456,7 +476,7 @@ export default class Player extends Entity implements ConsoleSender {
             if (recipe) {
                 if ((this.workbench || !recipe.requireWorkbench) && (this.fire || !recipe.requireFire)) {
                     let slot = this.inventory.findStack(item);
-                    if (slot) {
+                    if (slot || item === Items.BAG) {
                         let haveCraftingItems = true;
                         for (let element of recipe.ingredients) {
                             if (!this.inventory.findStack(element[0], element[1])) {
@@ -474,26 +494,28 @@ export default class Player extends Entity implements ConsoleSender {
     }
 
     updateCrafting() {
-        let fire: boolean = false;
-        let workbench: boolean = false;
-        for (let entity of this.getEntitiesInRange(1, 1, false, true).filter(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < 240)) {
-            if (entity.type === EntityItemType.FIRE) {
-                fire = true;
-            } else if (entity.type === EntityItemType.WORKBENCH) {
-                workbench = true;
-                if (fire === true) {
-                    break;
+        if (!this.craftTimeout) {
+            let fire: boolean = false;
+            let workbench: boolean = false;
+            for (let entity of this.getEntitiesInRange(1, 1, false, true).filter(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < 240)) {
+                if (entity.type === EntityItemType.FIRE) {
+                    fire = true;
+                } else if (entity.type === EntityItemType.WORKBENCH) {
+                    workbench = true;
+                    if (fire === true) {
+                        break;
+                    }
                 }
             }
-        }
 
-        if (workbench != this.workbench) {
-            this.workbench = workbench;
-            this.send(new Uint8Array([19, workbench ? 1 : 0]));
-        }
-        if (fire != this.fire) {
-            this.fire = fire;
-            this.send(new Uint8Array([20, fire ? 1 : 0]));
+            if (workbench != this.workbench) {
+                this.workbench = workbench;
+                this.send(new Uint8Array([19, workbench ? 1 : 0]));
+            }
+            if (fire != this.fire) {
+                this.fire = fire;
+                this.send(new Uint8Array([20, fire ? 1 : 0]));
+            }
         }
     }
 
@@ -565,7 +587,7 @@ export default class Player extends Entity implements ConsoleSender {
     gather(item: Item, amount: number = 1, ret: boolean = false) {
         if (this.inventory.findStack(item, 0) === undefined && this.inventory.items.length >= this.inventory.size) {
             this.send(new Uint8Array([13]));
-            return ret ? [] : undefined;
+            return [];
         }
 
         const trueAmount = amount;
@@ -579,7 +601,8 @@ export default class Player extends Entity implements ConsoleSender {
             return list;
         }
         this.inventory.add(item, trueAmount);
-        if (list.length > 1) { this.send([14].concat(list)); };
+        if (list.length) { this.send([14].concat(list)); };
+        return list;
     }
 
     decreaseItem(Item: Item, amount: number = 1) {

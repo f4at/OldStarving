@@ -196,7 +196,7 @@ export default class Entity implements Collider {
                             this.pos = { x: 10400 + Math.random() * 19600, y: Math.random() * 10000 };
                             break;
                         case EntityTypes.DRAGON:
-                            this.pos = { x: 28500 + Math.random() * 1500, y: 4500 + Math.random() * 4500 }
+                            this.pos = { x: 28500 + Math.random() * 1500, y: 4500 + Math.random() * 1500 };
                             break;
                     }
                     this.chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
@@ -644,8 +644,28 @@ export default class Entity implements Collider {
                 }
             }
             let pos = this.pos;
-            this.pos.x = Math.min(Math.max(0, this.pos.x), world.mapSize.x * 1000 - 1);
-            this.pos.y = Math.min(Math.max(0, this.pos.y), world.mapSize.y * 1000 - 1);
+            switch (this.entityType) {
+                case EntityTypes.WOLF:
+                case EntityTypes.RABBIT:
+                case EntityTypes.SPIDER:
+                    this.pos.x = Math.min(Math.max(0, this.pos.x), 10500);
+                    this.pos.y = Math.min(Math.max(0, this.pos.y), world.mapSize.y * 1000 - 1);
+                    break;
+                case EntityTypes.FOX:
+                case EntityTypes.BEAR:
+                    this.pos.x = Math.min(Math.max(10300, this.pos.x), world.mapSize.x * 1000 - 1);
+                    this.pos.y = Math.min(Math.max(0, this.pos.y), world.mapSize.y * 1000 - 1);
+                    break;
+                case EntityTypes.DRAGON:
+                    this.pos.x = Math.min(Math.max(28500, this.pos.x), world.mapSize.x * 1000 - 1);
+                    this.pos.y = Math.min(Math.max(4500, this.pos.y), 6000);
+                    break;
+                default:
+                    this.pos.x = Math.min(Math.max(0, this.pos.x), world.mapSize.x * 1000 - 1);
+                    this.pos.y = Math.min(Math.max(0, this.pos.y), world.mapSize.y * 1000 - 1);
+                    break;
+            }
+
             if (pos.x != this.pos.x || pos.y != this.pos.y) {
                 collide = true;
             }

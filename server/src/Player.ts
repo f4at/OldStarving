@@ -202,7 +202,7 @@ export default class Player extends Entity implements ConsoleSender {
         this.updateLoop = setInterval(() => {
             this.counter += 1;
             if (this.counter % (world.tickRate * 5) == 0) {
-                let temperature = Math.max(0, Math.min(100, this.temperature + (this.moving ? 1 : 0) + (this.attacking ? 1 : 0) + (world.isDay ? -3 : -20) * this.clothes.coldProtection + (this.fire ? (world.isDay ? 25 : 35) : 0)));
+                let temperature = Math.max(0, Math.min(100, this.temperature + (this.moving ? 1 : 0) + (this.attacking ? 1 : 0) + (world.isDay ? -3 : -20) + (this.pos.x > 10400 ? 0 : -15) * this.clothes.coldProtection + (this.fire ? (world.isDay ? 25 : 35) + (this.pos.x > 10400 ? 0 : 10) : 0)));
                 let food = Math.max(0, this.food + (this.moving ? -5 : -2.5) + (this.attacking ? -2.5 : 0));
                 if (this.temperature == temperature && temperature == 0) {
                     this.damage(10, null, false, false);

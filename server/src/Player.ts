@@ -205,19 +205,21 @@ export default class Player extends Entity implements ConsoleSender {
                 let temperature = Math.max(0, Math.min(100, this.temperature + (this.moving ? 1 : 0) + (this.attacking ? 1 : 0) + (world.isDay ? -3 : -20) + (this.pos.x > 10400 ? 0 : -15) * this.clothes.coldProtection + (this.fire ? (world.isDay ? 25 : 35) + (this.pos.x > 10400 ? 0 : 10) : 0)));
                 let food = Math.max(0, this.food + (this.moving ? -5 : -2.5) + (this.attacking ? -2.5 : 0));
                 if (this.temperature == temperature && temperature == 0) {
-                    this.damage(10, null, false, false);
+                    this.damage(this.pos.x < 10400 ? 20 : 40, null, false, false);
                     this.action |= EntityState.Cold;
                 }
                 if (this.food == food && food == 0) {
-                    this.damage(15, null, false, false);
+                    this.damage(40, null, false, false);
                     this.action |= EntityState.Hunger;
                 }
-                if (food > 25 && temperature > 25) {
-                    if (this.regen > 0) {
-                        this.regen -= 1;
-                        this.damage(-30, null, true, false);
-                    } else {
-                        this.damage(-10, null, true, false);
+                if (this.counter % (world.tickRate * 10) == 0) {
+                    if (food > 34 && temperature > 34) {
+                        if (this.regen > 0) {
+                            this.regen -= 1;
+                            this.damage(-30, null, true, false);
+                        } else {
+                            this.damage(-10, null, true, false);
+                        }
                     }
                 }
                 this.food = food;
@@ -226,8 +228,9 @@ export default class Player extends Entity implements ConsoleSender {
                 if (this.counter % (world.tickRate * 480) == 0) {
                     this.survive();
                 }
+
             }
-            if (this.counter % Math.ceil(world.tickRate / 4) == 0) {
+            if (this.counter % Math.ceil(world.tickRate / 3) == 0) {
                 this.updateCrafting();
             }
             if (this.moving || this.updating || this.action) {

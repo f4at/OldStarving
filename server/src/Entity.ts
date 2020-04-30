@@ -60,11 +60,11 @@ export class EntityTypes {
     static AMETHYST_DOOR = Items.AMETHYST_DOOR.entityType = new EntityType(21, 7, 50, 1, 3500, EntityItemType.DOOR, { physical: true, tier: 4 });
 
     static RABBIT = new EntityType(60, 0, 23, 1, 60, EntityItemType.MOB, { regen: 10, drops: [{ item: Items.FUR, amount: 1 }, { item: Items.MEAT, amount: 2 }], kscore: 60, physical: false, speed: 260, dmg: 0, genes: [0.05, 0, 300, 200, -200, 200, 2, 0.7, 0.2, 1, 0, 0.9, 0.99, 8, 2, 30, 0.1, 0.2, 0.01, 0.5, 300, 0.4, 1.5] });
-    static WOLF = new EntityType(61, 0, 50, 1, 300, EntityItemType.MOB, { regen: 20, drops: [{ item: Items.FUR_WOLF, amount: 1 }, { item: Items.MEAT, amount: 2 }], kscore: 60, physical: false, offensive: true, dmg: 40, dmgRange: 32, speed: 160, genes: [0.05, 3, 200, 300, -200, 200, 3, 0.7, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 20, 0.1, 0.05, 0.01, 0.25, 300, 0.2, 2] });
-    static SPIDER = new EntityType(62, 0, 65, 1, 120, EntityItemType.MOB, { rgen: 20, drops: [{ item: Items.CORD, amount: 2 }], kscore: 100, physical: false, offensive: true, dmg: 20, speed: 160, dmgRange: 30, genes: [0.05, 5, 150, 250, -200, 200, 2, 0.7, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 5, 0.1, 0.05, 0.01, 0.5, 300, 0.2, 2] });
-    static FOX = new EntityType(63, 0, 50, 1, 300, EntityItemType.MOB, { regen: 20, drops: [{ item: Items.FUR_WINTER, amount: 1 }, { item: Items.MEAT, amount: 2 }], kscore: 60, physical: false, offensive: true, dmg: 25, speed: 130, dmgRange: 32, genes: [0.05, 4, 150, 300, -200, 200, 3, 0.7, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 15, 0.1, 0.05, 0.01, 0.5, 300, 0.2, 2] });
-    static BEAR = new EntityType(64, 0, 50, 1, 900, EntityItemType.MOB, { regen: 40, drops: [{ item: Items.FUR_WINTER, amount: 2 }, { item: Items.MEAT, amount: 3 }], kscore: 90, physical: false, offensive: true, dmg: 60, speed: 13, dmgRange: 32, genes: [0.1, 3, 200, 300, -200, 200, 3, 0.7, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 20, 0.1, 0.05, 0.01, 0.5, 300, 0.2, 2] });
-    static DRAGON = new EntityType(65, 0, 80, 1, 1500, EntityItemType.MOB, { regen: 50, drops: [{ item: Items.MEAT, amount: 5 }], kscore: 1000, physical: false, offensive: true, dmg: 90, speed: 150, dmgRange: 50, genes: [0.05, 3, 200, 350, -200, 200, 3, 0.7, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 5, 0.1, 0.1, 0.01, 0.5, 300, 0.2, 2] });
+    static WOLF = new EntityType(61, 0, 50, 1, 300, EntityItemType.MOB, { regen: 20, drops: [{ item: Items.FUR_WOLF, amount: 1 }, { item: Items.MEAT, amount: 2 }], kscore: 60, physical: false, offensive: true, dmg: 40, dmgRange: 30, speed: 150, genes: [0.05, 3, 200, 300, -200, 200, 3, 0.7, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 20, 0.1, 0.05, 0.01, 0.25, 300, 0.2, 2] });
+    static SPIDER = new EntityType(62, 0, 65, 1, 120, EntityItemType.MOB, { rgen: 20, drops: [{ item: Items.CORD, amount: 2 }], kscore: 100, physical: false, offensive: true, dmg: 20, speed: 150, dmgRange: 30, genes: [0.05, 5, 150, 250, -200, 200, 2, 0.7, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 5, 0.1, 0.05, 0.01, 0.5, 300, 0.2, 2] });
+    static FOX = new EntityType(63, 0, 50, 1, 300, EntityItemType.MOB, { regen: 20, drops: [{ item: Items.FUR_WINTER, amount: 1 }, { item: Items.MEAT, amount: 2 }], kscore: 60, physical: false, offensive: true, dmg: 25, speed: 120, dmgRange: 30, genes: [0.05, 4, 150, 300, -200, 200, 3, 0.7, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 15, 0.1, 0.05, 0.01, 0.5, 300, 0.2, 2] });
+    static BEAR = new EntityType(64, 0, 50, 1, 900, EntityItemType.MOB, { regen: 40, drops: [{ item: Items.FUR_WINTER, amount: 2 }, { item: Items.MEAT, amount: 3 }], kscore: 90, physical: false, offensive: true, dmg: 60, speed: 120, dmgRange: 30, genes: [0.1, 3, 200, 300, -200, 200, 3, 0.7, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 20, 0.1, 0.05, 0.01, 0.5, 300, 0.2, 2] });
+    static DRAGON = new EntityType(65, 0, 80, 1, 1500, EntityItemType.MOB, { regen: 50, drops: [{ item: Items.MEAT, amount: 5 }], kscore: 1000, physical: false, offensive: true, dmg: 90, speed: 140, dmgRange: 50, genes: [0.05, 3, 200, 350, -200, 200, 3, 0.7, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 5, 0.1, 0.1, 0.01, 0.5, 300, 0.2, 2] });
 
     static FRUIT = new EntityType(100, 0, 65, 1, 0, EntityItemType.HARVESTABLE, { fscore: 2, physical: false, inv: { item: Items.PLANT, amount: 3, maximum: 5, delay: 10, respawn: 1 } });
 
@@ -293,12 +293,12 @@ export default class Entity implements Collider {
                 }
                 break;
             case EntityItemType.MOB:
-                let movement = { vec: { x: 0, y: 0 }, time: 0.5, active: false };
+                let movement = { vec: { x: 0, y: 0 }, time: 0.5, active: 0 };
                 let loopDuration = (this.moveDelay * world.mobtickRate / 1000);
                 let dmgDuration = (this.dmgDelay * world.mobtickRate / 1000);
                 this.updateLoop = setInterval(() => {
                     this.counter += 1;
-                    let fac = movement.active ? 1 : 5;
+                    let fac = movement.active === 1 ? 1 : (movement.active === 0 ? 6 : 12);
                     let mov = (this.counter % (loopDuration * fac));
                     if (movement.active) {
                         if (this.counter % dmgDuration < 1) {
@@ -307,12 +307,14 @@ export default class Entity implements Collider {
                                 player.damage(this.dmg, this, true, true, true);
                             }
                             if (this.entityType === EntityTypes.SPIDER) {
-                                for (let player of players.filter(e => Math.random() > 0.2 && Utils.distance({ x: e.pos.x - this.pos.x, y: e.pos.y - this.pos.y }) < this.dmgRange * 1.5 + e.radius)) {
-                                    player.webed += 1;
-                                    player.action |= EntityState.Web;
-                                    setTimeout(() => {
-                                        player.webed -= 1;
-                                    }, 1000)
+                                for (let player of players.filter(e => Math.random() > 0.15 && Utils.distance({ x: e.pos.x - this.pos.x, y: e.pos.y - this.pos.y }) < this.dmgRange * 1.5 + e.radius)) {
+                                    if (player.webed < 2) {
+                                        player.webed += 1;
+                                        player.action |= EntityState.Web;
+                                        setTimeout(() => {
+                                            player.webed -= 1;
+                                        }, 1000)
+                                    }
                                 }
                             }
                         }
@@ -556,7 +558,7 @@ export default class Entity implements Collider {
         let scores = [];
         let vectors = [];
         let players = this.getPlayersInRange(1, 1);
-        let active = false;
+        let active = 0;
         let adistance = 0;
         for (let player of players) {
             let memory = this.memory.find(e => e.player === player);
@@ -577,13 +579,13 @@ export default class Entity implements Collider {
                 memory.edmg *= 0.7;
             }
         }
-
         adistance /= scores.reduce((pv, cv) => pv + cv, 0);
         this.memory = this.memory.filter(e => players.includes(e.player));
         let fvector = { x: 0, y: 0 };
         let time = 0;
 
         if (players.length && Math.max(...scores.map(e => Math.abs(e))) > v[18]) {
+            active = 1;
             if (Math.random() > v[17] + Utils.remap(adistance, 0, v[20], v[21], 0, true) ** v[22]) {
                 let min = Math.min(...scores);
                 scores = scores.map(e => (e - min * v[7]) ** v[6] - min * v[8]);
@@ -606,7 +608,6 @@ export default class Entity implements Collider {
                     fvector.y *= this.speed / fvecDistance;
                 }
                 time = tdistance / scores.reduce((pv, cv) => pv + Math.abs(cv), 0);
-                active = true;
             } else {
                 fvector = Utils.angleToCoords(Math.random() * 256);
                 fvector.x *= this.speed;
@@ -617,8 +618,14 @@ export default class Entity implements Collider {
             fvector = Utils.angleToCoords(Math.random() * 256);
             fvector.x *= this.speed * 0.8;
             fvector.y *= this.speed * 0.8;
-            time = 0.75;
+            if (players.length === 0) {
+                active = -1;
+                time = 0.3;
+            } else {
+                time = 0.6;
+            }
         }
+
         return { vec: fvector, time: time, active: active };
     }
 

@@ -579,7 +579,7 @@ export default class Player extends Entity implements ConsoleSender {
     }
 
     chat(message: string) {
-        this.sendToRange([0, this.pid, message]);
+        this.sendToRange(JSON.stringify([0, this.pid, message]));
     }
 
     gatherAll() {

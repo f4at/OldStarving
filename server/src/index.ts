@@ -101,7 +101,7 @@ const server = (config.ssl ? https.createServer({
 const wss = new WebSocket.Server({ server });
 
 setInterval(() => {
-    const leaderboard = world.players.sort(function (a, b) { return a.compressedScore - b.compressedScore; }).slice(0, 10);
+    const leaderboard = world.players.sort(function (a, b) { return b.compressedScore - a.compressedScore; }).slice(0, 10);
     const list = leaderboard.flatMap(player => [player.pid, player.compressedScore]);
     for (let player of world.players) {
         player.send(new Uint16Array([6, player.compressedScore].concat(list)));

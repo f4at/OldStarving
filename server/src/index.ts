@@ -1,5 +1,6 @@
 import WebSocket from "ws";
 import * as https from "https";
+import * as http from "http";
 import world from "./World";
 import Player from "./Player";
 import { Items } from "./Item";
@@ -89,10 +90,10 @@ world.map.loadFromFile("./map.json");
 const app = express();
 
 let [hostname, port] = config.address.split(":");
-const server = https.createServer({
+const server = (config.ssl ? https.createServer({
     key: fs.readFileSync(config.ssl.key),
     cert: fs.readFileSync(config.ssl.cert)
-}, app).listen(Number.parseInt(port), hostname, () => {
+}, app) : http.createServer(app)).listen(Number.parseInt(port), hostname, () => {
     let address = server.address() as AddressInfo;
     console.log(`Listening on ${address.address}:${address.port}`);
 });
@@ -116,7 +117,7 @@ setInterval(() => {
             new Entity(null, 0, null, entity.e, false);
         }
     }
-}, 15000)
+}, 15000);
 
 wss.on("connection", (ws, req) => {
     let player: Player;

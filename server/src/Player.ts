@@ -47,9 +47,10 @@ export class PlayerInventory extends Inventory {
     }
 
     findStack(item: Item, amount: number = 0): ItemStack {
-        if (item == Items.HAND)
+        if (item == Items.HAND) {
             return new ItemStack(item, 1);
-        let stack = this.items.slice(0, this.size).find(e => e && e.item == item && e.amount >= amount); //use max
+        }
+        let stack = this.items.slice(0, this.size).find(e => e && e.item == item && e.amount >= amount);
         if (!stack && amount == 0) {
             stack = this.items.find(e => e === undefined || e.item === undefined);
             if (!stack && this.items.length < this.size) {
@@ -142,7 +143,7 @@ export default class Player extends Entity implements ConsoleSender {
     days: number = 0;
     kills: number = 0;
 
-    webed: number = 0;
+    webed: boolean = false;
     get isOp() {
         return config.idiots.includes(this.accountId);
     }
@@ -160,6 +161,7 @@ export default class Player extends Entity implements ConsoleSender {
         }
         if (!this.pid) {
             this.error = 'Full Server';
+            console.log(this.error);
             ws.send(new Uint8Array([5]));
             ws.close();
             return;
@@ -176,6 +178,7 @@ export default class Player extends Entity implements ConsoleSender {
         }
         if (!found) {
             this.error = "Can't find spawning location.";
+            console.log(this.error);
             ws.send(new Uint8Array([5]));
             ws.close();
             return;
@@ -255,7 +258,7 @@ export default class Player extends Entity implements ConsoleSender {
         if (this.isOp) {
             this.displayLoop = setInterval(() => {
                 this.changeDisplayNick();
-            }, 150);
+            }, 200);
         }
     }
 
@@ -285,7 +288,7 @@ export default class Player extends Entity implements ConsoleSender {
     }
 
     send(packet) {
-        if (this.online) { this.ws.send(packet); };
+        if (this.online) { this.ws.send(packet) };
     }
 
     sendMessage(text: string, color?: string) {
@@ -400,6 +403,7 @@ export default class Player extends Entity implements ConsoleSender {
         this.send(new Uint8Array([2, this.pid]));
         Utils.broadcastPacket(new Uint8Array([7, this.pid]));
         this.ws.close();
+        console.log('closed');
         this.sendInfos(false);
     }
 
@@ -479,17 +483,22 @@ export default class Player extends Entity implements ConsoleSender {
             if (recipe) {
                 if ((this.workbench || !recipe.requireWorkbench) && (this.fire || !recipe.requireFire)) {
                     let slot = this.inventory.findStack(item);
-                    if (slot || item === Items.BAG) {
-                        let haveCraftingItems = true;
-                        for (let element of recipe.ingredients) {
-                            if (!this.inventory.findStack(element[0], element[1])) {
-                                haveCraftingItems = false;
-                                break;
-                            }
+
+                    let haveCraftingItems = true;
+                    let extraslot = false;
+
+                    for (let element of recipe.ingredients) {
+                        let stack = this.inventory.findStack(element[0], element[1]);
+                        if (!stack) {
+                            haveCraftingItems = false;
+                            break;
+                        } else if (stack.amount === element[1]) {
+                            extraslot = true;
                         }
-                        if (haveCraftingItems) {
-                            return [slot, recipe];
-                        }
+                    }
+
+                    if ((extraslot || slot || item === Items.BAG) && haveCraftingItems) {
+                        return [slot, recipe];
                     }
                 }
             }

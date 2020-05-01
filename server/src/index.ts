@@ -90,6 +90,7 @@ world.map.loadFromFile("./map.json");
 const app = express();
 
 let [hostname, port] = config.address.split(":");
+
 const server = (config.ssl ? https.createServer({
     key: fs.readFileSync(config.ssl.key),
     cert: fs.readFileSync(config.ssl.cert)
@@ -109,7 +110,7 @@ setInterval(() => {
 }, 2000);
 
 setInterval(() => {
-    let entities = [{ e: EntityTypes.WOLF, m: 50, p: 1 }, { e: EntityTypes.RABBIT, m: 25, p: 0.5 }, { e: EntityTypes.SPIDER, m: 40, p: 1.5 }, { e: EntityTypes.FOX, m: 75, p: 0.5 }, { e: EntityTypes.BEAR, m: 25, p: 1 }, { e: EntityTypes.DRAGON, m: 8, p: 0.1 }];
+    let entities = [{ e: EntityTypes.WOLF, m: 30, p: 0.25 }, { e: EntityTypes.RABBIT, m: 10, p: 0.25 }, { e: EntityTypes.SPIDER, m: 20, p: 0.25 }, { e: EntityTypes.FOX, m: 30, p: 0.25 }, { e: EntityTypes.BEAR, m: 20, p: 0.25 }, { e: EntityTypes.DRAGON, m: 8, p: 0.1 }];
     for (let entity of entities) {
         let r = world.entities[0].filter(e => e.entityType == entity.e).length;
         let c = Math.floor(Math.min(Math.max(2, (entity.m + entity.p * world.players.length) / 10), (entity.m + entity.p * world.players.length - r) / 2));
@@ -118,6 +119,9 @@ setInterval(() => {
         }
     }
 }, 15000);
+
+
+console.log('version Number', 1);
 
 wss.on("connection", (ws, req) => {
     let player: Player;
@@ -131,6 +135,7 @@ wss.on("connection", (ws, req) => {
                 let data = JSON.parse(message.toString());
                 if (!player) {
                     if (typeof data[0] === "string") {
+
                         const response = await fetch(config.api + "/api/verify", {
                             method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ accountId: data[2], server: 0 })
                         });

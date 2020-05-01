@@ -9508,11 +9508,11 @@ export function start(ModdedStarving: ModdedStarving) {
     };
     var CLIENT = {
         VERSION_NUMBER: 5,
-        TIMEOUT_TIME: 2e3,
+        TIMEOUT_TIME: 5e3,
         TIMEOUT_NUMBER: 3,
         PING: "[13]",
         PING_DELAY: 6e4,
-        ROTATE: 1 / 32,
+        ROTATE: 1 / 24,
         ATTACK: .2,
         CAM_DELAY: 50,
         MUTE_DELAY: 125e3,
@@ -9920,7 +9920,7 @@ export function start(ModdedStarving: ModdedStarving) {
             }
         };
         this.select_craft = function (c) {
-            if (user.inv.max != user.inv.can_select.length || user.inv.find_item(RECIPES[c].id2) != -1 || user.inv.free_place(RECIPES[c].r)) {
+            if (user.inv.max != user.inv.can_select.length || user.inv.find_item(c) != -1 || user.inv.free_place(c)) {
                 this.socket.send(JSON.stringify([7, c]));
             } else {
                 this.inv_full();

@@ -162,7 +162,7 @@ export default class Entity implements Collider {
     genes: any;
     drops: any;
 
-    constructor(pos: Vector = null, angle: number, owner: Player, entityItem: EntityType, forceSpawn = false) {
+    constructor(pos: Vector = null, angle: number, owner: Player, entityItem: EntityType, forceSpawn: boolean = false) {
         if (entityItem !== null) {
             this.type = entityItem.type;
             this.entityType = entityItem;
@@ -180,6 +180,10 @@ export default class Entity implements Collider {
                 this.error = "The limit of possible placed entities of this type exceeded";
                 return;
             }
+
+            this.numberOfSides = entityItem.numberOfSides;
+            this.radius = entityItem.radius;
+            this.XtoYfac = entityItem.XtoYfactor;
 
             if (pos === null) {
                 let co = 0;
@@ -222,9 +226,7 @@ export default class Entity implements Collider {
             this.maxHealth = entityItem.hp;
             this.health = this.maxHealth;
 
-            this.numberOfSides = entityItem.numberOfSides;
-            this.radius = entityItem.radius;
-            this.XtoYfac = entityItem.XtoYfactor;
+
 
             let special = entityItem.special;
             this.physical = special.physical === undefined ? true : special.physical;
@@ -259,9 +261,7 @@ export default class Entity implements Collider {
             world.entities[this.ownerId].push(this);
             world.echunks[this.chunk.x][this.chunk.y][this.ownerId].push(this);
             this.sendInfos();
-            if (!(entityItem instanceof MapEntity)) {
-                this.init();
-            }
+            this.init();
         }
     }
 
@@ -270,7 +270,7 @@ export default class Entity implements Collider {
             if (this.lifespan) {
                 this.updateLoop = this.lifeUpdate * Utils.remap(Math.random(), 0, 1, 0.9, 1.1);
                 if (this.type === EntityItemType.MOB) {
-                    this.lifeLoop = setInterval(() => {
+                    this.lifeLoop = Utils.setIntervalAsync(async () => {
                         if (new Date().getTime() - this.stime > this.lifespan * 60000) {
                             this.die();
                         } else {
@@ -278,7 +278,7 @@ export default class Entity implements Collider {
                         }
                     }, this.lifeUpdate);
                 } else {
-                    this.lifeLoop = setInterval(() => {
+                    this.lifeLoop = Utils.setIntervalAsync(async () => {
                         this.damage(this.maxHealth * this.lifespan / this.lifeUpdate);
                     }, this.lifeUpdate);
                 }
@@ -288,7 +288,7 @@ export default class Entity implements Collider {
                     this.info = this.inv.amount;
                     this.inv.delay = this.inv.delay * Utils.remap(Math.random(), 0, 1, 0.9, 1.1);
                     if (this.inv.respawn > 0) {
-                        this.updateLoop = setInterval(() => {
+                        this.updateLoop = Utils.setIntervalAsync(async () => {
                             this.inv.amount = Math.min(this.inv.maximum, this.inv.amount + this.inv.respawn);
                             if (this.entityType === EntityTypes.FRUIT) {
                                 this.info = this.inv.amount;
@@ -302,7 +302,7 @@ export default class Entity implements Collider {
                     let loopDuration = (this.moveDelay * world.mobtickRate / 1000);
                     let fac = 6;
                     this.counter = 0;
-                    this.updateLoop = setInterval(() => {
+                    this.updateLoop = Utils.setIntervalAsync(async () => {
                         this.counter += 1;
                         if (this.counter === 1) {
                             movement = this.moveAI();
@@ -352,7 +352,7 @@ export default class Entity implements Collider {
                     }, 1000 / world.mobtickRate);
                     break;
                 case EntityItemType.FIRE:
-                    this.updateLoop = setInterval(() => {
+                    this.updateLoop = Utils.setIntervalAsync(async () => {
                         let players = this.getPlayersInRange(1, 1).filter(e => Utils.distance({ x: e.pos.x - this.pos.x, y: e.pos.y - this.pos.y }) < e.radius + this.dmgRange);
                         for (let player of players) {
                             player.damage(this.dmg, null, true, true, true);
@@ -370,7 +370,7 @@ export default class Entity implements Collider {
                     }, this.dmgDelay);
                     break;
                 case EntityItemType.SPIKE:
-                    this.updateLoop = setInterval(() => {
+                    this.updateLoop = Utils.setIntervalAsync(async () => {
                         let players = this.getPlayersInRange(1, 1).filter(e => Utils.distance({ x: e.pos.x - this.pos.x, y: e.pos.y - this.pos.y }) < e.radius + this.dmgRange && e !== this.owner);
                         for (let player of players) {
                             player.damage(this.dmg, null, true, true, true);
@@ -378,7 +378,7 @@ export default class Entity implements Collider {
                     }, this.dmgDelay);
                     break;
                 default:
-                    this.updateLoop = setInterval(() => {
+                    this.updateLoop = Utils.setIntervalAsync(async () => {
                         if (this.action) { this.sendInfos(); };
                     }, 200);
                     break;
@@ -468,10 +468,10 @@ export default class Entity implements Collider {
         world.entities[this.ownerId].splice(world.entities[this.ownerId].indexOf(this), 1);
 
         if (this.updateLoop) {
-            clearInterval(this.updateLoop);
+            Utils.clearIntervalAsync(this.updateLoop);
         }
         if (this.lifeLoop) {
-            clearInterval(this.lifeLoop);
+            Utils.clearIntervalAsync(this.lifeLoop);
         }
         if (attacker) {
             attacker.score += 10 + this.kscore;

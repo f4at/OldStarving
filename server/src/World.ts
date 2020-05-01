@@ -87,7 +87,6 @@ export class MapEntity extends Entity {
         this.physical = type.physical;
 
         this.type = EntityItemType.HARVESTABLE;
-        this.init();
     }
 }
 
@@ -116,7 +115,7 @@ export class GameMap {
                     if (typeName === 'p' && row.p.length) {
                         mapEntitiesCounter++;
                         let type = MapEntityTypes.get(typeName);
-                        let fruit = new Entity({ x: row.p[0].x, y: row.p[0].y }, 0, null, EntityTypes.FRUIT);
+                        let fruit = new Entity({ x: row.p[0].x, y: row.p[0].y }, 0, null, EntityTypes.FRUIT, true);
                         this.chunks[y][x].push(new MapEntity(type, { x: row.p[0].x, y: row.p[0].y }, s, mapEntitiesCounter));
                     } else {
                         for (const mapEntity of row[typeName]) {
@@ -124,13 +123,13 @@ export class GameMap {
                                 mapEntitiesCounter++;
                                 let type = MapEntityTypes.get(typeName);
                                 if (type.physical === true) {
-                                    let mEntity = new MapEntity(type, { x: mapEntity[0].x, y: mapEntity[0].y }, s, mapEntitiesCounter)
+                                    let mEntity = new MapEntity(type, { x: mapEntity[0].x, y: mapEntity[0].y }, s, mapEntitiesCounter);
                                     this.chunks[y][x].push(mEntity);
                                     if (harvastabeMapEntites[typeName]) {
                                         harvastabeMapEntites[typeName].push(mEntity);
                                     } else {
                                         harvastabeMapEntites[typeName] = [mEntity];
-                                        setInterval(() => {
+                                        Utils.setIntervalAsync(async () => {
                                             for (let entity of harvastabeMapEntites[typeName]) {
                                                 entity.inv.amount = Math.min(entity.inv.maximum, entity.inv.amount + entity.inv.respawn);
                                             }
@@ -183,11 +182,13 @@ export class World {
             }
         }
         let otime = this.isDay;
-        setInterval(() => {
-            if (this.isDay != otime) {
-                otime = this.isDay;
-                Utils.broadcastPacket(new Uint8Array([10, this.isDay ? 0 : 1]));
-            }
+        setTimeout(() => {
+            Utils.setIntervalAsync(async () => {
+                if (this.isDay != otime) {
+                    otime = this.isDay;
+                    Utils.broadcastPacket(new Uint8Array([10, this.isDay ? 0 : 1]));
+                }
+            }, 10000);
         }, 100);
     }
 

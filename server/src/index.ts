@@ -56,7 +56,6 @@ export abstract class Utils {
         } else {
             return 0;
         }
-
     }
 
     static distance(vector: Vector) {
@@ -83,6 +82,21 @@ export abstract class Utils {
         }
         return id;
     }
+
+    static setIntervalAsync(fn, ms, cancellation = { cancel: false }) {
+        if (!cancellation.cancel) {
+            fn().then(() => {
+                setTimeout(() => Utils.setIntervalAsync(fn, ms, cancellation), ms);
+            });
+        }
+        return cancellation;
+    };
+
+    static clearIntervalAsync(interval) {
+        if (interval !== undefined && interval !== null && interval.cancel === false) {
+            interval.cancel = true;
+        }
+    }
 }
 
 world.map.loadFromFile("./map.json");
@@ -101,7 +115,7 @@ const server = (config.ssl ? https.createServer({
 
 const wss = new WebSocket.Server({ server });
 
-setInterval(() => {
+Utils.setIntervalAsync(async () => {
     const leaderboard = world.players.sort(function (a, b) { return b.compressedScore - a.compressedScore; }).slice(0, 10);
     const list = leaderboard.flatMap(player => [player.pid, player.compressedScore]);
     for (let player of world.players) {
@@ -109,7 +123,7 @@ setInterval(() => {
     }
 }, 2000);
 
-setInterval(() => {
+Utils.setIntervalAsync(async () => {
     let entities = [{ e: EntityTypes.WOLF, m: 30, p: 0.25 }, { e: EntityTypes.RABBIT, m: 10, p: 0.25 }, { e: EntityTypes.SPIDER, m: 20, p: 0.25 }, { e: EntityTypes.FOX, m: 30, p: 0.25 }, { e: EntityTypes.BEAR, m: 20, p: 0.25 }, { e: EntityTypes.DRAGON, m: 8, p: 0.1 }];
     for (let entity of entities) {
         let r = world.entities[0].filter(e => e.entityType == entity.e).length;

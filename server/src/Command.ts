@@ -74,11 +74,10 @@ export class Commands {
 
                 let targets = this.matchPlayers(args[1], sender);
                 let amount = (args.length >= 3 ? Number(args[3]) : NaN) || 1;
-                let id = Number(args[3]);
+                let id = Number(args[2]);
                 let item = Items.get(isNaN(id) ? args[2].toUpperCase() : id);
 
                 for (const target of targets) {
-                    target.inventory.add(item, amount);
                     target.gather(item, amount);
                 }
 

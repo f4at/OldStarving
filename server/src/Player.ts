@@ -28,9 +28,11 @@ export class PlayerInventory extends Inventory {
         this.player.send([26, this.size = size]);
     }
 
-    remove(item: Item, amount: number = 0) {
-        let slot = this.items.find(e => e && e.item == item);
-        if (slot && slot !== undefined) {
+    remove(item: Item, amount: number = 0, slot: ItemStack = null) {
+        if (!slot) {
+            slot = this.items.find(e => e.item === item);
+        }
+        if (slot.item) {
             if (slot.item === this.player.tool) {
                 this.player.tool = Items.HAND;
                 this.player.updating = true;
@@ -38,7 +40,7 @@ export class PlayerInventory extends Inventory {
                 this.player.clothes == Items.AIR;
                 this.player.updating = true;
             }
-            if (!amount || slot.amount <= amount) {
+            if (amount === 0 || slot.amount <= amount) {
                 this.items.splice(this.items.indexOf(slot), 1);
             } else {
                 slot.amount -= amount;
@@ -50,20 +52,22 @@ export class PlayerInventory extends Inventory {
         if (item == Items.HAND) {
             return new ItemStack(item, 1);
         }
-        let stack = this.items.slice(0, this.size).find(e => e && e.item == item && e.amount >= amount);
+        let stack = this.items.find(e => e.item == item && e.amount >= amount);
         if (!stack && amount == 0) {
-            stack = this.items.find(e => e === undefined || e.item === undefined);
-            if (!stack && this.items.length < this.size) {
+            if (this.items.length < this.size) {
                 stack = new ItemStack(undefined, 0);
-                this.items.push(stack);
+                return stack;
             }
-        };
-        return stack;
+        } else {
+            return stack;
+        }
     }
 
     add(item: Item, amount: number = 1, slot: ItemStack = null) {
         if (!slot) {
             slot = this.findStack(item);
+        } else if (slot.item === undefined) {
+            this.items.push(slot);
         }
         if (slot) {
             slot.item = item;
@@ -126,9 +130,9 @@ export default class Player extends Entity implements ConsoleSender {
     attacking: boolean;
     update: boolean;
     updating: boolean;
-    updateLoop: NodeJS.Timeout;
-    attackLoop: NodeJS.Timeout;
-    displayLoop: NodeJS.Timeout;
+    updateLoop: any;
+    attackLoop: any;
+    displayLoop: any;
     craftTimeout: NodeJS.Timeout;
     movVector: Vector = { "x": 0, "y": 0 };
 
@@ -202,7 +206,7 @@ export default class Player extends Entity implements ConsoleSender {
         world.players.push(this);
         world.chunks[this.chunk.x][this.chunk.y].push(this);
         this.join(ws);
-        this.updateLoop = setInterval(() => {
+        this.updateLoop = Utils.setIntervalAsync(async () => {
             this.counter += 1;
             if (this.counter % (world.tickRate * 5) == 0) {
                 let temperature = Math.max(0, Math.min(100, this.temperature + (this.moving ? 1 : 0) + (this.attacking ? 1 : 0) + (world.isDay ? -3 : -20) + (this.pos.x > 10400 ? 0 : -15) * this.clothes.coldProtection + (this.fire ? (world.isDay ? 25 : 35) + (this.pos.x > 10400 ? 0 : 10) : 0)));
@@ -256,7 +260,7 @@ export default class Player extends Entity implements ConsoleSender {
         this.attackLoop = null;
 
         if (this.isOp) {
-            this.displayLoop = setInterval(() => {
+            this.displayLoop = Utils.setIntervalAsync(async () => {
                 this.changeDisplayNick();
             }, 200);
         }
@@ -325,11 +329,11 @@ export default class Player extends Entity implements ConsoleSender {
         this.attacking = true;
         if (!this.attackLoop) {
             this.hit2();
-            this.attackLoop = setInterval(() => {
+            this.attackLoop = Utils.setIntervalAsync(async () => {
                 if (this.attacking) {
                     this.hit2();
                 } else {
-                    clearInterval(this.attackLoop);
+                    Utils.clearIntervalAsync(this.attackLoop);
                     this.attackLoop = null;
                 }
             }, 550);
@@ -394,16 +398,16 @@ export default class Player extends Entity implements ConsoleSender {
     }
 
     die() {
-        clearInterval(this.updateLoop);
-        clearInterval(this.attackLoop);
-        clearInterval(this.updateLoop);
-        clearInterval(this.displayLoop);
+        Utils.clearIntervalAsync(this.updateLoop);
+        Utils.clearIntervalAsync(this.attackLoop);
+        Utils.clearIntervalAsync(this.updateLoop);
+        Utils.clearIntervalAsync(this.displayLoop);
         world.players = world.players.filter(e => e !== this);
         world.chunks[this.chunk.x][this.chunk.y] = world.chunks[this.chunk.x][this.chunk.y].filter(e => e !== this);
         this.send(new Uint8Array([2, this.pid]));
         Utils.broadcastPacket(new Uint8Array([7, this.pid]));
         this.ws.close();
-        console.log('closed');
+        console.log(`Player ${this.nick} left server`);
         this.sendInfos(false);
     }
 
@@ -459,8 +463,7 @@ export default class Player extends Entity implements ConsoleSender {
         if (!this.craftTimeout) {
             let infos = this.canCraft(item);
             if (infos) {
-                let slot = infos[0], recipe = infos[1];
-                for (let element of recipe.ingredients) {
+                for (let element of item.recipe.ingredients) {
                     this.inventory.remove(element.item, element.amount);
                 }
                 this.allowCrafting(item);
@@ -468,21 +471,21 @@ export default class Player extends Entity implements ConsoleSender {
                     if (item === Items.BAG) {
                         this.bag = true;
                     } else {
-                        this.inventory.add(item, 1, slot);
+                        this.inventory.add(item, 1);
                     }
                     this.finishedCrafting();
                     this.craftTimeout = null;
-                }, 1000 / (this.tool === Items.BOOK ? recipe.time / 3 : recipe.time));
+                }, 1000 / (this.tool === Items.BOOK ? item.recipe.time / 3 : item.recipe.time));
             }
         }
     }
 
-    canCraft(item: Item): [ItemStack, Recipe] {
+    canCraft(item: Item) {
         if (!this.craftTimeout) {
             let recipe = item.recipe;
             if (recipe) {
                 if ((this.workbench || !recipe.requireWorkbench) && (this.fire || !recipe.requireFire)) {
-                    let slot = this.inventory.findStack(item);
+                    let slot = this.inventory.findStack(item, 0);
 
                     let haveCraftingItems = true;
                     let extraslot = false;
@@ -496,9 +499,8 @@ export default class Player extends Entity implements ConsoleSender {
                             extraslot = true;
                         }
                     }
-
                     if ((extraslot || slot || item === Items.BAG) && haveCraftingItems) {
-                        return [slot, recipe];
+                        return true;
                     }
                 }
             }
@@ -597,7 +599,8 @@ export default class Player extends Entity implements ConsoleSender {
     }
 
     gather(item: Item, amount: number = 1, ret: boolean = false) {
-        if (this.inventory.findStack(item, 0) === undefined && this.inventory.items.length >= this.inventory.size) {
+        let slot = this.inventory.findStack(item, ret ? 1 : 0);
+        if (!slot && this.inventory.items.length >= this.inventory.size) {
             this.send(new Uint8Array([13]));
             return [];
         }
@@ -612,7 +615,7 @@ export default class Player extends Entity implements ConsoleSender {
         if (ret) {
             return list;
         }
-        this.inventory.add(item, trueAmount);
+        this.inventory.add(item, trueAmount, slot);
         if (list.length) { this.send([14].concat(list)); };
         return list;
     }

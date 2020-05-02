@@ -37,12 +37,12 @@ export class EntityType {
 }
 
 export class EntityTypes {
-    static FIRE = Items.FIRE.entityType = new EntityType(1, 0, 40, 1, 500, EntityItemType.FIRE, { physical: false, Lifespan: 2, dmg: 10, dmgDelay: 4000, dmgRange: 35 });
+    static FIRE = Items.FIRE.entityType = new EntityType(1, 0, 40, 1, 500, EntityItemType.FIRE, { physical: false, Lifespan: 2, dmg: 40, dmgDelay: 2500, dmgRange: 30 });
     static WORKBENCH = Items.WORKBENCH.entityType = new EntityType(2, 4, 50, 1.25, 500, EntityItemType.WORKBENCH, { physical: true });
     static SEED = Items.SEED.entityType = new EntityType(3, 0, 40, 1, 500, EntityItemType.HARVESTABLE, { physical: false, inv: { item: Items.PLANT, amount: 0, max: 3, delay: 15, respawn: 1 }, Lifespan: 60 });
     static WOOD_WALL = Items.WOOD_WALL.entityType = new EntityType(4, 0, 50, 1, 1000, EntityItemType.WALL, { physical: true });
     static WOOD_SPIKE = Items.WOOD_SPIKE.entityType = new EntityType(5, 0, 50, 1, 150, EntityItemType.SPIKE, { physical: true, hitdmg: 2, dmg: 5 });
-    static BIG_FIRE = Items.BIG_FIRE.entityType = new EntityType(6, 0, 35, 1, 700, EntityItemType.FIRE, { physical: false, Lifespan: 5, dmg: 20, dmgDelay: 4000, dmgRange: 30 });
+    static BIG_FIRE = Items.BIG_FIRE.entityType = new EntityType(6, 0, 35, 1, 700, EntityItemType.FIRE, { physical: false, Lifespan: 5, dmg: 50, dmgDelay: 2500, dmgRange: 35 });
     static STONE_WALL = Items.STONE_WALL.entityType = new EntityType(7, 7, 50, 1, 1500, EntityItemType.WALL, { physical: true, tier: 1 });
     static GOLD_WALL = Items.GOLD_WALL.entityType = new EntityType(8, 7, 50, 1, 2000, EntityItemType.WALL, { physical: true, tier: 2 });
     static DIAMOND_WALL = Items.DIAMOND_WALL.entityType = new EntityType(9, 7, 50, 1, 2500, EntityItemType.WALL, { physical: true, tier: 3 });
@@ -59,12 +59,12 @@ export class EntityTypes {
     static AMETHYST_SPIKE = Items.AMETHYST_SPIKE.entityType = new EntityType(20, 7, 50, 1, 1200, EntityItemType.SPIKE, { physical: true, tier: 4, hitdmg: 20, dmg: 50, dmgDelay: 1000, dmgRange: 80 });
     static AMETHYST_DOOR = Items.AMETHYST_DOOR.entityType = new EntityType(21, 7, 50, 1, 3500, EntityItemType.DOOR, { physical: true, tier: 4 });
 
-    static RABBIT = new EntityType(60, 0, 23, 1, 60, EntityItemType.MOB, { regen: 10, drops: [{ item: Items.FUR, amount: 1 }, { item: Items.MEAT, amount: 2 }], kscore: 60, physical: false, speed: 260, dmg: 0, genes: [0.05, 0, 300, 200, -200, 200, 2, 0.7, 0.2, 1, 0, 0.9, 0.99, 8, 2, 30, 0.1, 0.2, 0.01, 0.5, 300, 0.4, 1.5] });
-    static WOLF = new EntityType(61, 0, 50, 1, 300, EntityItemType.MOB, { regen: 20, drops: [{ item: Items.FUR_WOLF, amount: 1 }, { item: Items.MEAT, amount: 2 }], kscore: 60, physical: false, offensive: true, dmg: 40, dmgRange: 30, speed: 150, genes: [0.05, 5, 200, 300, -200, 200, 3, 0.7, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 20, 0.1, 0.05, 0.01, 0.25, 300, 0.2, 2] });
-    static SPIDER = new EntityType(62, 0, 65, 1, 120, EntityItemType.MOB, { rgen: 20, drops: [{ item: Items.CORD, amount: 2 }], kscore: 100, physical: false, offensive: true, dmg: 20, speed: 150, dmgRange: 30, genes: [0.05, 10, 150, 250, -200, 200, 2, 0.7, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 5, 0.1, 0.05, 0.01, 0.5, 300, 0.2, 2] });
-    static FOX = new EntityType(63, 0, 50, 1, 300, EntityItemType.MOB, { regen: 20, drops: [{ item: Items.FUR_WINTER, amount: 1 }, { item: Items.MEAT, amount: 2 }], kscore: 60, physical: false, offensive: true, dmg: 25, speed: 120, dmgRange: 30, genes: [0.05, 6, 150, 300, -200, 200, 3, 0.7, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 15, 0.1, 0.05, 0.01, 0.5, 300, 0.2, 2] });
-    static BEAR = new EntityType(64, 0, 50, 1, 900, EntityItemType.MOB, { regen: 40, drops: [{ item: Items.FUR_WINTER, amount: 2 }, { item: Items.MEAT, amount: 3 }], kscore: 90, physical: false, offensive: true, dmg: 60, speed: 120, dmgRange: 30, genes: [0.1, 5, 200, 300, -200, 200, 3, 0.7, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 20, 0.1, 0.05, 0.01, 0.5, 300, 0.2, 2] });
-    static DRAGON = new EntityType(65, 0, 80, 1, 1500, EntityItemType.MOB, { regen: 50, drops: [{ item: Items.MEAT, amount: 5 }], kscore: 1000, physical: false, offensive: true, dmg: 90, speed: 140, dmgRange: 50, genes: [0.05, 5, 200, 350, -200, 200, 3, 0.7, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 5, 0.1, 0.1, 0.01, 0.5, 300, 0.2, 2] });
+    static RABBIT = new EntityType(60, 0, 23, 1, 60, EntityItemType.MOB, { regen: 15, drops: [{ item: Items.FUR, amount: 1 }, { item: Items.MEAT, amount: 2 }], kscore: 60, physical: false, speed: 260, dmg: 0, genes: [0.05, 0, 300, 400, -200, 200, 3, 0.1, 0.2, 1, 0, 0.9, 0.99, 8, 2, 30, 0.1, 0.2, 0.01, 0.5, 300, 0.4, 1.5] });
+    static WOLF = new EntityType(61, 0, 50, 1, 300, EntityItemType.MOB, { regen: 40, drops: [{ item: Items.FUR_WOLF, amount: 1 }, { item: Items.MEAT, amount: 2 }], kscore: 60, physical: false, offensive: true, dmg: 40, dmgRange: 29, speed: 140, genes: [0.05, 5, 200, 300, -200, 200, 3, 0.1, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 20, 0.1, 0.05, 0.01, 0.25, 300, 0.2, 2] });
+    static SPIDER = new EntityType(62, 0, 65, 1, 120, EntityItemType.MOB, { rgen: 40, drops: [{ item: Items.CORD, amount: 2 }], kscore: 100, physical: false, offensive: true, dmg: 20, speed: 140, dmgRange: 29, genes: [0.05, 10, 150, 250, -200, 200, 3, 0.1, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 5, 0.1, 0.05, 0.01, 0.5, 300, 0.2, 2] });
+    static FOX = new EntityType(63, 0, 50, 1, 300, EntityItemType.MOB, { regen: 40, drops: [{ item: Items.FUR_WINTER, amount: 1 }, { item: Items.MEAT, amount: 2 }], kscore: 60, physical: false, offensive: true, dmg: 25, speed: 110, dmgRange: 29, genes: [0.05, 6, 150, 300, -200, 200, 3, 0.1, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 15, 0.1, 0.05, 0.01, 0.5, 300, 0.2, 2] });
+    static BEAR = new EntityType(64, 0, 50, 1, 900, EntityItemType.MOB, { regen: 40, drops: [{ item: Items.FUR_WINTER, amount: 2 }, { item: Items.MEAT, amount: 3 }], kscore: 90, physical: false, offensive: true, dmg: 60, speed: 110, dmgRange: 29, genes: [0.1, 5, 200, 300, -200, 200, 3, 0.1, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 20, 0.1, 0.05, 0.01, 0.5, 300, 0.2, 2] });
+    static DRAGON = new EntityType(65, 0, 80, 1, 1500, EntityItemType.MOB, { regen: 50, drops: [{ item: Items.MEAT, amount: 5 }], kscore: 1000, physical: false, offensive: true, dmg: 90, speed: 140, dmgRange: 50, genes: [0.05, 5, 200, 350, -200, 200, 3, 0.1, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 5, 0.1, 0.1, 0.01, 0.5, 300, 0.2, 2] });
 
     static FRUIT = new EntityType(100, 0, 65, 1, 0, EntityItemType.HARVESTABLE, { fscore: 2, physical: false, inv: { item: Items.PLANT, amount: 3, maximum: 5, delay: 10, respawn: 1 } });
 
@@ -214,8 +214,8 @@ export default class Entity implements Collider {
             } else {
                 this.pos = pos;
                 this.chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
-                if (!forceSpawn) {
-                    if (this.getEntitiesInRange(1, 1, true, true).filter(e => e.physical || e.type === EntityItemType.PLAYER).concat(this.getMapEntitiesInRange(5, 5)).find(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < this.radius + e.radius)) {
+                if (!forceSpawn) { // filter(e => e.physical || entityItem.special.physical || e.type === EntityItemType.PLAYER)
+                    if (this.getEntitiesInRange(1, 1, true, true).concat(this.getMapEntitiesInRange(5, 5)).find(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < this.radius + e.radius)) {
                         this.error = "Can't place entity in top of other Entities";
                         return;
                     }
@@ -226,11 +226,9 @@ export default class Entity implements Collider {
             this.maxHealth = entityItem.hp;
             this.health = this.maxHealth;
 
-
-
             let special = entityItem.special;
             this.physical = special.physical === undefined ? true : special.physical;
-            this.offensive = special.offensive !== undefined ? true : false;
+            this.offensive = special.offensive !== undefined ? special.offensive : false;
             this.dmg = special.dmg !== undefined ? special.dmg : 0;
             this.dmgRange = special.dmgRange !== undefined ? special.dmgRange : 0;
             this.eangle = special.eangle !== undefined ? special.eangle : 0;
@@ -240,7 +238,7 @@ export default class Entity implements Collider {
             this.lifespan = special.Lifespan;
             this.hitDamage = special.hitdmg !== undefined ? special.hitdmg : 0;
             this.miningTier = special.ftier !== undefined ? special.ftier : -1;
-            this.moveDelay = special.moveDelay !== undefined ? special.moveDelay : 1000 * 3 / 8;
+            this.moveDelay = special.moveDelay !== undefined ? special.moveDelay : 1000 * 4 / 8;
             this.dmgDelay = special.dmgDelay !== undefined ? special.dmgDelay : 1000;
             this.regen = special.regen !== undefined ? special.regen : 0;
             this.fscore = special.fscore !== undefined ? special.fscore : 0;
@@ -279,7 +277,7 @@ export default class Entity implements Collider {
                     }, this.lifeUpdate);
                 } else {
                     this.lifeLoop = Utils.setIntervalAsync(async () => {
-                        this.damage(this.maxHealth * this.lifespan / this.lifeUpdate);
+                        this.damage(this.maxHealth * this.lifeUpdate / (this.lifespan * 60000));
                     }, this.lifeUpdate);
                 }
             }
@@ -302,11 +300,12 @@ export default class Entity implements Collider {
                     let loopDuration = (this.moveDelay * world.mobtickRate / 1000);
                     let fac = 6;
                     this.counter = 0;
+                    let dmgCounter = 0;
                     this.updateLoop = Utils.setIntervalAsync(async () => {
                         this.counter += 1;
                         if (this.counter === 1) {
                             movement = this.moveAI();
-                            fac = movement.active === 1 ? 1 : (movement.active === 0 ? 6 : 16);
+                            fac = movement.active === 1 ? 1 : (movement.active === 0 ? 5 : 15);
                         }
                         if (this.counter <= movement.time * loopDuration * fac) {
                             let opos = { x: this.pos.x, y: this.pos.y };
@@ -326,23 +325,28 @@ export default class Entity implements Collider {
                                 this.sendInfos();
                                 this.action = 0;
                             }
-                            if (this.counter === movement.time * loopDuration * fac) {
+                            if (this.offensive && this.counter === movement.time * loopDuration * fac) {
                                 if (fac === 1) {
-                                    let players = this.getPlayersInRange(1, 1);
-                                    for (let player of players.filter(e => Utils.distance({ x: e.pos.x - this.pos.x, y: e.pos.y - this.pos.y }) < this.dmgRange + e.radius)) {
-                                        player.damage(this.dmg, this, true, true, true);
-                                    }
-                                    if (this.entityType === EntityTypes.SPIDER) {
-                                        for (let player of players.filter(e => Math.random() < 0.2 && Utils.distance({ x: e.pos.x - this.pos.x, y: e.pos.y - this.pos.y }) < this.dmgRange * 2 + e.radius)) {
-                                            if (!player.webed) {
-                                                player.webed = true;
-                                                player.action |= EntityState.Web;
-                                                setTimeout(() => {
-                                                    player.webed = false;
-                                                }, 1000)
+                                    dmgCounter += 1;
+                                    if (dmgCounter % 3 == 2) {
+                                        let players = this.getPlayersInRange(1, 1);
+                                        for (let player of players.filter(e => Utils.distance({ x: e.pos.x - this.pos.x, y: e.pos.y - this.pos.y }) < this.dmgRange + e.radius)) {
+                                            player.damage(this.dmg, this, true, true, true);
+                                        }
+                                        if (this.entityType === EntityTypes.SPIDER) {
+                                            for (let player of players.filter(e => Math.random() < 0.25 && Utils.distance({ x: e.pos.x - this.pos.x, y: e.pos.y - this.pos.y }) < this.dmgRange * 2 + e.radius)) {
+                                                if (!player.webed) {
+                                                    player.webed = true;
+                                                    player.action |= EntityState.Web;
+                                                    setTimeout(() => {
+                                                        player.webed = false;
+                                                    }, 1000)
+                                                }
                                             }
                                         }
                                     }
+                                } else {
+                                    dmgCounter = 0;
                                 }
                             }
                         }
@@ -352,22 +356,19 @@ export default class Entity implements Collider {
                     }, 1000 / world.mobtickRate);
                     break;
                 case EntityItemType.FIRE:
-                    this.updateLoop = Utils.setIntervalAsync(async () => {
-                        let players = this.getPlayersInRange(1, 1).filter(e => Utils.distance({ x: e.pos.x - this.pos.x, y: e.pos.y - this.pos.y }) < e.radius + this.dmgRange);
-                        for (let player of players) {
-                            player.damage(this.dmg, null, true, true, true);
-                        }
-                        if (this.entityType === EntityTypes.FURNACE && this.inv.amount > 0) {
-                            this.inv.amount -= 1;
-                            this.info = this.inv.amount;
+                    if (this.entityType === EntityTypes.FURNACE) {
+                        this.updateLoop = Utils.setIntervalAsync(async () => {
                             if (this.inv.amount > 0) {
-                                this.action = EntityState.Hurt;
-                            } else {
-                                this.action = EntityState.None;
+                                this.inv.amount -= 1;
+                                this.info = this.inv.amount;
+                                if (this.inv.amount === 0) {
+                                    this.action = EntityState.None;
+                                    this.sendInfos();
+                                }
+
                             }
-                            this.sendInfos();
-                        }
-                    }, this.dmgDelay);
+                        }, this.dmgDelay);
+                    }
                     break;
                 case EntityItemType.SPIKE:
                     this.updateLoop = Utils.setIntervalAsync(async () => {
@@ -445,10 +446,12 @@ export default class Entity implements Collider {
                 switch (this.type) {
                     case EntityItemType.DOOR:
                         if (this.owner === attacker) {
-                            this.info = this.info ? 0 : 1;
-                            this.physical = !this.physical;
-                            this.sendInfos();
-                            break;
+                            if (!this.info || !this.getEntitiesInRange(1, 1).filter(e => e !== this && Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < this.radius + e.radius - 1)) {
+                                this.info = this.info ? 0 : 1;
+                                this.physical = !this.physical;
+                                this.sendInfos();
+                                break;
+                            }
                         }
                     default:
                         let id = Utils.toHex(this.id);
@@ -578,8 +581,7 @@ export default class Entity implements Collider {
             if (memory.dmg > 10 || player.clothes != Items.EXPLORER_HAT) {
                 let s = Utils.remap(v[1] * this.health - player.health - v[9] * memory.dmg / this.maxHealth + v[10] * memory.edmg / 200, v[4], v[5], -1, 1, true);
                 let distance = Utils.distance({ x: this.pos.x - player.pos.x, y: this.pos.y - player.pos.y });
-                let fac = Utils.remap(s, -1, 1, v[2], v[3]);
-                memory.score = (memory.score + s * (1 - Utils.remap(distance, 0, fac, 0, 1, true))) / 2;
+                memory.score = (memory.score + s * (1 - Utils.remap(distance, 0, Utils.remap(s, -1, 1, v[2], v[3]), 0, 1, true))) / 2;
                 memory.score = memory.score < 0 ? memory.score : memory.score * v[7];
                 adistance += distance * (memory.score < 0 ? memory.score : memory.score * v[19]);
                 scores.push(memory.score);
@@ -597,8 +599,7 @@ export default class Entity implements Collider {
             active = 1;
             if (Math.random() > v[17] + Utils.remap(adistance, 0, v[20], v[21], 0, true) ** v[22]) {
                 let min = Math.min(...scores);
-                scores = scores.map(e => (e - min * v[7]) ** v[6] - min * v[8]);
-
+                scores = scores.map(e => -1 * (e - min * v[7]) ** v[6]);
                 let tdistance = 0;
                 for (let i = 0; i < scores.length; i++) {
                     let distance = Utils.distance(vectors[i]);
@@ -629,9 +630,9 @@ export default class Entity implements Collider {
             fvector.y *= this.speed * 0.8;
             if (players.length === 0) {
                 active = -1;
-                time = 1 / 48;
+                time = 1 / 60;
             } else {
-                time = 2 / 3;
+                time = 2 / 4;
             }
         }
 

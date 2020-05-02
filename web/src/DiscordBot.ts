@@ -23,7 +23,12 @@ export default class DiscordBot {
             const member = await guild.members.fetch(id.toString());
             if (!member)
                 return false;
-            return member.roles.cache.has(config.roleId);
+            for (let role of config.roleId) {
+                if (member.roles.cache.has(role)) {
+                    return true;
+                }
+            }
+            return false;
         } catch (error) {
             console.error("User " + id + " isn't in guild!");
             return false;

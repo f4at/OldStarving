@@ -139,7 +139,6 @@ console.log('version Number', 1);
 
 wss.on("connection", (ws, req) => {
     let player: Player;
-
     ws.binaryType = "arraybuffer";
     ws.on("message", async (message) => {
         try {
@@ -157,8 +156,8 @@ wss.on("connection", (ws, req) => {
                             ws.send(JSON.stringify([1, "Authentication failed"]));
                             return;
                         }
-
                         player = world.players.find(e => e.accountId == data[2]);
+
                         let rejoin = player !== undefined;
                         if (!rejoin) {
                             player = new Player(data[0], data[2], ws);

@@ -6,6 +6,7 @@ import Entity, { Collider, EntityState, EntityItemType, EntityTypes } from "./En
 import { MapEntity } from './World';
 import config from "../config";
 import { ConsoleSender } from "./Command";
+import { workerData } from "worker_threads";
 
 // TODO Move to Entity.ts
 export abstract class Inventory {
@@ -32,11 +33,11 @@ export class PlayerInventory extends Inventory {
         if (!slot) {
             slot = this.items.find(e => e.item === item);
         }
-        if (slot.item) {
-            if (slot.item === this.player.tool) {
+        if (slot) {
+            if (slot.item == this.player.tool) {
                 this.player.tool = Items.HAND;
                 this.player.updating = true;
-            } else if (slot.item === this.player.clothes) {
+            } else if (slot.item == this.player.clothes) {
                 this.player.clothes == Items.AIR;
                 this.player.updating = true;
             }
@@ -58,18 +59,18 @@ export class PlayerInventory extends Inventory {
                 stack = new ItemStack(undefined, 0);
                 return stack;
             }
-        } else {
-            return stack;
         }
+        return stack;
     }
 
     add(item: Item, amount: number = 1, slot: ItemStack = null) {
         if (!slot) {
             slot = this.findStack(item);
-        } else if (slot.item === undefined) {
-            this.items.push(slot);
         }
         if (slot) {
+            if (slot.item === undefined) {
+                this.items.push(slot);
+            }
             slot.item = item;
             slot.amount = slot.amount ? slot.amount + amount : amount;
         }
@@ -107,7 +108,7 @@ export default class Player extends Entity implements ConsoleSender {
 
     set bag(bag) {
         if (bag != this.bag) {
-            this.inventory.updateSize(bag ? 13 : 9);
+            this.inventory.updateSize(bag ? 12 : 9);
             this._bag = bag;
         }
     }
@@ -187,62 +188,73 @@ export default class Player extends Entity implements ConsoleSender {
             ws.close();
             return;
         }
-
         this.bag = false;
 
-        /*
-        this.inventory.add(Items.SWORD_AMETHYST, 1);
-        this.inventory.add(Items.DIAMOND_HELMET, 1);
-        this.inventory.add(Items.AMETHYST_SPEAR, 1);
-        this.inventory.add(Items.AMETHYST_SPIKE, 20);
-        this.inventory.add(Items.HAMMER_AMETHYST, 1);
-        this.inventory.add(Items.SEED, 10);
-        this.inventory.add(Items.CHEST, 10);
-        this.inventory.add(Items.FURNACE, 10);
-        this.inventory.add(Items.WOOD, 100);
-        this.inventory.add(Items.FIRE, 100);
-        */
+        this.inventory.add(Items.WOOD, 2000);
+        this.inventory.add(Items.STONE, 1000);
+        this.inventory.add(Items.GOLD, 500);
+        this.inventory.add(Items.FIRE, 10);
+        this.inventory.add(Items.FUR_WOLF, 10);
+        this.inventory.add(Items.CORD, 20);
+        this.inventory.add(Items.FUR, 5);
 
         world.players.push(this);
         world.chunks[this.chunk.x][this.chunk.y].push(this);
         this.join(ws);
+
         this.updateLoop = Utils.setIntervalAsync(async () => {
             this.counter += 1;
-            if (this.counter % (world.tickRate * 5) == 0) {
-                let temperature = Math.max(0, Math.min(100, this.temperature + (this.moving ? 1 : 0) + (this.attacking ? 1 : 0) + (world.isDay ? -3 : -20) + (this.pos.x > 10400 ? 0 : -15) * this.clothes.coldProtection + (this.fire ? (world.isDay ? 25 : 35) + (this.pos.x > 10400 ? 0 : 10) : 0)));
-                let food = Math.max(0, this.food + (this.moving ? -5 : -2.5) + (this.attacking ? -2.5 : 0));
-                if (this.temperature == temperature && temperature == 0) {
-                    this.damage(this.pos.x < 10400 ? 20 : 40, null, false, false);
-                    this.action |= EntityState.Cold;
-                }
-                if (this.food == food && food == 0) {
-                    this.damage(40, null, false, false);
-                    this.action |= EntityState.Hunger;
-                }
-                if (this.counter % (world.tickRate * 10) == 0) {
-                    if (food > 34 && temperature > 34) {
-                        if (this.regen > 0) {
-                            this.regen -= 1;
-                            this.damage(-30, null, true, false);
-                        } else {
-                            this.damage(-10, null, true, false);
-                        }
-                    }
-                }
-                this.food = food;
-                this.temperature = temperature;
-                this.updateBars();
-                if (this.counter % (world.tickRate * 480) == 0) {
-                    this.survive();
+            if (this.counter % (world.tickRate * 2.5) == 0) {
+                let firelevel = this.fireLevel();
+                let fire = firelevel[0], firedmg = firelevel[1];
+                let temperature = this.temperature;
+
+                if (fire === 2) {
+                    this.damage(firedmg, null, false, false);
+                    this.action |= EntityState.Hurt;
+                    temperature += 10;
                 }
 
+                if (this.counter % (world.tickRate * 5) == 0) {
+                    temperature = Math.max(0, Math.min(100, temperature + (this.moving ? 1 : 0) + (this.attacking ? 1 : 0) + ((world.isDay ? -3 : -15) + (this.pos.x < 10400 ? 0 : -15)) * (this.clothes.coldProtection === undefined ? 1 : this.clothes.coldProtection) + (fire ? (world.isDay ? 25 : 35) + (this.pos.x > 10400 ? 0 : 20) : 0)));
+
+                    if (this.temperature == temperature && temperature == 0) {
+                        this.damage(this.pos.x < 10400 ? 20 : 40, null, false, false);
+                        this.action |= EntityState.Cold;
+                    }
+                    this.temperature = temperature;
+
+                    let food = Math.max(0, this.food + (this.moving ? -4.5 : -2.5) + (this.attacking ? -2.5 : 0));
+                    if (this.food == food && food == 0) {
+                        this.damage(40, null, false, false);
+                        this.action |= EntityState.Hunger;
+                    }
+                    if (this.counter % (world.tickRate * 10) == 0) {
+                        if (food > 34 && temperature > 34) {
+                            if (this.regen > 0) {
+                                this.regen -= 1;
+                                this.damage(-30, null, true, false);
+                            } else {
+                                this.damage(-10, null, true, false);
+                            }
+                        }
+                        if (this.counter % (world.tickRate * 480) == 0) {
+                            this.survive();
+                        }
+                    }
+                    this.food = food;
+                    this.updateBars();
+                } else if (fire == 2) {
+                    this.updateBars();
+                }
             }
             if (this.counter % Math.ceil(world.tickRate / 3) == 0) {
                 this.updateCrafting();
             }
             if (this.moving || this.updating || this.action) {
+
                 if (this.moving) {
-                    let fac = this.webed ? 0 : ((this.attackLoop ? 0.8 : 1) * (this.pos.x < 10400 ? 1 : 0.85) * (this.tool.tier ? 1 : 0.85));
+                    let fac = this.webed ? 0 : ((this.attackLoop ? 0.75 : 1) * (this.pos.x < 10400 ? 1 : 0.8) * ((this.tool.tier || this.tool.damage.pvp < 10) ? 1 : 0.8));
                     this.pos.x += this.movVector.x / world.tickRate * fac;
                     this.pos.y += this.movVector.y / world.tickRate * fac;
                     this.collision();
@@ -328,7 +340,6 @@ export default class Player extends Entity implements ConsoleSender {
         this.angle = angle;
         this.attacking = true;
         if (!this.attackLoop) {
-            this.hit2();
             this.attackLoop = Utils.setIntervalAsync(async () => {
                 if (this.attacking) {
                     this.hit2();
@@ -348,7 +359,11 @@ export default class Player extends Entity implements ConsoleSender {
 
             let entities = (this.getEntitiesInRange(1, 1, true, true) as any[]).concat(this.getMapEntitiesInRange(4, 4)).filter(e => Utils.distance({ x: center.x - e.pos.x, y: center.y - e.pos.y }) < this.tool.range + e.radius && e !== this);
             for (let entity of entities) {
-                entity.damage((entity.type === EntityItemType.PLAYER || entity.type === EntityItemType.MOB) ? this.tool.damage.pvp : this.tool.damage.pve, this);
+                if (entity.type === EntityItemType.PLAYER) {
+                    entity.damage(this.tool.damage.pvp, this, true, true, true);
+                } else {
+                    entity.damage(entity.type === EntityItemType.MOB ? this.tool.damage.pvp : this.tool.damage.pve, this);
+                }
             }
         }
     }
@@ -404,11 +419,14 @@ export default class Player extends Entity implements ConsoleSender {
         Utils.clearIntervalAsync(this.displayLoop);
         world.players = world.players.filter(e => e !== this);
         world.chunks[this.chunk.x][this.chunk.y] = world.chunks[this.chunk.x][this.chunk.y].filter(e => e !== this);
+        this.sendInfos(false);
         this.send(new Uint8Array([2, this.pid]));
         Utils.broadcastPacket(new Uint8Array([7, this.pid]));
         this.ws.close();
         console.log(`Player ${this.nick} left server`);
-        this.sendInfos(false);
+        for (let entity of world.entities[this.pid]) {
+            entity.die();
+        }
     }
 
     updateChunk(chunk: Vector) {
@@ -441,7 +459,7 @@ export default class Player extends Entity implements ConsoleSender {
         let arr;
         if (visible) {
             let pos = { "x": Utils.toHex(Math.round(this.pos.x * 2)), "y": Utils.toHex(Math.round(this.pos.y * 2)) };
-            let infos = Utils.toHex(this.tool.id + this.clothes.id * 128 + (this.bag ? 1 : 0) * 16384);
+            let infos = Utils.toHex(this.tool.id + this.clothes.id * 128 + (this.bag ? 16384 : 0));
             arr = [0, 0, this.pid, this.action, this.sid, this.angle, pos.x[0], pos.x[1], pos.y[0], pos.y[1], 0, 0, infos[0], infos[1]];
         } else {
             arr = [0, 0, this.pid, 1, this.sid, 0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -468,14 +486,14 @@ export default class Player extends Entity implements ConsoleSender {
                 }
                 this.allowCrafting(item);
                 this.craftTimeout = setTimeout(() => {
-                    if (item === Items.BAG) {
+                    if (item == Items.BAG) {
                         this.bag = true;
                     } else {
                         this.inventory.add(item, 1);
                     }
                     this.finishedCrafting();
                     this.craftTimeout = null;
-                }, 1000 / (this.tool === Items.BOOK ? item.recipe.time / 3 : item.recipe.time));
+                }, 1000 / (this.tool == Items.BOOK ? item.recipe.time * 3 : item.recipe.time));
             }
         }
     }
@@ -491,15 +509,16 @@ export default class Player extends Entity implements ConsoleSender {
                     let extraslot = false;
 
                     for (let element of recipe.ingredients) {
-                        let stack = this.inventory.findStack(element[0], element[1]);
-                        if (!stack) {
+                        let stack = this.inventory.findStack(element.item, element.amount);
+                        if (stack === undefined) {
                             haveCraftingItems = false;
                             break;
                         } else if (stack.amount === element[1]) {
                             extraslot = true;
                         }
                     }
-                    if ((extraslot || slot || item === Items.BAG) && haveCraftingItems) {
+
+                    if ((extraslot || (slot !== undefined) || item == Items.BAG) && haveCraftingItems && (item !== Items.BAG || this.bag === false)) {
                         return true;
                     }
                 }
@@ -507,11 +526,24 @@ export default class Player extends Entity implements ConsoleSender {
         }
     }
 
+    fireLevel() {
+        let fire: number = 0, firedmg: number = 0;
+        for (let entity of this.getEntitiesInRange(1, 1, false, true).filter(e => e.type === EntityItemType.FIRE && (e.entityType !== EntityTypes.FURNACE || e.inv.amount > 0) && Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < 200)) {
+            if (Utils.distance({ x: this.pos.x - entity.pos.x, y: this.pos.y - entity.pos.y }) < entity.dmgRange) {
+                fire = 2;
+                firedmg = entity.dmg;
+                break;
+            }
+            fire = 1;
+        }
+        return [fire, firedmg];
+    }
+
     updateCrafting() {
         if (!this.craftTimeout) {
             let fire: boolean = false;
             let workbench: boolean = false;
-            for (let entity of this.getEntitiesInRange(1, 1, false, true).filter(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < 240)) {
+            for (let entity of this.getEntitiesInRange(1, 1, false, true).filter(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < 200)) {
                 if (entity.type === EntityItemType.FIRE) {
                     fire = true;
                 } else if (entity.type === EntityItemType.WORKBENCH) {
@@ -521,7 +553,6 @@ export default class Player extends Entity implements ConsoleSender {
                     }
                 }
             }
-
             if (workbench != this.workbench) {
                 this.workbench = workbench;
                 this.send(new Uint8Array([19, workbench ? 1 : 0]));
@@ -551,7 +582,7 @@ export default class Player extends Entity implements ConsoleSender {
 
     use(id: number) {
         let item = Items.get(id);
-        if (this.inventory.findStack(item, 1)) {
+        if (this.inventory.findStack(item, 1) && !this.craftTimeout) {
             switch (item.constructor) {
                 case Clothes:
                     this.updating = true;
@@ -565,7 +596,7 @@ export default class Player extends Entity implements ConsoleSender {
                 case Usable:
                     const usable = item as Usable;
                     this.food = Math.min(100, Math.max(0, this.food + usable.food));
-                    this.health += Math.min(this.maxHealth, Math.max(0, usable.hp));
+                    this.health = Math.max(0, Math.min(this.maxHealth, this.health + usable.hp));
                     this.temperature += Math.min(100, Math.max(0, usable.temp));
                     this.regen += Math.max(0, usable.regeneration);
                     this.inventory.remove(item, 1);
@@ -594,12 +625,13 @@ export default class Player extends Entity implements ConsoleSender {
     }
 
     gatherAll() {
-        let list = new Uint8Array([14].concat(...this.inventory.items.filter(e => e.amount).map(e => this.gather(e.item, e.amount, true))));
+        let list = new Uint8Array([14].concat(...this.inventory.items.map(e => this.gather(e.item, e.amount, true))));
         if (list.length > 1) { this.send(list); };
     }
 
     gather(item: Item, amount: number = 1, ret: boolean = false) {
         let slot = this.inventory.findStack(item, ret ? 1 : 0);
+
         if (!slot && this.inventory.items.length >= this.inventory.size) {
             this.send(new Uint8Array([13]));
             return [];
@@ -609,9 +641,10 @@ export default class Player extends Entity implements ConsoleSender {
         let list = [];
 
         while (amount > 0) {
-            list = list.concat([item.id, amount]);
-            amount -= amount % 256;
+            list = list.concat([item.id, Math.min(amount, 255)]);
+            amount -= Math.min(amount, 255);
         }
+
         if (ret) {
             return list;
         }

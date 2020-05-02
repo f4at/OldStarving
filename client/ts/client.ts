@@ -11972,7 +11972,7 @@ export function start(ModdedStarving: ModdedStarving) {
         this.draw_please = function () {
             this.ctx.fillStyle = "white";
             this.ctx.font = "30px Comic Sans MS";
-            const text = "lapa don't sue us plz";
+            const text = "LOOOOOOOOOOOOOOOOL";
             const size = this.ctx.measureText(text);
             const x = 150;
             const y = 150;

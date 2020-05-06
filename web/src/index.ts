@@ -78,7 +78,9 @@ app.use(express.static('./public'));
 const servers: Server[] = [];
 
 if (config.debugServer) {
-    servers.push(config.debugServer);
+    for (let server of config.debugServer) {
+        servers.push(server);
+    }
 }
 
 app.get('/servers', function (req, res) {
@@ -98,7 +100,7 @@ app.get("/unauthorized", async (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-    res.redirect(`https://discordapp.com/api/oauth2/authorize?client_id=${config.clientId}&scope=identify&response_type=code&redirect_uri=${config.redirectUri}`);
+    res.redirect(`https://discordapp.com/api/oauth2/authorize?client_id=${config.clientId}&scope=identify&response_type=code&redirect_uri=${encodeURIComponent(config.redirectUri)}`);
 });
 
 app.post("/api/join", async (req, res) => {
@@ -127,7 +129,7 @@ app.get('/api/discord/callback', async (req, res) => {
     if (!req.query.code) throw new Error('NoCodeProvided');
     const code = req.query.code;
     const credentials = btoa(`${config.clientId}:${config.clientSecret}`);
-    const response = await fetch(`https://discordapp.com/api/oauth2/token?grant_type=authorization_code&code=${code}&redirect_uri=${config.redirectUri}`,
+    const response = await fetch(`https://discordapp.com/api/oauth2/token?grant_type=authorization_code&code=${code}&redirect_uri=${encodeURIComponent(config.redirectUri)}`,
         {
             method: 'POST',
             headers: {

@@ -40,9 +40,20 @@ export function start(ModdedStarving: ModdedStarving) {
         };
 
         clientCommands = {
-            "clear": () => {
+            "clear": (e) => {
                 for (const node of document.querySelectorAll('.output')) {
                     node.remove();
+                }
+            },
+            "keyboard": (e) => {
+                if (e.length == 1) {
+                    if (e[0].toLowerCase() === 'azerty' && keyboard.type != keyboard.types['azerty']) {
+                        keyboard.set_azerty();
+                        gameConsole.addMessage(`<span style='color: green;'>Keyboard switched to AZERTY!</span>`);
+                    } else if (e[0].toLowerCase() === 'qwerty' && keyboard.type != keyboard.types['qwerty']) {
+                        keyboard.set_qwerty();
+                        gameConsole.addMessage(`<span style='color: green;'>Keyboard switched to QWERTY!</span>`);
+                    }
                 }
             }
         };
@@ -50,20 +61,20 @@ export function start(ModdedStarving: ModdedStarving) {
         constructor() {
             const input = document.querySelector("#input") as HTMLInputElement;
             input.addEventListener("keydown", function (event) {
-                if (event.keyCode === 192) {
+                if (event.keyCode === keyboard.console1 || event.keyCode === keyboard.console2) {
                     event.preventDefault();
                 }
             });
             input.addEventListener("keyup", function (event) {
-                if (event.keyCode === 192) {
+                if (event.keyCode === keyboard.console1 || event.keyCode === keyboard.console2) {
                     event.preventDefault();
-                } else if (event.keyCode === 13) {
+                } else if (event.keyCode === keyboard.enter) {
                     event.preventDefault();
 
                     if (this.value !== "") {
-                        const clientCommand = gameConsole.clientCommands[this.value];
+                        const clientCommand = gameConsole.clientCommands[this.value.split(' ')[0]];
                         if (clientCommand) {
-                            clientCommand();
+                            clientCommand(this.value.split(' ').slice(1));
                         } else {
                             if (client && client.socket && client.socket.readyState === WebSocket.OPEN) {
                                 client.socket.send(JSON.stringify([1, this.value]));
@@ -76,11 +87,11 @@ export function start(ModdedStarving: ModdedStarving) {
                 }
             });
             document.addEventListener("keyup", function (event) {
-                if (event.keyCode === 192) {
+                if (!user.chat.open && (event.keyCode === keyboard.console1 || event.keyCode === keyboard.console2)) {
                     event.preventDefault();
 
                     gameConsole.open = !gameConsole.open;
-                } else if (event.keyCode == 27) {
+                } else if (event.keyCode == keyboard.esc) {
                     gameConsole.open = false;
                 }
                 if (gameConsole.open) {
@@ -485,18 +496,28 @@ export function start(ModdedStarving: ModdedStarving) {
     }
 
     function Keyboard() {
+        this.types = { 'qwerty': 0, 'azerty': 1 };
         this.set_azerty = function () {
             this.LEFT = 81;
             this.RIGHT = 68;
             this.TOP = 90;
             this.DOWN = 83;
+            this.CONSOLE = 222;
+            this.type = this.types['azerty'];
         };
         this.set_qwerty = function () {
             this.LEFT = 65;
             this.RIGHT = 68;
             this.TOP = 87;
             this.BOTTOM = 83;
+            this.CONSOLE = 192;
+            this.type = this.types['qwerty'];
         };
+        this.spectator = 80;
+        this.console1 = 192;
+        this.console2 = 222;
+        this.esc = 27;
+        this.enter = 13;
         this.UP = 0;
         this.DOWN = 1;
         this._1 = 49;
@@ -510,10 +531,12 @@ export function start(ModdedStarving: ModdedStarving) {
         this.ARROW_TOP = 38;
         this.ARROW_BOTTOM = 40;
         this.SPACE = 32;
-        this.R = 82;
+        this.auto_feed = 82;
+        this.bigmap = 89;
         this.G = 71;
         this.V = 86;
         this.B = 66;
+
         this.set_qwerty();
         this.keys = Array(255).fill(this.UP);
         this.up = function (c) {
@@ -1005,7 +1028,8 @@ export function start(ModdedStarving: ModdedStarving) {
         INV_BLUE_CORD: 307,
         CHEST_BLUE_CORD: 309,
         CRAFT_BLUE_CORD: 310,
-        BIGMAP: 311
+        BIGMAP: 311,
+        VIEW_SPECTATORS: 312
     };
     const sprite = [];
 
@@ -7975,7 +7999,7 @@ export function start(ModdedStarving: ModdedStarving) {
         sprite[SPRITE.LEADERBOARD] = CTI(create_leaderboard(1));
         sprite[SPRITE.COUNTER] = [];
         sprite[SPRITE.SLOT_NUMBER] = [];
-        for (c = 0; 11 > c; c++) {
+        for (c = 0; 20 > c; c++) {
             sprite[SPRITE.SLOT_NUMBER][c] = create_text(1, "" + (c + 1), 12, "#FFF");
         }
         sprite[SPRITE.PLAY] = create_button([{
@@ -8013,6 +8037,7 @@ export function start(ModdedStarving: ModdedStarving) {
             color: "#FFF"
         }]);
         sprite[SPRITE.AUTO_FEED] = create_text(1, "Auto-Feed", 25, "#FFF", void 0, void 0, "#000", 5, 140);
+        sprite[SPRITE.VIEW_SPECTATORS] = create_text(1, "Show spectators", 25, "#FFF", void 0, void 0, "#000", 5, 210);
         ModdedStarving.on("sprite", {
             SPRITE,
             sprite
@@ -8245,11 +8270,19 @@ export function start(ModdedStarving: ModdedStarving) {
             circle(ctx, c.translate.x + (.0077 * g.x + 9) * scale, c.translate.y + (.0125 * g.y + 12) * scale, 4 * scale);
             ctx.fill();
         }
+        for (let player of user.rplayers) {
+            ctx.fillStyle = world.time ? "#900" : "#f00";
+            circle(ctx, c.translate.x + (.0077 * player.x + 9) * scale, c.translate.y + (.0125 * player.y + 12) * scale, 4 * scale);
+            ctx.fill();
+        }
     }
 
     function draw_auto_feed() {
         if (user.auto_feed.enabled) {
             ctx.drawImage(sprite[SPRITE.AUTO_FEED], user.auto_feed.translate.x, user.auto_feed.translate.y);
+        }
+        if (user.showSpectators) {
+            ctx.drawImage(sprite[SPRITE.VIEW_SPECTATORS], user.auto_feed.translate.x - 70, user.auto_feed.translate.y + sprite[SPRITE.AUTO_FEED].height + 10);
         }
     }
 
@@ -8288,6 +8321,26 @@ export function start(ModdedStarving: ModdedStarving) {
             }
         }
         ctx.drawImage(g.can, g.translate.x, g.translate.y);
+    }
+
+    function draw_ui_equiptimeout() {
+        var c = user.equiptimeout;
+        if (c.active) {
+            var f = c.timeout.update();
+            ctx.save();
+            ctx.beginPath();
+            ctx.strokeStyle = "#FFFFFF";
+            ctx.lineWidth = 5;
+            ctx.arc(60, canh - 180, 30, 0, c.timeout.v * Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+
+            if (f) {
+                c.active = false;
+                c.timeout.v = 0;
+                c.timeout.o = false;
+            }
+        }
     }
 
     function draw_ui_crafting() {
@@ -8383,13 +8436,13 @@ export function start(ModdedStarving: ModdedStarving) {
     }
 
     function draw_gauges() {
-        if (.25 > user.gauges.life.x) {
+        if (.35 > user.gauges.life.x) {
             ctx.globalAlpha = user.gauges.warn_life.v;
         }
         ctx.fillStyle = "#69A148";
         ctx.fillRect(this.translate.x + 66 * scale, this.translate.y + 17 * scale, 247 * user.gauges.life.x * scale, 16 * scale);
         ctx.globalAlpha = 1;
-        if (.25 > user.gauges.hunger.x) {
+        if (.35 > user.gauges.hunger.x) {
             ctx.fillStyle = "#8F050A";
             ctx.globalAlpha = user.gauges.warn_hunger.v;
             ctx.fillRect(this.translate.x + 66 * scale, this.translate.y + 52 * scale, 247 * scale, 16 * scale);
@@ -8397,7 +8450,7 @@ export function start(ModdedStarving: ModdedStarving) {
         }
         ctx.fillStyle = "#AF352A";
         ctx.fillRect(this.translate.x + 66 * scale, this.translate.y + 52 * scale, 247 * user.gauges.hunger.x * scale, 16 * scale);
-        if (.25 > user.gauges.cold.x) {
+        if (.35 > user.gauges.cold.x) {
             ctx.fillStyle = "#366B91";
             ctx.globalAlpha = user.gauges.warn_cold.v;
             ctx.fillRect(this.translate.x + 66 * scale, this.translate.y + 87 * scale, 247 * scale, 16 * scale);
@@ -8874,10 +8927,24 @@ export function start(ModdedStarving: ModdedStarving) {
                 this.label = create_message(scale, this.text);
             }
             ctx.drawImage(this.label, -this.label.width / 2, -this.label.height / 2 - 110 * scale);
-            if (this.chat.update() && this.chat.o == 0) {
-                this.text = "";
+            if (this.chat.update() || (this.chat.o && this.textQueue.length)) {
+                if (this.chat.o && this.textQueue.length) {
+                    this.chat.o = false;
+                    this.chat.v = 1;
+                }
+                if (this.textQueue.length) {
+                    this.text = this.textQueue[0];
+                    this.textQueue.splice(0, 1);
+                    this.chat.min_speed = 1 / (1 + 0.029 * this.text.length);
+                } else {
+                    this.text = "";
+                }
                 this.label = null;
             }
+        } else if (this.textQueue.length) {
+            this.text = this.textQueue[0];
+            this.textQueue.splice(0, 1);
+            this.chat.min_speed = 1 / (0.5 + 0.029 * this.text.length);
         }
         ctx.restore();
     }
@@ -8934,9 +9001,9 @@ export function start(ModdedStarving: ModdedStarving) {
 
     function draw_world() {
         var c = Math.max(Math.floor(-user.cam.x / world.dw) - 2, 0);
-        var g = Math.min(Math.floor((-user.cam.x + user.cam.w) / world.dw) + 2, world.nw - 1);
+        var g = Math.min(Math.floor((-user.cam.x + user.cam.rw) / world.dw) + 2, world.nw - 1);
         var f = Math.max(Math.floor(-user.cam.y / world.dh) - 2, 0);
-        var d = Math.min(Math.floor((-user.cam.y + user.cam.h) / world.dh) + 1, world.nh - 1);
+        var d = Math.min(Math.floor((-user.cam.y + user.cam.rh) / world.dh) + 1, world.nh - 1);
         draw_map_transition(draw_map_objects, f, d, c, g, SPRITE.HERB, "h", 2);
         draw_map_transition(draw_map_objects, f, d, c, g, SPRITE.HERB_WINTER, "hw", 2);
         draw_map_transition(draw_map_objects, f, d, c, g, SPRITE.SNOW, "so", 6);
@@ -9031,9 +9098,9 @@ export function start(ModdedStarving: ModdedStarving) {
             }
         } else if (world.mode === WORLD.MODE_HUNGER_GAMES) {
             for (m = 0; m < e.length; m++) {
-                if (world.players[user.id].nickname === "spectator") {
+                if (user.showSpectators) {
                     e[m].draw();
-                } else if (e[m].player.nickname !== "spectator") {
+                } else if (e[m].player.nickname !== "spectator" || e[m].pid == user.id) {
                     e[m].draw();
                 }
             }
@@ -9182,9 +9249,9 @@ export function start(ModdedStarving: ModdedStarving) {
             }
         } else if (world.mode === WORLD.MODE_HUNGER_GAMES) {
             for (m = 0; m < e.length; m++) {
-                if (world.players[user.id].nickname === "spectator") {
+                if (user.showSpectators) {
                     e[m].draw_text();
-                } else if (e[m].player.nickname !== "spectator") {
+                } else if (e[m].player.nickname !== "spectator" || e[m].pid == user.id) {
                     e[m].draw_text();
                 }
             }
@@ -9595,6 +9662,13 @@ export function start(ModdedStarving: ModdedStarving) {
         this.set_inventory_size = function (size) {
             user.inv.max = size;
         };
+        this.playersPos = function (data) {
+            let s = (data.length - 1) / 2;
+            user.rplayers = [];
+            for (let i = 0; i < s; i++) {
+                user.rplayers.push({ x: data[i * 2 + 1] * MAP.w / 256, y: data[i * 2 + 2] * MAP.h / 253 });
+            }
+        };
         this.get_focus = function () {
             this.socket.send(JSON.stringify([11]));
         };
@@ -9916,11 +9990,11 @@ export function start(ModdedStarving: ModdedStarving) {
         this.chat = function (c) {
             var f = world.fast_units[c[1] * world.max_units];
             if (f) {
-                f.text = c[2];
+                f.textQueue.push(c[2]);
             }
         };
         this.select_craft = function (c) {
-            if (user.inv.max != user.inv.can_select.length || user.inv.find_item(c) != -1 || user.inv.free_place(c)) {
+            if (user.inv.max != user.inv.can_select.length || c === INV.BAG || user.inv.find_item(c) != -1 || user.inv.free_place(RECIPES.find(e => e.id === c).r)) {
                 this.socket.send(JSON.stringify([7, c]));
             } else {
                 this.inv_full();
@@ -10044,7 +10118,7 @@ export function start(ModdedStarving: ModdedStarving) {
             this.socket.send(JSON.stringify([2, c]));
         };
         this.send_chat = function (c) {
-            world.fast_units[user.uid].text = c;
+            world.fast_units[user.uid].textQueue.push(c);
             this.socket.send(JSON.stringify([0, c]));
         };
         this.move_units = function (c) {
@@ -10137,6 +10211,8 @@ export function start(ModdedStarving: ModdedStarving) {
             clearTimeout(this.timeout_handler);
             this.timeout_server = old_timestamp;
             this.load_map(JSON.parse(c[9]));
+            user.bag = 0;
+            user.rplayers = [];
             user.gauges.cold.ed = user.gauges.cold.em;
             user.gauges.hunger.ed = user.gauges.hunger.em;
             user.gauges.l = 1;
@@ -10145,7 +10221,7 @@ export function start(ModdedStarving: ModdedStarving) {
             user.bigmap = false;
             user.inv.can_select = [];
             user.inv.n = [];
-            user.inv.max = 8;
+            user.inv.max = 9;
             user.inv.id = -1;
             user.craft.can_craft = [];
             user.craft.crafting = false;
@@ -10156,6 +10232,10 @@ export function start(ModdedStarving: ModdedStarving) {
             user.craft.fire = false;
             user.craft.timeout = new Utils.LinearAnimation(false, 0, 1, 0, 1, 1);
             world.mode = c[8];
+            if (world.mode === WORLD.MODE_HUNGER_GAMES) {
+                user.alert.text = "YOU ARE PLAYING HUNGER MODE!";
+            }
+            user.showSpectators = false;
             world.time = c[7];
             world.transition = false;
             user.day = 0;
@@ -10199,6 +10279,7 @@ export function start(ModdedStarving: ModdedStarving) {
             for (var d = 0; d < c[6]; d++) {
                 f.push(new Player(""));
             }
+            if (world.players[user.id].nickname === "spectator") user.showSpectators = true;
             d = 0;
             for (c = c[3]; d < c.length; d++) {
                 var e = f[c[d].id];
@@ -10242,6 +10323,9 @@ export function start(ModdedStarving: ModdedStarving) {
                                 break;
                             case 4:
                                 gameConsole.addMessage(f[1]);
+                                break;
+                            case 5:
+                                user.alert.text = f[1];
                                 break;
                         }
                     } else {
@@ -10328,6 +10412,9 @@ export function start(ModdedStarving: ModdedStarving) {
                             case 26:
                                 c.set_inventory_size(d[1]);
                                 break;
+                            case 27:
+                                c.playersPos(d);
+                                break;
                         }
                     }
                 }
@@ -10392,6 +10479,21 @@ export function start(ModdedStarving: ModdedStarving) {
         FRUIT: 100
     };
 
+    function isWeapon(c) {
+        switch (c) {
+            case INV.SWORD:
+            case INV.SWORD_AMETHYST:
+            case INV.SWORD_DIAMOND:
+            case INV.SWORD_GOLD:
+            case INV.SPEAR:
+            case INV.GOLD_SPEAR:
+            case INV.DIAMOND_SPEAR:
+            case INV.AMETHYST_SPEAR:
+                return true;
+                break;
+        }
+    }
+
     function Player(c) {
         this.nickname = this.displayName = c;
         this.ldb_label = this.label_winter = this.label = null;
@@ -10433,14 +10535,14 @@ export function start(ModdedStarving: ModdedStarving) {
                 this.idle = new Utils.LinearAnimation(true, 0, 2.25, -1.5, 3.75, 7.5);
                 this.walk = new Utils.LinearAnimation(true, 0, 7.5, -3, 22.5, 33.75);
                 this.attack = new Utils.LinearAnimation(false, 0, 0, -Math.PI / 3, 6, 9);
-                this.chat = new Utils.LinearAnimation(false, 1, 1, 0, 4, .25);
+                this.chat = new Utils.LinearAnimation(false, 1, 1, 0, 8, 1);
                 this.web = new Utils.LinearAnimation(false, .6, .6, 0, 1, 3);
+                this.textQueue = [];
                 this.text = "";
                 this.draw_text = draw_chat;
                 this.hand = true;
                 this.right = -1;
                 this.action = STATE.IDLE;
-                this.info = INV.HAND;
                 this.collide = false;
                 this.bag = this.clothe = 0;
                 this.update = function () {
@@ -10456,9 +10558,24 @@ export function start(ModdedStarving: ModdedStarving) {
                     } else {
                         this.bag = 0;
                     }
+
                     this.clothe = Math.floor(this.info / 128);
                     this.info -= 128 * this.clothe;
-                    this.right = this.info == INV.HAND ? -1 : this.info;
+
+                    let right = (this.info == INV.HAND ? -1 : this.info);
+                    if (user.id === this.pid) {
+                        user.inv.id = right;
+                        if (user.bag != this.bag) {
+                            user.bag = this.bag;
+                            user.craft.update();
+                        }
+                        if (this.right != right && isWeapon(right) && !user.equiptimeout.active) {
+                            user.equiptimeout.active = true;
+                        } else if (this.right != right && user.equiptimeout.active) {
+                            user.equiptimeout.restart();
+                        }
+                    }
+                    this.right = right;
                     if (this.action & STATE.COLD && this.action & STATE.HEAL) {
                         this.action -= STATE.COLD + STATE.HEAL;
                         this.action |= STATE.WEB;
@@ -10933,7 +11050,7 @@ export function start(ModdedStarving: ModdedStarving) {
         id2: INV.PICK,
         time: 1 / 15
     }, {
-        r: [[4, 3], [3, 20]],
+        r: [[4, 3]],
         w: 0,
         f: 1,
         id: CRAFT.SEED,
@@ -11087,14 +11204,14 @@ export function start(ModdedStarving: ModdedStarving) {
         id2: INV.DIAMOND_DOOR,
         time: .125
     }, {
-        r: [[34, 8], [22, 4]],
+        r: [[34, 6], [22, 4]],
         w: 1,
         f: 0,
         id: CRAFT.EARMUFFS,
         id2: INV.EARMUFFS,
         time: 1 / 15
     }, {
-        r: [[36, 1], [34, 5], [35, 10], [22, 6]],
+        r: [[36, 1], [35, 10], [22, 6]],
         w: 1,
         f: 0,
         id: CRAFT.COAT,
@@ -11312,6 +11429,7 @@ export function start(ModdedStarving: ModdedStarving) {
                 }
             }
         };
+        this.rplayers = [];
         this.cam.w = screen.width;
         this.cam.h = screen.height;
         this.cam.rw = this.cam.w;
@@ -11401,7 +11519,7 @@ export function start(ModdedStarving: ModdedStarving) {
         };
         this.bigmap = false;
         this.inv = {
-            max: 8,
+            max: 9,
             n: [],
             id: -1,
             can_select: [],
@@ -11449,17 +11567,26 @@ export function start(ModdedStarving: ModdedStarving) {
                     this.delay += delta;
                     if (2 < this.delay) {
                         this.delay = 0;
-                        if (.25 > user.gauges.h) {
+                        if (.35 > user.gauges.h) {
                             if (user.inv.n[INV.PLANT]) {
                                 client.select_inv(INV.PLANT, user.inv.find_item(INV.PLANT));
                             } else if (user.inv.n[INV.COOKED_MEAT]) {
                                 client.select_inv(INV.COOKED_MEAT, user.inv.find_item(INV.COOKED_MEAT));
-                            } else if (user.inv.n[INV.MEAT]) {
+                            } else if (user.inv.n[INV.MEAT] && 0 === user.gauges.h && user.gauges.l > .15) {
                                 client.select_inv(INV.MEAT, user.inv.find_item(INV.MEAT));
                             }
                         }
                     }
                 }
+            }
+        };
+        this.equiptimeout = {
+            timeout: new Utils.LinearAnimation(false, 0, 1, 0, 0.5, 0.5),
+            active: false,
+            restart: function () {
+                this.active = false;
+                this.timeout.v = 0;
+                this.timeout.o = false;
             }
         };
         this.craft = {
@@ -11476,7 +11603,7 @@ export function start(ModdedStarving: ModdedStarving) {
                 this.id = c;
                 this.crafting = true;
                 c = world.fast_units[user.uid];
-                this.timeout.max_speed = c && c.right == INV.BOOK ? 2 * g.time : g.time;
+                this.timeout.max_speed = c && c.right == INV.BOOK ? 3 * g.time : g.time;
                 this.id2 = g.id2;
                 for (c = 0; c < g.r.length; c++) {
                     var f = g.r[c];
@@ -11491,7 +11618,7 @@ export function start(ModdedStarving: ModdedStarving) {
                     var f = true;
                     if (g.r) {
                         for (var d = 0; d < g.r.length; d++) {
-                            if (user.inv.max === 10 && g.id === CRAFT.BAG) {
+                            if (user.bag && g.id === CRAFT.BAG) {
                                 f = false;
                                 break;
                             }
@@ -11587,14 +11714,27 @@ export function start(ModdedStarving: ModdedStarving) {
                 this.input.value = "";
             },
             run: function () {
-                // if (!world.fast_units[user.uid].text) {
-                if (this.open && !world.fast_units[user.uid].text) {
+                if (this.open) {
                     this.open = false;
                     this.style.display = "none";
-                    if (this.input.value) {
-                        client.send_chat(this.input.value);
-                        this.input.value = "";
+                    let text = this.input.value;
+                    this.input.value = "";
+                    while (text.indexOf('  ') != -1) {
+                        text = text.replace('  ', ' ');
                     }
+                    while (text) {
+                        if (text[0] === ' ') {
+                            text = text.slice(1);
+                        } else if (text[text.length - 1] === ' ') {
+                            text = text.slice(0, text.length - 1);
+                        } else {
+                            break;
+                        }
+                    }
+                    if (text) {
+                        client.send_chat(text);
+                    }
+
                 } else {
                     this.open = true;
                     this.style.display = "inline-block";
@@ -11784,18 +11924,6 @@ export function start(ModdedStarving: ModdedStarving) {
             }
         });
         this.nickname.input.value = decodeURIComponent(Cookies.get("starve_nickname") ? Cookies.get("starve_nickname") : "");
-        this.all_rights_reserved = {
-            id: document.getElementById("all_rights_reserved"),
-            style: document.getElementById("all_rights_reserved").style,
-            translate: {
-                x: 0,
-                y: 0
-            },
-            update: function () {
-                this.style.left = this.translate.x + "px";
-                this.style.top = Math.floor(this.translate.y) + "px";
-            }
-        };
         this.creation = {
             id: document.getElementById("creation"),
             style: document.getElementById("creation").style,
@@ -11872,7 +12000,6 @@ export function start(ModdedStarving: ModdedStarving) {
                 Cookies.set("starve_nickname", f.nickname.input.value);
                 f.nickname.style.display = "none";
                 f.server_list.style.display = "none";
-                f.all_rights_reserved.style.display = "none";
                 f.creation.style.display = "none";
                 f.sidebox.style.display = "none";
                 f.discord.style.display = "none";
@@ -11891,7 +12018,6 @@ export function start(ModdedStarving: ModdedStarving) {
             document.getElementById("game_body").style.backgroundColor = SPRITE.GROUND[fake_world.time];
             f.nickname.style.display = "inline-block";
             f.server_list.style.display = "inline-block";
-            f.all_rights_reserved.style.display = "inline-block";
             f.creation.style.display = "inline-block";
             f.sidebox.style.display = "inline-block";
             f.discord.style.display = "inline-block";
@@ -11913,8 +12039,6 @@ export function start(ModdedStarving: ModdedStarving) {
             this.nickname.translate.y = this.play.info.translate.y - 95;
             this.server_list.translate.x = (this.can.width - 300) / 2;
             this.server_list.translate.y = this.play.info.translate.y - 48;
-            this.all_rights_reserved.translate.x = (this.can.width - 300) / 2;
-            this.all_rights_reserved.translate.y = this.can.height - 30;
             this.creation.translate.x = 10;
             this.creation.translate.y = 5;
             this.sidebox.translate.x = this.can.width - 255;
@@ -11943,7 +12067,6 @@ export function start(ModdedStarving: ModdedStarving) {
             }
             this.nickname.update();
             this.server_list.update();
-            this.all_rights_reserved.update();
             this.creation.update();
             this.sidebox.update();
             this.discord.update();
@@ -12547,12 +12670,13 @@ export function start(ModdedStarving: ModdedStarving) {
             this.minimap.translate.y -= 0 > c ? c : -c;
         };
         this.draw_UI = function () {
+            draw_ui_inventory();
             draw_minimap();
+            draw_ui_equiptimeout();
             draw_leaderboard();
             draw_auto_feed();
             this.gauges.draw();
             draw_ui_crafting();
-            draw_ui_inventory();
             draw_chest_inventory();
             draw_furnace_inventory();
             draw_bigmap();
@@ -12584,13 +12708,15 @@ export function start(ModdedStarving: ModdedStarving) {
             if (gameConsole.open)
                 return;
 
-            if (user.chat.open && c.keyCode == 27) {
+            if (user.chat.open && c.keyCode == keyboard.esc) {
                 user.chat.quit();
-            } else if (c.keyCode == 13) {
+            } else if (c.keyCode == keyboard.enter) {
                 user.chat.run();
             } else if (!user.chat.open) {
-                if (c.keyCode == 82) {
+                if (c.keyCode == keyboard.auto_feed) {
                     user.auto_feed.enabled = !user.auto_feed.enabled;
+                } else if (c.keyCode == keyboard.spectator) {
+                    user.showSpectators = !user.showSpectators;
                 } else if (49 <= c.keyCode && 57 >= c.keyCode) {
                     if (0 > user.craft.id) {
                         var d = c.keyCode - 49;
@@ -12599,7 +12725,7 @@ export function start(ModdedStarving: ModdedStarving) {
                             client.select_inv(e.id, d);
                         }
                     }
-                } else if (c.keyCode == 89) {
+                } else if (c.keyCode == keyboard.bigmap) {
                     user.bigmap = !user.bigmap;
                 }
             }

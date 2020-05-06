@@ -141,6 +141,38 @@ export class Commands {
                 }
             }
         }],
+        ["givexp", new class extends Command {
+            invoke(sender: CommandSender, args: string[]) {
+                if (args.length !== 3) throw new SyntaxError();
+
+                let targets = this.matchPlayers(args[1], sender);
+                let amount = Number(args[2]);
+                if (isNaN(amount)) throw new SyntaxError();
+
+                for (const target of targets) {
+                    target.score += amount;
+                }
+
+                sender.sendMessage(`Given ${amount} xp to ${targets.length} players`);
+            }
+        }],
+        ["message", new class extends Command {
+            invoke(sender: CommandSender, args: string[]) {
+                if (args.length < 3) throw new SyntaxError();
+
+                let targets = this.matchPlayers(args[1], sender);
+                let message = args[2];
+                for (let m = 3; m < args.length; m++) {
+                    message += ' ' + args[m];
+                }
+
+                for (const target of targets) {
+                    target.sendError(message);
+                }
+
+                sender.sendMessage(`Sent message to ${targets.length} players`);
+            }
+        }]
     ]);
 
     static process(sender: CommandSender, input: string) {

@@ -36,16 +36,16 @@ export class MapEntityTypes {
     static HERB = new MapEntityType(null, "h", false);
 
     static BUSH = new MapEntityType(0, "p", true, 0, 60, 1, [1], 0, { item: Items.PLANT, amount: 0, maximum: 0, delay: 10, respawn: 0 }, -1);
-    static STONES = new MapEntityType(1, "s", true, 7, 57, 1, [1.78, 1.43, 1], 21, { item: Items.STONE, amount: 10, maximum: 20, delay: 8, respawn: 2 }, 1);
-    static TREE = new MapEntityType(4, "t", true, 4, 80, 1.1, [1.5, 1.5, 1.25, 1.25, 1, 1], 0, { item: Items.WOOD, amount: 15, maximum: 30, delay: 9, respawn: 3 }, 0);
-    static GOLD = new MapEntityType(10, "g", true, 8, 64, 1, [1.35, 1.18, 1], 27, { item: Items.GOLD, amount: 10, maximum: 20, delay: 10, respawn: 2 }, 2);
-    static DIAMOND = new MapEntityType(13, "d", true, 3, 65, 1, [1.55, 1.25, 1], 53, { item: Items.DIAMOND, amount: 7, maximum: 15, delay: 12, respawn: 2 }, 3);
-    static TREE_BRANCH = new MapEntityType(16, "b", true, 4, 80, 1.1, [1.5, 1.5, 1.25, 1.25], 0, { item: Items.WOOD, amount: 20, maximum: 40, delay: 9, respawn: 3 }, 0);
-    static FIR = new MapEntityType(20, "f", true, 0, 100, 1, [1.5, 1.2, 1], 0, { item: Items.WOOD, amount: 15, maximum: 30, delay: 9, respawn: 3 }, 0);
-    static STONES_WINTER = new MapEntityType(23, "sw", true, 7, 57, 1, [1.78, 1.43, 1], 21, { item: Items.STONE, amount: 10, maximum: 20, delay: 8, respawn: 2 }, 1);
-    static GOLD_WINTER = new MapEntityType(26, "gw", true, 8, 64, 1, [1.35, 1.18, 1], 27, { item: Items.GOLD, amount: 10, maximum: 20, delay: 10, respawn: 2 }, 2);
-    static DIAMOND_WINTER = new MapEntityType(29, "dw", true, 3, 65, 1, [1.55, 1.25, 1], 53, { item: Items.DIAMOND, amount: 7, maximum: 15, delay: 12, respawn: 2 }, 3);
-    static AMETHYST = new MapEntityType(32, "a", true, 0, 66, 1, [1, 1, 1], 0, { item: Items.AMETHYST, amount: 5, maximum: 10, delay: 14, respawn: 2 }, 4);
+    static STONES = new MapEntityType(1, "s", true, 7, 57, 1, [1.78, 1.43, 1], 21, { item: Items.STONE, amount: 10, maximum: 20, delay: 7.9, respawn: 2 }, 1);
+    static TREE = new MapEntityType(4, "t", true, 4, 80, 1.1, [1.5, 1.5, 1.25, 1.25, 1, 1], 0, { item: Items.WOOD, amount: 15, maximum: 30, delay: 9.1, respawn: 3 }, 0);
+    static GOLD = new MapEntityType(10, "g", true, 8, 60, 1, [1.35, 1.18, 1], 27, { item: Items.GOLD, amount: 10, maximum: 20, delay: 10, respawn: 2 }, 2);
+    static DIAMOND = new MapEntityType(13, "d", true, 3, 65, 1, [1.55, 1.25, 1], 53, { item: Items.DIAMOND, amount: 7, maximum: 15, delay: 12.1, respawn: 2 }, 3);
+    static TREE_BRANCH = new MapEntityType(16, "b", true, 4, 80, 1.1, [1.5, 1.5, 1.25, 1.25], 0, { item: Items.WOOD, amount: 20, maximum: 40, delay: 8.9, respawn: 3 }, 0);
+    static FIR = new MapEntityType(20, "f", true, 0, 100, 1, [1.5, 1.2, 1], 0, { item: Items.WOOD, amount: 15, maximum: 30, delay: 12.5, respawn: 4 }, 0);
+    static STONES_WINTER = new MapEntityType(23, "sw", true, 7, 57, 1, [1.78, 1.43, 1], 21, { item: Items.STONE, amount: 10, maximum: 20, delay: 11.9, respawn: 3 }, 1);
+    static GOLD_WINTER = new MapEntityType(26, "gw", true, 8, 60, 1, [1.35, 1.18, 1], 27, { item: Items.GOLD, amount: 10, maximum: 20, delay: 14.9, respawn: 3 }, 2);
+    static DIAMOND_WINTER = new MapEntityType(29, "dw", true, 3, 65, 1, [1.55, 1.25, 1], 53, { item: Items.DIAMOND, amount: 7, maximum: 15, delay: 11.9, respawn: 2 }, 3);
+    static AMETHYST = new MapEntityType(32, "a", true, 0, 66, 1, [1, 1, 1], 0, { item: Items.AMETHYST, amount: 5, maximum: 10, delay: 13.9, respawn: 2 }, 4);
 
     static DRAGON_GROUND = new MapEntityType(null, "dg", false, 4, 72, 1, [1,], 0);
     static SNOW = new MapEntityType(null, "so", false, 4, 72, 1, [1,], 0);
@@ -70,6 +70,7 @@ export class MapEntity extends Entity {
         this.id = id;
         this.mapID = type.id + size;
         this.eangle = type.eangle;
+        this.dmgradius = type.dmgradius;
 
         this.inv = Object.assign({}, type.drop);
         this.inv.maximum = Math.ceil(this.inv.maximum * type.sizes[size] ** 2 / 5) * 5;
@@ -80,6 +81,7 @@ export class MapEntity extends Entity {
 
         this.numberOfSides = type.numberOfSides;
         this.radius = type.radius * type.sizes[size];
+        this.dmgradius = type.dmgradius * type.sizes[size];
         this.XtoYfac = type.XtoYfactor;
         this.stime = new Date().getTime();
         this.miningTier = type.miningTier;
@@ -156,7 +158,7 @@ export class World {
     static get instance(): World {
         return World._instance || (World._instance = new World());
     }
-
+    modes = { survival: 0, hunger: 1 };
     players: Array<Player> = new Array();
     entities: Entity[][] = new Array(128);
     mapSize: Vector = { x: 30, y: 10 };
@@ -165,8 +167,10 @@ export class World {
     tickRate: number = 24;
     mobtickRate: number = 8;
     stime: number = new Date().getTime();
-    mode: number = 0; //id of mode, probably useless for the moment.
+    mode: number = this.modes.hunger; //id of mode, probably useless for the moment.
     map: GameMap = new GameMap();
+    hungerClose: number = 480000 * 1;
+    days: number = -0.5;
 
     constructor() {
         for (let i = 0; i < this.mapSize.x; i++) {
@@ -184,12 +188,20 @@ export class World {
         let otime = this.isDay;
         setTimeout(() => {
             Utils.setIntervalAsync(async () => {
+                this.days += 0.5;
                 if (this.isDay != otime) {
                     otime = this.isDay;
                     Utils.broadcastPacket(new Uint8Array([10, this.isDay ? 0 : 1]));
+                    if (this.days % 1 === 0 && this.days <= this.hungerClose / 480000 && this.mode === this.modes.hunger) {
+                        let message = this.days === this.hungerClose / 480000 ? 'Player spawning Disabled!' : 'Player spawning will be disabled in ' + (this.hungerClose / 480000 - this.days) + (this.hungerClose / 480000 - this.days === 1 ? ' day!' : 'days');
+                        for (let player of this.players) {
+                            player.sendError(message);
+                        }
+
+                    }
                 }
-            }, 10000);
-        }, 100);
+            }, 240000);
+        }, 35);
     }
 
     get time() {

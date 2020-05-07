@@ -94,6 +94,7 @@ export class MapEntity extends Entity {
 
 export class GameMap {
     raw: string;
+    encoded: string;
     height: number;
     width: number;
     chunks: MapEntity[][][] = [];
@@ -150,6 +151,7 @@ export class GameMap {
         }
         console.log(`Loaded map ${this.width}x${this.height} (${mapEntitiesCounter} map entities)`);
         this.raw = JSON.stringify(map);
+        this.encoded = Utils.encode(this.raw);
     }
 }
 
@@ -169,7 +171,7 @@ export class World {
     stime: number = new Date().getTime();
     mode: number = this.modes.hunger; //id of mode, probably useless for the moment.
     map: GameMap = new GameMap();
-    hungerClose: number = 480000 * 1;
+    hungerClose: number = 480000 * 3;
     days: number = -0.5;
 
     constructor() {

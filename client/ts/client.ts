@@ -14,6 +14,7 @@ export function start(ModdedStarving: ModdedStarving) {
             return eval(name.toString() + "=JSON.parse('" + JSON.stringify(value) + "')");
         }
     });
+    function decode(b) { var a, e = {}, d = b.split(""), f = d[0], c = f, g = [c], o = 256, h = o; for (b = 1; b < d.length; b++)a = d[b].charCodeAt(0), a = h > a ? d[b] : e[a] ? e[a] : f + c, g.push(a), c = a.charAt(0), e[o] = f + c, o++, f = a; return g.join("") };
     const gameConsole = new class GameConsole {
         private _open: boolean = false;
 
@@ -10210,7 +10211,7 @@ export function start(ModdedStarving: ModdedStarving) {
             ___adsvid++;
             clearTimeout(this.timeout_handler);
             this.timeout_server = old_timestamp;
-            this.load_map(JSON.parse(c[9]));
+            this.load_map(JSON.parse(decode(c[9])));
             user.bag = 0;
             user.rplayers = [];
             user.gauges.cold.ed = user.gauges.cold.em;
@@ -10279,7 +10280,6 @@ export function start(ModdedStarving: ModdedStarving) {
             for (var d = 0; d < c[6]; d++) {
                 f.push(new Player(""));
             }
-            if (world.players[user.id].nickname === "spectator") user.showSpectators = true;
             d = 0;
             for (c = c[3]; d < c.length; d++) {
                 var e = f[c[d].id];
@@ -10288,6 +10288,7 @@ export function start(ModdedStarving: ModdedStarving) {
                 e.score = Utils.restore_number(c[d].score);
                 e.alive = true;
             }
+            if (world.players[user.id].nickname === "spectator") user.showSpectators = true;
             user.ldb.sort();
             ui.quit(game.run);
         };

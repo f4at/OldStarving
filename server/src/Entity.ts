@@ -568,7 +568,7 @@ export default class Entity implements Collider {
     }
 
     sendToRange(packet) {
-        let players = this.getPlayersInRange(2, 2);
+        let players = this.getPlayersInRange(2, 2, true);
         for (let player of players) { player.send(packet); };
     }
 

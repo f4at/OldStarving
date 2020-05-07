@@ -101,18 +101,21 @@ export abstract class Utils {
         let r = x % y;
         return r < 0 ? r + y : r;
     }
+
+    static encode(c) { var x = 'charCodeAt', b, e = {}, f = c.split(""), d = [], a = f[0], g = 256; for (b = 1; b < f.length; b++)c = f[b], null != e[a + c] ? a += c : (d.push(1 < a.length ? e[a] : a[x](0)), e[a + c] = g, g++, a = c); d.push(1 < a.length ? e[a] : a[x](0)); for (b = 0; b < d.length; b++)d[b] = String.fromCharCode(d[b]); return d.join("") };
 }
 
 world.map.loadFromFile("./map.json");
 
 const app = express();
 
+
 let [hostname, port] = config.address.split(":");
 
 const server = (config.ssl ? https.createServer({
     key: fs.readFileSync(config.ssl.key),
     cert: fs.readFileSync(config.ssl.cert)
-}, app) : http.createServer(app)).listen(Number.parseInt(port), hostname, () => {
+}) : http.createServer()).listen(Number.parseInt(port), hostname, () => {
     let address = server.address() as AddressInfo;
     console.log(`Listening on ${address.address}:${address.port}`);
 });

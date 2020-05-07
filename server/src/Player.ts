@@ -328,7 +328,7 @@ export default class Player extends Entity implements ConsoleSender {
     join(ws) {
         this.ws = ws;
         this.online = true;
-        this.send(JSON.stringify([3, this.pid, 1024, world.leaderboard, this.pos.x, this.pos.y, 256, world.isDay ? 0 : 1, world.mode, world.map.raw]));
+        this.send(JSON.stringify([3, this.pid, 1024, world.leaderboard, this.pos.x, this.pos.y, 256, world.isDay ? 0 : 1, world.mode, world.map.encoded]));
         this.getInfos();
         this.sendInfos();
         this.inventory.updateSize();

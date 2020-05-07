@@ -12941,5 +12941,5 @@ export function start(ModdedStarving: ModdedStarving) {
         f.appendChild(d);
     }
 
-    var ___adsvid = 1;
+    var ___adsvid = 1 ;
 }

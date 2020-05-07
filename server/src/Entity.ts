@@ -210,7 +210,7 @@ export default class Entity implements Collider {
                             break;
                     }
                     this.chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
-                    if (!this.getEntitiesInRange(1, 1, true, true).filter(e => e.physical || e.type === EntityItemType.PLAYER).concat(this.getMapEntitiesInRange(5, 5)).find(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < this.radius + e.radius)) {
+                    if (!this.getEntitiesInRange(2, 2, true, true).filter(e => e.physical || e.type === EntityItemType.PLAYER).concat(this.getMapEntitiesInRange(3, 3)).find(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < this.radius + e.radius)) {
                         break;
                     } else if (co == 32) {
                         this.error = "Can't place entity in top of other Entities";
@@ -221,7 +221,7 @@ export default class Entity implements Collider {
                 this.pos = pos;
                 this.chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
                 if (!forceSpawn) {
-                    if (this.getEntitiesInRange(1, 1, false, true).concat(this.getPlayersInRange(1, 1).filter(e => !e.spectator)).concat(this.getMapEntitiesInRange(5, 5)).find(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < this.radius + e.radius)) {
+                    if (this.getEntitiesInRange(2, 2, false, true).concat(this.getPlayersInRange(2, 2).filter(e => !e.spectator)).concat(this.getMapEntitiesInRange(3, 3)).find(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < this.radius + e.radius)) {
                         this.error = "Can't place entity in top of other Entities";
                         return;
                     }
@@ -351,7 +351,7 @@ export default class Entity implements Collider {
                                 if (fac === 1) {
                                     dmgCounter += 1;
                                     if (dmgCounter % 3 == 2) {
-                                        let players = this.getPlayersInRange(1, 1);
+                                        let players = this.getPlayersInRange(2, 2);
                                         for (let player of players.filter(e => Utils.distance({ x: e.pos.x - this.pos.x, y: e.pos.y - this.pos.y }) < this.dmgRange + e.radius)) {
                                             player.damage(this.dmg, this, true, true, true);
                                         }
@@ -396,7 +396,7 @@ export default class Entity implements Collider {
                     break;
                 case EntityItemType.SPIKE:
                     this.updateLoop = Utils.setIntervalAsync(async () => {
-                        let players = this.getPlayersInRange(1, 1).filter(e => Utils.distance({ x: e.pos.x - this.pos.x, y: e.pos.y - this.pos.y }) < e.radius + this.dmgRange && e !== this.owner);
+                        let players = this.getPlayersInRange(2, 2).filter(e => Utils.distance({ x: e.pos.x - this.pos.x, y: e.pos.y - this.pos.y }) < e.radius + this.dmgRange && e !== this.owner);
                         for (let player of players) {
                             player.damage(this.dmg, null, true, true, true);
                         }
@@ -494,7 +494,7 @@ export default class Entity implements Collider {
                 switch (this.type) {
                     case EntityItemType.DOOR:
                         if (this.owner === attacker) {
-                            if (!this.info || !this.getEntitiesInRange(1, 1).filter(e => e != this && Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < this.radius + e.radius - 1).length) {
+                            if (!this.info || !this.getEntitiesInRange(2, 2).filter(e => e != this && Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < this.radius + e.radius - 1).length) {
                                 this.info = this.info ? 0 : 1;
                                 this.physical = !this.physical;
                                 this.sendInfos();
@@ -568,7 +568,7 @@ export default class Entity implements Collider {
     }
 
     sendToRange(packet) {
-        let players = this.getPlayersInRange(2, 2, true);
+        let players = this.getPlayersInRange(4, 3, true);
         for (let player of players) { player.send(packet); };
     }
 
@@ -580,8 +580,9 @@ export default class Entity implements Collider {
     }
 
     getEntitiesInRange(x: number, y: number, player: boolean = true, entity: boolean = true): Entity[] {
-        let ymin = Math.max(-y + this.chunk.y, 0), ymax = Math.min(y + 1 + this.chunk.y, world.mapSize.y),
-            xmin = Math.max(-x + this.chunk.x, 0), xmax = Math.min(x + 1 + this.chunk.x, world.mapSize.x);
+
+        let ymin = Math.max(Math.round(-y + this.pos.y / 1000), 0), ymax = Math.min(Math.round(y + 1 + this.pos.y / 1000), world.mapSize.y),
+            xmin = Math.max(Math.round(-x + this.pos.x / 1000), 0), xmax = Math.min(Math.round(x + 1 + this.pos.x / 1000), world.mapSize.x);
         let list = [];
         for (let x = xmin; x < xmax; x++) {
             for (let y = ymin; y < ymax; y++) {
@@ -619,7 +620,7 @@ export default class Entity implements Collider {
         let v = this.genes;
         let scores = [];
         let vectors = [];
-        let players = this.getPlayersInRange(1, 1);
+        let players = this.getPlayersInRange(2, 2);
         let active = 0;
         let adistance = 0;
         for (let player of players) {
@@ -680,7 +681,7 @@ export default class Entity implements Collider {
             fvector.x *= this.speed;
             fvector.y *= this.speed;
             if (players.length === 0) {
-                players = this.getPlayersInRange(2, 2);
+                players = this.getPlayersInRange(4, 3);
                 if (Math.min(...players.map(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }))) < 1800) {
                     time = 1 / 5;
                 } else {
@@ -704,7 +705,7 @@ export default class Entity implements Collider {
     }
 
     collision() {
-        let colliders: Collider[] = (this.getMapEntitiesInRange(3, 3) as Collider[]).concat(this.getEntitiesInRange(1, 1, false, true)).filter(e => e.physical && e != this);
+        let colliders: Collider[] = (this.getMapEntitiesInRange(3, 3) as Collider[]).concat(this.getEntitiesInRange(2, 2, false, true)).filter(e => e.physical && e != this);
         let dis: number, vec: Vector, angle: number, angle2: number, collide: boolean, counter = 0;
         while (true) {
             collide = false;
@@ -758,7 +759,7 @@ export default class Entity implements Collider {
     }
 
     updateChunk(chunk: Vector) {
-        let list = this.getPlayersInRange(2, 2).filter(e => Math.abs(e.chunk.x - chunk.x) > 2 || Math.abs(e.chunk.y - chunk.y) > 2);
+        let list = this.getPlayersInRange(4, 3).filter(e => Math.abs(e.chunk.x - chunk.x) > 2 || Math.abs(e.chunk.y - chunk.y) > 2);
         this.sendInfos(false, list);
         world.echunks[this.chunk.x][this.chunk.y][this.ownerId].splice(world.echunks[this.chunk.x][this.chunk.y][this.ownerId].indexOf(this), 1);
         this.chunk = chunk;

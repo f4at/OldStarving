@@ -187,7 +187,7 @@ export default class Player extends Entity implements ConsoleSender {
         while (counter < 64 && !found) {
             this.pos = { "x": Math.random() * 9999, "y": 1 + Math.random() * 9999 }; //spawn in forest biome
             this.chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
-            if (!this.spectator && this.getEntitiesInRange(1, 1, true, true).concat(this.getMapEntitiesInRange(5, 5)).find(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < this.radius + e.radius + (e.type == EntityItemType.WALL || e.type == EntityItemType.SPIKE || e.type == EntityItemType.DOOR ? 500 : 0))) {
+            if (!this.spectator && this.getEntitiesInRange(2, 2, true, true).concat(this.getMapEntitiesInRange(3, 3)).find(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < this.radius + e.radius + (e.type == EntityItemType.WALL || e.type == EntityItemType.SPIKE || e.type == EntityItemType.DOOR ? 400 : 0))) {
                 counter += 1;
             } else {
                 found = true;
@@ -374,7 +374,7 @@ export default class Player extends Entity implements ConsoleSender {
 
     getInfos(visible: boolean = true, to: any[] = null) {
         if (to === null) {
-            to = this.getEntitiesInRange(2, 2);
+            to = this.getEntitiesInRange(3, 3);
         }
         this.send(new Uint8Array([0, 0].concat(...to.filter(e => !(e instanceof MapEntity)).map(e => e.infoPacket(visible, false).slice(2)))));
     }
@@ -425,7 +425,7 @@ export default class Player extends Entity implements ConsoleSender {
             let angle2: number = 0;
             let vec: Vector;
 
-            for (let entity of (this.getPlayersInRange(1, 1)).filter(e => e !== this)) {
+            for (let entity of (this.getPlayersInRange(2, 2)).filter(e => e !== this)) {
                 vec = { x: center.x - entity.pos.x, y: center.y - entity.pos.y };
                 if (entity.numberOfSides === 0) {
                     dis = entity.dmgradius + this.tool.range - Utils.distance(vec);
@@ -437,7 +437,7 @@ export default class Player extends Entity implements ConsoleSender {
                 if (dis > 1e-4) entity.damage(this.tool.damage.pvp, this, true, true, true);
             }
 
-            for (let entity of (this.getEntitiesInRange(1, 1, false, true)).concat(this.getMapEntitiesInRange(4, 4))) {
+            for (let entity of (this.getEntitiesInRange(2, 2, false, true)).concat(this.getMapEntitiesInRange(4, 4))) {
                 vec = { x: center.x - entity.pos.x, y: center.y - entity.pos.y };
                 if (entity.numberOfSides === 0) {
                     dis = entity.dmgradius + this.tool.range - Utils.distance(vec);
@@ -530,8 +530,8 @@ export default class Player extends Entity implements ConsoleSender {
     }
 
     updateChunk(chunk: Vector) {
-        let list = this.getPlayersInRange(2, 2).filter(e => Math.abs(e.chunk.x - chunk.x) > 2 || Math.abs(e.chunk.y - chunk.y) > 2);
-        let elist = this.getEntitiesInRange(2, 2, false, true).filter(e => Math.abs(e.chunk.x - chunk.x) > 2 || Math.abs(e.chunk.y - chunk.y) > 2);
+        let list = this.getPlayersInRange(4, 3).filter(e => Math.abs(e.chunk.x - chunk.x) > 2 || Math.abs(e.chunk.y - chunk.y) > 2);
+        let elist = this.getEntitiesInRange(4, 3, false, true).filter(e => Math.abs(e.chunk.x - chunk.x) > 2 || Math.abs(e.chunk.y - chunk.y) > 2);
         this.sendInfos(false, list);
         this.getInfos(false, elist.concat(list));
 
@@ -540,7 +540,7 @@ export default class Player extends Entity implements ConsoleSender {
         this.chunk = chunk;
         world.chunks[this.chunk.x][this.chunk.y].push(this);
 
-        elist = this.getEntitiesInRange(2, 2, true, true).filter(e => Math.abs(e.chunk.x - echunk.x) > 2 || Math.abs(e.chunk.y - echunk.y) > 2);
+        elist = this.getEntitiesInRange(4, 3, true, true).filter(e => Math.abs(e.chunk.x - echunk.x) > 2 || Math.abs(e.chunk.y - echunk.y) > 2);
         this.getInfos(true, elist);
     }
 
@@ -634,7 +634,7 @@ export default class Player extends Entity implements ConsoleSender {
 
     fireLevel() {
         let fire: number = 0, firedmg: number = 0;
-        for (let entity of this.getEntitiesInRange(1, 1, false, true).filter(e => e.type === EntityItemType.FIRE && (e.entityType !== EntityTypes.FURNACE || e.inv.amount > 0) && Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < 200)) {
+        for (let entity of this.getEntitiesInRange(2, 2, false, true).filter(e => e.type === EntityItemType.FIRE && (e.entityType !== EntityTypes.FURNACE || e.inv.amount > 0) && Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < 200)) {
             if (Utils.distance({ x: this.pos.x - entity.pos.x, y: this.pos.y - entity.pos.y }) < entity.dmgRange) {
                 fire = 2;
                 firedmg = entity.dmg;
@@ -647,7 +647,7 @@ export default class Player extends Entity implements ConsoleSender {
 
     updateCrafting(force: boolean = false) {
         if (!this.craftTimeout) {
-            let entities = this.getEntitiesInRange(1, 1, false, true).filter(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < 200);
+            let entities = this.getEntitiesInRange(2, 2, false, true).filter(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < 200);
             let fire = entities.find(e => e.type === EntityItemType.FIRE && (e.entityType !== EntityTypes.FURNACE || e.inv.amount > 0)) !== undefined;
             let workbench = entities.find(e => e.type === EntityItemType.WORKBENCH) !== undefined;
             if (workbench != this.workbench || force) {
@@ -814,7 +814,7 @@ export default class Player extends Entity implements ConsoleSender {
     }
 
     collision() {
-        let colliders: Collider[] = (this.getMapEntitiesInRange(3, 3) as Collider[]).concat(this.getEntitiesInRange(1, 1, false, true)).filter(e => e.physical && e != this);
+        let colliders: Collider[] = (this.getMapEntitiesInRange(3, 3) as Collider[]).concat(this.getEntitiesInRange(2, 2, false, true)).filter(e => e.physical && e != this);
         let dis: number, vec: Vector, angle: number, angle2: number, collide: boolean, counter = 0;
         while (true) {
             collide = false;

@@ -171,7 +171,7 @@ export class World {
     stime: number = new Date().getTime();
     mode: number = this.modes.survival; //id of mode, probably useless for the moment.
     map: GameMap = new GameMap();
-    hungerClose: number = 480000 * 1;
+    hungerClose: number = 480000 * 3;
     days: number = -0.5;
     timeInterval: any;
     constructor() {
@@ -222,7 +222,7 @@ export class World {
             setTimeout(() => {
                 this._restart();
             }, 5000)
-        }, 5000)
+        }, 7000)
     }
 
     _restart() {

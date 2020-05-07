@@ -16,6 +16,8 @@ export default class DiscordBot {
     }
 
     async checkUser(id: string | number) {
+        return true;
+        /*
         const guild = this.client.guilds.resolve(config.guildId);
         if (!guild)
             throw new Error("Guild " + config.guildId + " not found!");
@@ -33,5 +35,6 @@ export default class DiscordBot {
             console.error("User " + id + " isn't in guild!");
             return false;
         }
+        */
     }
 };

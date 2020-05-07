@@ -43,7 +43,7 @@ app.use(bodyParser.json());
 
 app.use(async (req, res, next) => {
     if (req.url == "/register") {
-        res.redirect("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+        res.redirect("https://discord.gg/cHqX9dg");
         return;
     }
 

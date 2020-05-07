@@ -169,11 +169,11 @@ export class World {
     tickRate: number = 24;
     mobtickRate: number = 8;
     stime: number = new Date().getTime();
-    mode: number = this.modes.hunger; //id of mode, probably useless for the moment.
+    mode: number = this.modes.survival; //id of mode, probably useless for the moment.
     map: GameMap = new GameMap();
-    hungerClose: number = 480000 * 3;
+    hungerClose: number = 480000 * 1;
     days: number = -0.5;
-
+    timeInterval: any;
     constructor() {
         for (let i = 0; i < this.mapSize.x; i++) {
             this.chunks[i] = new Array(this.mapSize.y);
@@ -189,13 +189,67 @@ export class World {
         }
         let otime = this.isDay;
         setTimeout(() => {
-            Utils.setIntervalAsync(async () => {
+            this.timeInterval = Utils.setIntervalAsync(async () => {
                 this.days += 0.5;
                 if (this.isDay != otime) {
                     otime = this.isDay;
                     Utils.broadcastPacket(new Uint8Array([10, this.isDay ? 0 : 1]));
                     if (this.days % 1 === 0 && this.days <= this.hungerClose / 480000 && this.mode === this.modes.hunger) {
-                        let message = this.days === this.hungerClose / 480000 ? 'Player spawning Disabled!' : 'Player spawning will be disabled in ' + (this.hungerClose / 480000 - this.days) + (this.hungerClose / 480000 - this.days === 1 ? ' day!' : 'days');
+                        let message: string;
+                        if (this.days === this.hungerClose / 480000) {
+                            if (this.players.length > 1) {
+                                message = 'Player spawning Disabled!';
+                            } else {
+                                message = 'There is less than 2 players, server will get restarted';
+                                this.restart()
+                            }
+                        } else {
+                            message = 'Player spawning will be disabled in ' + (this.hungerClose / 480000 - this.days) + (this.hungerClose / 480000 - this.days === 1 ? ' day!' : 'days');
+                        }
+                        for (let player of this.players) {
+                            player.sendError(message);
+                        }
+
+                    }
+                }
+            }, 240000);
+        }, 35);
+    }
+
+    restart() {
+        setTimeout(() => {
+            for (let player of this.players) player.sendError('Restarting server in 5 secs!');
+            setTimeout(() => {
+                this._restart();
+            }, 5000)
+        }, 5000)
+    }
+
+    _restart() {
+        Utils.clearIntervalAsync(this.timeInterval);
+        for (let player of this.players) player.die();
+        for (let entities of this.entities) for (let entity of entities) if (entity.entityType !== EntityTypes.FRUIT) entity.die();
+        this.stime = new Date().getTime();
+        this.days = -0.5;
+        let otime = this.isDay;
+        setTimeout(() => {
+            this.timeInterval = Utils.setIntervalAsync(async () => {
+                this.days += 0.5;
+                if (this.isDay != otime) {
+                    otime = this.isDay;
+                    Utils.broadcastPacket(new Uint8Array([10, this.isDay ? 0 : 1]));
+                    if (this.days % 1 === 0 && this.days <= this.hungerClose / 480000 && this.mode === this.modes.hunger) {
+                        let message: string;
+                        if (this.days === this.hungerClose / 480000) {
+                            if (this.players.length > 1) {
+                                message = 'Player spawning Disabled!';
+                            } else {
+                                message = 'There is less than 2 players, server will get restarted';
+                                this.restart();
+                            }
+                        } else {
+                            message = 'Player spawning will be disabled in ' + (this.hungerClose / 480000 - this.days) + (this.hungerClose / 480000 - this.days === 1 ? ' day!' : 'days');
+                        }
                         for (let player of this.players) {
                             player.sendError(message);
                         }

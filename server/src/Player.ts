@@ -300,7 +300,13 @@ export default class Player extends Entity implements ConsoleSender {
                     this.pos.x += this.movVector.x / world.tickRate * fac;
                     this.pos.y += this.movVector.y / world.tickRate * fac;
 
-                    if (!this.spectator) this.collision();
+                    if (!this.spectator) {
+                        this.collision();
+                    } else {
+                        this.pos.x = Math.min(Math.max(0, this.pos.x), world.map.width - 1);
+                        this.pos.y = Math.min(Math.max(0, this.pos.y), world.map.height - 1);
+                    }
+
                     let chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
                     if (this.chunk.x != chunk.x || chunk.y != this.chunk.y) {
                         this.updateChunk(chunk);
@@ -506,6 +512,16 @@ export default class Player extends Entity implements ConsoleSender {
         this.attacking = false;
         this.sendInfos(false);
         Utils.broadcastPacket(new Uint8Array([7, this.pid]));
+
+        if (world.mode === world.modes.hunger && new Date().getTime() - world.stime > world.hungerClose) {
+            let players = world.players.filter(e => !e.spectator);
+            if (players.length === 1) {
+                for (let player of players) player.sendError(player[0].nick + ' is the winner!');
+            }
+            if (players.length <= 1) {
+                world.restart();
+            }
+        }
 
         for (let entity of world.entities[this.pid]) {
             entity.die();

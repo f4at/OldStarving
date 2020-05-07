@@ -172,6 +172,25 @@ export class Commands {
 
                 sender.sendMessage(`Sent message to ${targets.length} players`);
             }
+        }],
+        ["restart", new class extends Command {
+            invoke(sender: CommandSender, args: string[]) {
+                world.restart();
+                sender.sendMessage(`Restarting server!`);
+            }
+        }],
+        ["mode", new class extends Command {
+            invoke(sender: CommandSender, args: string[]) {
+                if (args.length < 2) throw new SyntaxError();
+                if (world.modes[args[1]]) {
+                    sender.sendMessage(`Changing mode to ${args[1]} mode`);
+                    world.mode = world.modes[args[1]];
+                    world.restart();
+                } else {
+                    sender.sendMessage(`Can't find ${args[1]} mode`);
+                }
+
+            }
         }]
     ]);
 

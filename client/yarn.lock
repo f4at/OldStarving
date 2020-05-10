@@ -634,10 +634,10 @@ chalk@2.4.2, chalk@^2.3.0, chalk@^2.4.1:
     escape-string-regexp "^1.0.5"
     supports-color "^5.3.0"
 
-chalk@3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/chalk/-/chalk-3.0.0.tgz#3f73c2bf526591f574cc492c51e2456349f844e4"
-  integrity sha512-4D3B6Wf41KOYRFdszmDqMCGq5VV/uMAB273JILmO+3jAlh8X4qDtdtgCR3fxtbLEMzSx22QdhnDcJvu2u1fVwg==
+chalk@4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/chalk/-/chalk-4.0.0.tgz#6e98081ed2d17faab615eb52ac66ec1fe6209e72"
+  integrity sha512-N9oWFcegS0sFr9oh1oz2d7Npos6vNoWW9HvtCg5N1KRFpUhaAhvTv5Y58g880fZaEYSNm3qDz8SU1UrGvp+n7A==
   dependencies:
     ansi-styles "^4.1.0"
     supports-color "^7.1.0"
@@ -701,10 +701,10 @@ class-utils@^0.3.5:
     isobject "^3.0.0"
     static-extend "^0.1.1"
 
-class-validator@0.11.0:
-  version "0.11.0"
-  resolved "https://registry.yarnpkg.com/class-validator/-/class-validator-0.11.0.tgz#5fca8b8a957c738a6749391e03ee81fad375dc4a"
-  integrity sha512-niAmmSPFku9xsnpYYrddy8NZRrCX3yyoZ/rgPKOilE5BG0Ma1eVCIxpR4X0LasL/6BzbYzsutG+mSbAXlh4zNw==
+class-validator@0.11.1:
+  version "0.11.1"
+  resolved "https://registry.yarnpkg.com/class-validator/-/class-validator-0.11.1.tgz#9033b9ebdc3883e826dfc0c545a45935e3298553"
+  integrity sha512-6CGdjwJLmKw+sQbK5ZDo1v1yTajkqfPOUDWSYVIlhUiCh6Phy8sAnMFE2XKHAcKAdoOz4jJUQhjPQWPYUuHxrA==
   dependencies:
     "@types/validator" "10.11.3"
     google-libphonenumber "^3.1.6"
@@ -1103,7 +1103,12 @@ esrecurse@^4.1.0:
   dependencies:
     estraverse "^4.1.0"
 
-estraverse@4.3.0, estraverse@^4.1.0, estraverse@^4.1.1, estraverse@^4.2.0:
+estraverse@5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/estraverse/-/estraverse-5.0.0.tgz#ac81750b482c11cca26e4b07e83ed8f75fbcdc22"
+  integrity sha512-j3acdrMzqrxmJTNj5dbr1YbjacrYgAxVMeF0gK16E3j494mOe7xygM/ZLIguEQ0ETwAg2hlJCtHRGav+y0Ny5A==
+
+estraverse@^4.1.0, estraverse@^4.1.1, estraverse@^4.2.0:
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/estraverse/-/estraverse-4.3.0.tgz#398ad3f3c5a24948be7725e83d11a7de28cdbd1d"
   integrity sha512-39nnKffWz8xN1BU/2c79n9nB9HDzo0niYUqx6xyqUnyoAnQyyWpOTdZEeiCch8BBu515t4wp9ZmgVfVhn9EBpw==
@@ -1711,28 +1716,28 @@ isobject@^3.0.0, isobject@^3.0.1:
   resolved "https://registry.yarnpkg.com/isobject/-/isobject-3.0.1.tgz#4e431e92b11a9731636aa1f9c8d1ccbcfdab78df"
   integrity sha1-TkMekrEalzFjaqH5yNHMvP2reN8=
 
-javascript-obfuscator@^0.27.2:
-  version "0.27.2"
-  resolved "https://registry.yarnpkg.com/javascript-obfuscator/-/javascript-obfuscator-0.27.2.tgz#942e0531cb1d78fc989b744b3ee5311b0f4f1a87"
-  integrity sha512-ocx1OArrc1DjWO7TSXln8AsEvYwXrhsxpHAWySmeZmetKZW4WKM7kPxjUG7+fiRxmaLKDs+jOaVcj9EvPL/7/w==
+javascript-obfuscator@^0.27.4:
+  version "0.27.4"
+  resolved "https://registry.yarnpkg.com/javascript-obfuscator/-/javascript-obfuscator-0.27.4.tgz#5adbe5a928b2fa175f9d5c4edb537dc3b470a844"
+  integrity sha512-F2qFKmP6w11j8QayQbIDJg2LWRaiaxMFKyFGgE45E/VinvFKrv3ZQjJ/H4ZCYMQP42RZgtH2ZS2TZRw1Re0HBg==
   dependencies:
     "@gradecam/tsenum" "1.2.0"
     "@nuxtjs/opencollective" "0.2.2"
     acorn "7.1.1"
     acorn-import-meta "1.0.0"
-    chalk "3.0.0"
+    chalk "4.0.0"
     chance "1.1.4"
-    class-validator "0.11.0"
+    class-validator "0.11.1"
     commander "5.0.0"
     escodegen "1.14.1"
     eslint-scope "5.0.0"
-    estraverse "4.3.0"
+    estraverse "5.0.0"
     eventemitter3 "4.0.0"
     fast-deep-equal "3.1.1"
     inversify "5.0.1"
     js-string-escape "1.0.1"
     md5 "2.2.1"
-    mkdirp "1.0.3"
+    mkdirp "1.0.4"
     multimatch "4.0.0"
     reflect-metadata "0.1.13"
     source-map-support "0.5.16"
@@ -1999,10 +2004,10 @@ mixin-deep@^1.2.0:
     for-in "^1.0.2"
     is-extendable "^1.0.1"
 
-mkdirp@1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/mkdirp/-/mkdirp-1.0.3.tgz#4cf2e30ad45959dddea53ad97d518b6c8205e1ea"
-  integrity sha512-6uCP4Qc0sWsgMLy1EOqqS/3rjDHOEnsStVr/4vtAIK2Y5i2kA7lFFejYrpIyiN9w0pYf4ckeCYT9f1r1P9KX5g==
+mkdirp@1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/mkdirp/-/mkdirp-1.0.4.tgz#3eb5ed62622756d79a5f0e2a221dfebad75c2f7e"
+  integrity sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==
 
 mkdirp@^0.5.1, mkdirp@^0.5.3:
   version "0.5.4"
@@ -3092,12 +3097,12 @@ webpack-log@^2.0.0:
     ansi-colors "^3.0.0"
     uuid "^3.3.2"
 
-webpack-obfuscator@^0.27.2:
-  version "0.27.2"
-  resolved "https://registry.yarnpkg.com/webpack-obfuscator/-/webpack-obfuscator-0.27.2.tgz#e8cd2950a933f3891832222da6fee7f7f09e27d7"
-  integrity sha512-bjj1yyefRv3Voc92Yle/pHEar82y88hsdDIXQpYXTKzXmu2PK2kDEfrz9+ajacmp4LzE+QT30fi8avMaSnflEg==
+webpack-obfuscator@^0.27.4:
+  version "0.27.4"
+  resolved "https://registry.yarnpkg.com/webpack-obfuscator/-/webpack-obfuscator-0.27.4.tgz#697a1d36412b31b3838cf305b06e071695d7180d"
+  integrity sha512-9XGmF2dELB+ST1a7XUaGjbAhZVEIhU0ECvxWL2EBYb7LmoHIaQrdP/ESgQuw0Cxr4vR8fmDYAlpAv2guQLeiIw==
   dependencies:
-    javascript-obfuscator "^0.27.2"
+    javascript-obfuscator "^0.27.4"
     multi-stage-sourcemap "^0.2.1"
     multimatch "^2.1.0"
     webpack-sources "^1.3.0"

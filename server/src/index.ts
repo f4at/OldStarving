@@ -4,7 +4,6 @@ import * as http from "http";
 import world from "./World";
 import Player from "./Player";
 import { Items, EntityItem } from "./Item";
-import express from 'express';
 import Entity, { EntityState, EntityTypes, EntityType } from "./Entity";
 import fetch from 'node-fetch';
 import config from "../config";
@@ -107,9 +106,6 @@ export abstract class Utils {
 
 world.map.loadFromFile("./map.json");
 
-const app = express();
-
-
 let [hostname, port] = config.address.split(":");
 
 const server = (config.ssl ? https.createServer({
@@ -140,7 +136,7 @@ Utils.setIntervalAsync(async () => {
 }, 2177);
 
 Utils.setIntervalAsync(async () => {
-    let entities = [{ e: EntityTypes.WOLF, m: 25, p: 0.2 }, { e: EntityTypes.RABBIT, m: 10, p: 0.2 }, { e: EntityTypes.SPIDER, m: 20, p: 0.2 }, { e: EntityTypes.FOX, m: 40, p: 0.2 }, { e: EntityTypes.BEAR, m: 25, p: 0.2 }, { e: EntityTypes.DRAGON, m: 4, p: 0.04 }];
+    let entities = [{ e: EntityTypes.WOLF, m: 30, p: 0.2 }, { e: EntityTypes.RABBIT, m: 13, p: 0.2 }, { e: EntityTypes.SPIDER, m: 25, p: 0.2 }, { e: EntityTypes.FOX, m: 50, p: 0.3 }, { e: EntityTypes.BEAR, m: 25, p: 0.4 }, { e: EntityTypes.DRAGON, m: 4, p: 0.04 }];
     for (let entity of entities) {
         (function (entity: any) {
             let r = world.entities[0].filter(e => e.entityType == entity.e).length;
@@ -153,7 +149,6 @@ Utils.setIntervalAsync(async () => {
         })(entity);
     }
 }, 15570);
-
 
 console.log('version Number', 1);
 
@@ -170,7 +165,7 @@ wss.on("connection", (ws, req) => {
                     if (typeof data[0] === "string") {
 
                         const response = await fetch(config.api + "/api/verify", {
-                            method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ accountId: data[2], server: 0 })
+                            method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ accountId: data[2], port: port, ip: config.ip })
                         });
                         if (response.status !== 200) {
                             ws.send(JSON.stringify([1, "Authentication failed"]));
@@ -294,6 +289,12 @@ wss.on("connection", (ws, req) => {
 
 wss.on("listening", () => {
     console.log("Started WebSocket server");
+
+    Utils.setIntervalAsync(async () => {
+        const response = await fetch(config.api + "/api/serverupdate", {
+            method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: config.apikey, name: config.name, online: world.players.length, max: config.maxPlayers, ip: config.ip, port: port, ssl: config.ssl ? true : false })
+        });
+    }, 30000);
 
     const rl = readline.createInterface({
         input: process.stdin,

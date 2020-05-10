@@ -4,10 +4,8 @@ export class ModdedStarving {
 
     async initialize() {
         console.log(`ModdedStarving v${this.version} initializing`);
-
         const promises = [];
-        // promises.push(this.loadMod(await import("./mods/AmethystHelmet")));
-
+        promises.push(import("./mods/AmethystHelmet").then(mod => this.loadMod(mod)));
         return Promise.all(promises);
     }
 
@@ -30,7 +28,7 @@ export class ModdedStarving {
     }
 }
 
-export type ModEvent = "start" | "load" | "registry_init" | "sprite" | "draw_clothe" | "select_inv";
+export type ModEvent = "start" | "load" | "registry_init" | "sprite" | "draw_clothe" | "select_inv" | "buttons";
 
 export abstract class Mod {
     client: any;

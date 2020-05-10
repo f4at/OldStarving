@@ -18,6 +18,8 @@ import Server from './Server';
 const bot = new DiscordBot();
 bot.start();
 
+const counters = { playersCounter: 0 };
+
 app.engine('handlebars', exphbs.create().engine);
 app.set('view engine', 'handlebars');
 app.set('trust proxy', true);
@@ -35,6 +37,24 @@ if (config.redis) {
     sessionOptions.store = new RedisStore({ client: redisClient });
 }
 
+abstract class Utils {
+    static strings: String[] = [];
+    static chars: String = '0123456789abcedfghejklmnopqrstuvwyzABCDEFGHEJKLMNEPQRSTUVWYZ';
+    static randomString(x: number, d: boolean = true) {
+        let str = '';
+        while (true) {
+            for (let i = 0; i < x; i++) {
+                str += this.chars.charAt(Math.floor(Math.random() * this.chars.length));
+            }
+            if (!this.strings.includes(str)) {
+                this.strings.push(str);
+                break;
+            }
+        }
+        return str;
+    }
+}
+
 app.use(session(sessionOptions));
 
 app.use(cookieParser());
@@ -46,29 +66,50 @@ app.use(async (req, res, next) => {
         res.redirect("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
         return;
     }
-
-    if (req.session.accessToken == null || req.session.user == null) {
-        if (!req.url.startsWith("/login") && !req.url.startsWith("/api")) {
-            res.redirect("/login");
-            return;
-        }
-    } else {
-        const authorized = await bot.checkUser(req.session.user.id);
-        if (!authorized) {
-            if (!req.url.startsWith("/unauthorized")) {
-                res.redirect("/unauthorized");
+    if (config.discord || req.session.accessToken) {
+        if (req.session.accessToken == null || req.session.user == null) {
+            if (!req.url.startsWith("/login") && !req.url.startsWith("/api")) {
+                res.redirect("/login");
                 return;
             }
         } else {
-            res.cookie('starve_nickname', `${req.session.displayName}`, { maxAge: 900000 });
-            res.cookie('account_id', `${req.session.user.id}`, { maxAge: 900000 });
-            res.cookie('session_id', `${req.session.id}`, { maxAge: 900000 });
+            const authorized = await bot.checkUser(req.session.user.id);
+            if (!authorized) {
+                if (!req.url.startsWith("/unauthorized")) {
+                    res.redirect("/unauthorized");
+                    return;
+                }
+            } else {
+                //res.cookie('starve_nickname', `${req.session.displayName}`);
+                res.cookie('account_id', `${req.session.user.id}`);
+                res.cookie('session_id', `${req.session.id}`);
+
+                if (req.url == "/") {
+                    console.log(`${req.session.displayName} (${req.session.user.id}) logged from ${req.ip}`);
+                }
+            }
+        }
+    } else {
+        if (!req.session.user) {
+            if (!req.url.startsWith("/api")) {
+                counters.playersCounter += 1;
+                req.session.displayName = `Player#${counters.playersCounter}`;
+                req.session.user = { id: Utils.randomString(16) };
+                res.cookie('starve_nickname', `${req.session.displayName}`);
+                res.cookie('account_id', `${req.session.user.id}`);
+                res.cookie('session_id', `${req.session.id}`);
+            }
+        } else {
+            //res.cookie('starve_nickname', `${req.session.displayName}`);
+            res.cookie('account_id', `${req.session.user.id}`);
+            res.cookie('session_id', `${req.session.id}`);
 
             if (req.url == "/") {
                 console.log(`${req.session.displayName} (${req.session.user.id}) logged from ${req.ip}`);
             }
         }
     }
+
     next();
 });
 
@@ -77,16 +118,14 @@ app.use(express.static('./public'));
 
 const servers: Server[] = [];
 
-if (config.debugServer) {
-    for (let server of config.debugServer) {
-        servers.push(server);
-    }
+for (let server of config.debugServer) {
+    servers.push(server);
 }
 
 app.get('/servers', function (req, res) {
     res.setHeader("access-control-allow-origin", "*");
     res.setHeader("content-type", "application/json");
-    res.end(JSON.stringify(servers, (key, value) => key === "joiningPlayers" ? undefined : value));
+    res.end(JSON.stringify(servers.filter(e => new Date().getTime() - e.lastupdate > 61), (key, value) => key === "joiningPlayers" || key === "lastupdate" ? undefined : value));
 });
 
 app.get("/unauthorized", async (req, res) => {
@@ -113,15 +152,30 @@ app.post("/api/join", async (req, res) => {
     res.status(200).send();
 });
 
+app.post("/api/serverupdate", async (req, res) => {
+    if (config.apiKeys.includes(req.body.key)) {
+        let server = servers.find(x => x.ip == req.body.ip && x.port == req.body.port);
+        if (server) {
+            server.players.online = req.body.online;
+            server.players.max = req.body.max;
+            server.name = req.body.name;
+            server.lastupdate = new Date().getTime();
+        } else {
+            servers.push(new Server(servers.length.toString(), req.body.name, req.body.online, req.body.max, req.body.ip, req.body.port, req.body.ssl));
+        }
+        res.status(200).send();
+    }
+});
+
 app.post("/api/verify", async (req, res) => {
-    const server = servers.find(x => x.id == req.body.server);
-    if (server === null || !server.joiningPlayers.has(req.body.accountId)) {
+    const server = servers.find(x => x.ip == req.body.ip && x.port == req.body.port);
+    if (server === undefined || !server.joiningPlayers.has(req.body.accountId)) {
         res.status(401).send();
         return;
     }
 
     const time = new Date().getTime() - server.joiningPlayers.get(req.body.accountId).getTime();
-    console.log(`Server #${req.body.server} verified player ${req.body.accountId} (${time}ms)`);
+    console.log(`Server #${server.id} verified player ${req.body.accountId} (${time}ms)`);
     res.status(time < 5000 ? 200 : 401).send();
 });
 

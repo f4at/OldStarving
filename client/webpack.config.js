@@ -41,7 +41,7 @@ module.exports = (env, argv) => {
             deadCodeInjectionThreshold: 0.4,
             debugProtection: false,
             debugProtectionInterval: false,
-            disableConsoleOutput: true,
+            disableConsoleOutput: false,
             identifierNamesGenerator: 'hexadecimal',
             log: false,
             renameGlobals: false,

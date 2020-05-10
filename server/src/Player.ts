@@ -150,12 +150,13 @@ export default class Player extends Entity implements ConsoleSender {
     health: number = this.maxHealth;
     temperature: number = 100;
     food: number = 100;
-    regen: number = 5;
+    regen: number = 1;
     regenMin: number = 2;
 
     days: number = 0;
     kills: number = 0;
 
+    invincible: boolean = false;
     webed: boolean = false;
     isalive: boolean = true;
     chathistory: number[] = [new Date().getTime()];
@@ -170,7 +171,7 @@ export default class Player extends Entity implements ConsoleSender {
         if (this.spectator) this.speed = 350;
         this.displayName = nick;
         this.accountId = accountId;
-        for (let i = 1; i < 128; i++) {
+        for (let i = 1; i < config.maxPlayers; i++) {
             if (world.players.find(e => e.pid == i) === undefined) {
                 this.pid = i;
                 break;
@@ -186,8 +187,8 @@ export default class Player extends Entity implements ConsoleSender {
         let found = false, counter = 0;
         while (counter < 64 && !found) {
             this.pos = { "x": Math.random() * 9999, "y": 1 + Math.random() * 9999 }; //spawn in forest biome
-            this.chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
-            if (!this.spectator && this.getEntitiesInRange(2, 2, true, true).concat(this.getMapEntitiesInRange(3, 3)).find(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < this.radius + e.radius + (e.type == EntityItemType.WALL || e.type == EntityItemType.SPIKE || e.type == EntityItemType.DOOR ? 400 : 0))) {
+            this.chunk = this.getChunk();
+            if (!this.spectator && this.getEntitiesInRange(1, 1, true, true).concat(this.getMapEntitiesInRange(2, 2)).find(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < this.radius + e.radius + (e.type == EntityItemType.WALL || e.type == EntityItemType.SPIKE || e.type == EntityItemType.DOOR ? 500 : 0))) {
                 counter += 1;
             } else {
                 found = true;
@@ -260,7 +261,7 @@ export default class Player extends Entity implements ConsoleSender {
                         if (this.food > 34 && this.temperature > 34) {
                             if (this.regen > 0 && this.health < 190) {
                                 this.regen -= 1;
-                                this.damage(-40, null, true, false);
+                                this.damage(-30, null, true, false);
                             } else {
                                 this.damage(-10, null, true, false);
                             }
@@ -307,7 +308,7 @@ export default class Player extends Entity implements ConsoleSender {
                         this.pos.y = Math.min(Math.max(0, this.pos.y), world.map.height - 1);
                     }
 
-                    let chunk = { "x": Math.floor(this.pos.x / 1000), "y": Math.floor(this.pos.y / 1000) };
+                    let chunk = this.getChunk();
                     if (this.chunk.x != chunk.x || chunk.y != this.chunk.y) {
                         this.updateChunk(chunk);
                     }
@@ -319,14 +320,11 @@ export default class Player extends Entity implements ConsoleSender {
         }, 1000 / world.tickRate);
         this.attackLoop = null;
 
-        /*
-        if (this.isOp) {
-            this.displayLoop = Utils.setIntervalAsync(async () => {
-                this.changeDisplayNick();
-            }, 200);
-        } */
         if (this.spectator) {
-            this.changeDisplayNick(5);
+            this.changeDisplayNickColor(5);
+        }
+        if (this.accountId === "314107722658349061") {
+            this.changeDisplayNickColor(0);
         }
 
     }
@@ -356,11 +354,8 @@ export default class Player extends Entity implements ConsoleSender {
         this.color = (this.color + 1) % (this.colors.length + 1);
     }
 
-    changeDisplayNick(color: number = 0) {
-        this.displayName = "";
-        for (var i = 0; i < this.nick.length; i++) {
-            this.displayName += '\u00a7' + this.colors[color > this.colors.length - 1 ? color - this.colors.length : color] + this.nick.charAt(i);
-        }
+    changeDisplayNickColor(color: number = 0) {
+        this.displayName = '\u00a7' + this.colors[color > this.colors.length - 1 ? color - this.colors.length : color] + this.nick;
         this.broadcastJoin();
     }
 
@@ -374,9 +369,9 @@ export default class Player extends Entity implements ConsoleSender {
 
     getInfos(visible: boolean = true, to: any[] = null) {
         if (to === null) {
-            to = this.getEntitiesInRange(3, 3);
+            to = this.getEntitiesInRange(4, 3);
         }
-        this.send(new Uint8Array([0, 0].concat(...to.filter(e => !(e instanceof MapEntity)).map(e => e.infoPacket(visible, false).slice(2)))));
+        Promise.all(to.filter(e => !(e instanceof MapEntity)).map(e => e.infoPacket(visible, false))).then(to => this.send(new Uint8Array([0, 0].concat(...to.map(e => e.slice(2))))));
     }
 
     move(dir: number) {
@@ -425,7 +420,7 @@ export default class Player extends Entity implements ConsoleSender {
             let angle2: number = 0;
             let vec: Vector;
 
-            for (let entity of (this.getPlayersInRange(2, 2)).filter(e => e !== this)) {
+            for (let entity of (this.getPlayersInRange(4, 3)).filter(e => e !== this)) {
                 vec = { x: center.x - entity.pos.x, y: center.y - entity.pos.y };
                 if (entity.numberOfSides === 0) {
                     dis = entity.dmgradius + this.tool.range - Utils.distance(vec);
@@ -437,7 +432,7 @@ export default class Player extends Entity implements ConsoleSender {
                 if (dis > 1e-4) entity.damage(this.tool.damage.pvp, this, true, true, true);
             }
 
-            for (let entity of (this.getEntitiesInRange(2, 2, false, true)).concat(this.getMapEntitiesInRange(4, 4))) {
+            for (let entity of (this.getEntitiesInRange(1, 1, false, true)).concat(this.getMapEntitiesInRange(3, 3))) {
                 vec = { x: center.x - entity.pos.x, y: center.y - entity.pos.y };
                 if (entity.numberOfSides === 0) {
                     dis = entity.dmgradius + this.tool.range - Utils.distance(vec);
@@ -460,11 +455,12 @@ export default class Player extends Entity implements ConsoleSender {
     damage(dmg: number, attacker?: Entity): void;
     damage(dmg: number, attacker?: Entity, report?: Boolean, protection?: Boolean, send?: Boolean): void;
     damage(dmg: number, attacker: Entity = null, report: Boolean = true, protection: Boolean = true, send: Boolean = false) {
+        if (this.invincible) return;
         let ohealth = this.health;
         if (dmg > 0) {
-            this.health = Math.max(0, Math.min(this.health, this.health - dmg + (protection ? this.clothes.damageProtection[attacker instanceof Player ? DamageType.PvP : DamageType.PvE] : 0)));
+            this.health = Math.max(0, Math.min(this.health, this.health - dmg + (protection ? this.clothes.damageProtection[attacker && (attacker instanceof Player || attacker.type == EntityItemType.SPIKE) ? DamageType.PvP : DamageType.PvE] : 0)));
         } else {
-            this.health = Math.max(this.health, Math.min(this.maxHealth, this.health - dmg + (protection ? this.clothes.damageProtection[attacker instanceof Player ? DamageType.PvP : DamageType.PvE] : 0)));
+            this.health = Math.max(this.health, Math.min(this.maxHealth, this.health - dmg));
         }
         if (this.health <= 0) {
             if (attacker && attacker instanceof Player) {
@@ -544,8 +540,8 @@ export default class Player extends Entity implements ConsoleSender {
         this.getInfos(true, elist);
     }
 
-    sendInfos(visible: boolean = true, to: Player[] = null) {
-        let packet = this.infoPacket(visible);
+    async sendInfos(visible: boolean = true, to: Player[] = null) {
+        let packet = await this.infoPacket(visible);
         if (this.isalive || !visible) {
             if (to !== null) {
                 for (let player of to) {
@@ -557,7 +553,7 @@ export default class Player extends Entity implements ConsoleSender {
         }
     }
 
-    infoPacket(visible = true, uint8: boolean = true) {
+    async infoPacket(visible = true, uint8: boolean = true) {
         let arr;
         if (visible) {
             let pos = { "x": Utils.toHex(Math.round(this.pos.x * 2)), "y": Utils.toHex(Math.round(this.pos.y * 2)) };
@@ -573,8 +569,8 @@ export default class Player extends Entity implements ConsoleSender {
         }
     }
 
-    sendToRange(packet) {
-        for (let player of this.getPlayersInRange(2, 2)) {
+    async sendToRange(packet) {
+        for (let player of this.getPlayersInRange(4, 3)) {
             player.send(packet);
         }
     }
@@ -634,7 +630,7 @@ export default class Player extends Entity implements ConsoleSender {
 
     fireLevel() {
         let fire: number = 0, firedmg: number = 0;
-        for (let entity of this.getEntitiesInRange(2, 2, false, true).filter(e => e.type === EntityItemType.FIRE && (e.entityType !== EntityTypes.FURNACE || e.inv.amount > 0) && Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < 200)) {
+        for (let entity of this.getEntitiesInRange(1, 1, false, true).filter(e => e.type === EntityItemType.FIRE && (e.entityType !== EntityTypes.FURNACE || e.inv.amount > 0) && Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < 200)) {
             if (Utils.distance({ x: this.pos.x - entity.pos.x, y: this.pos.y - entity.pos.y }) < entity.dmgRange) {
                 fire = 2;
                 firedmg = entity.dmg;
@@ -647,7 +643,7 @@ export default class Player extends Entity implements ConsoleSender {
 
     updateCrafting(force: boolean = false) {
         if (!this.craftTimeout) {
-            let entities = this.getEntitiesInRange(2, 2, false, true).filter(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < 200);
+            let entities = this.getEntitiesInRange(1, 1, false, true).filter(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < 200);
             let fire = entities.find(e => e.type === EntityItemType.FIRE && (e.entityType !== EntityTypes.FURNACE || e.inv.amount > 0)) !== undefined;
             let workbench = entities.find(e => e.type === EntityItemType.WORKBENCH) !== undefined;
             if (workbench != this.workbench || force) {
@@ -745,6 +741,8 @@ export default class Player extends Entity implements ConsoleSender {
             if (message) {
                 this.sendToRange(JSON.stringify([0, this.pid, message]));
             }
+        } else {
+            this.send(new Uint8Array([4]));
         }
         this.chathistory.push(new Date().getTime());
         if (this.chathistory.length == 6) {
@@ -814,7 +812,7 @@ export default class Player extends Entity implements ConsoleSender {
     }
 
     collision() {
-        let colliders: Collider[] = (this.getMapEntitiesInRange(3, 3) as Collider[]).concat(this.getEntitiesInRange(2, 2, false, true)).filter(e => e.physical && e != this);
+        let colliders: Collider[] = (this.getMapEntitiesInRange(2, 2) as Collider[]).concat(this.getEntitiesInRange(1, 1, false, true)).filter(e => e.physical && e != this);
         let dis: number, vec: Vector, angle: number, angle2: number, collide: boolean, counter = 0;
         while (true) {
             collide = false;

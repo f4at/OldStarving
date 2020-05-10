@@ -48,12 +48,24 @@ export function start(ModdedStarving: ModdedStarving) {
             },
             "keyboard": (e) => {
                 if (e.length == 1) {
-                    if (e[0].toLowerCase() === 'azerty' && keyboard.type != keyboard.types['azerty']) {
-                        keyboard.set_azerty();
-                        gameConsole.addMessage(`<span style='color: green;'>Keyboard switched to AZERTY!</span>`);
-                    } else if (e[0].toLowerCase() === 'qwerty' && keyboard.type != keyboard.types['qwerty']) {
-                        keyboard.set_qwerty();
-                        gameConsole.addMessage(`<span style='color: green;'>Keyboard switched to QWERTY!</span>`);
+                    if (e[0].toLowerCase() === 'azerty') {
+                        if (keyboard.type != keyboard.types['azerty']) {
+                            keyboard.set_azerty();
+                            gameConsole.addMessage(`<span style='color: green;'>Keyboard switched to AZERTY!</span>`);
+                        } else {
+                            keyboard.set_azerty();
+                            gameConsole.addMessage(`<span style='color: red;'>Keyboard is already AZERTY!</span>`);
+                        }
+
+                    } else if (e[0].toLowerCase() === 'qwerty') {
+                        if (keyboard.type != keyboard.types['qwerty']) {
+                            keyboard.set_qwerty();
+                            gameConsole.addMessage(`<span style='color: green;'>Keyboard switched to QWERTY!</span>`);
+                        } else {
+                            keyboard.set_qwerty();
+                            gameConsole.addMessage(`<span style='color: red;'>Keyboard is already QWERTY!</span>`);
+                        }
+
                     }
                 }
             }
@@ -502,9 +514,10 @@ export function start(ModdedStarving: ModdedStarving) {
             this.LEFT = 81;
             this.RIGHT = 68;
             this.TOP = 90;
-            this.DOWN = 83;
+            this.BOTTOM = 83;
             this.CONSOLE = 222;
             this.type = this.types['azerty'];
+            Cookies.set("starve_keyboard", '1');
         };
         this.set_qwerty = function () {
             this.LEFT = 65;
@@ -513,6 +526,7 @@ export function start(ModdedStarving: ModdedStarving) {
             this.BOTTOM = 83;
             this.CONSOLE = 192;
             this.type = this.types['qwerty'];
+            Cookies.set("starve_keyboard", '0');
         };
         this.spectator = 80;
         this.console1 = 192;
@@ -538,7 +552,8 @@ export function start(ModdedStarving: ModdedStarving) {
         this.V = 86;
         this.B = 66;
 
-        this.set_qwerty();
+        parseInt(Cookies.get("starve_keyboard")) ? this.set_azerty() : this.set_qwerty();
+
         this.keys = Array(255).fill(this.UP);
         this.up = function (c) {
             this.keys[Math.min(c.charCode || c.keyCode, 255)] = this.UP;
@@ -2773,7 +2788,7 @@ export function start(ModdedStarving: ModdedStarving) {
         return g;
     }
 
-    function create_text(c, g, f, d, e?, m?, p?, n?, r?, u?, q?) {
+    function create_text(c, g, f, d, e?, m?, p?, n?, r?, u?, q?, l = 0) {
         const formatted = formatText(g);
         g = formatted.fullText;
 
@@ -2784,13 +2799,13 @@ export function start(ModdedStarving: ModdedStarving) {
         t.font = z + "px Baloo Paaji";
         n *= c;
         var A = p ? 2 * n : 0;
-        r = r ? Math.min(t.measureText(g).width + 2 * c + A, r) : t.measureText(g).width + 2 * c + A;
-        z = (z + m) * c + A;
+        r = r ? Math.min(t.measureText(g).width + 2 * c + A, r) : t.measureText(g).width + 2 * c + A + l;
+        z = (z + m) * c + A + l;
         v.width = r;
         v.height = z;
         if (p) {
             t.fillStyle = p;
-            round_rect(t, 0, 0, r, z, 2 * n);
+            round_rect(t, l / 2, 0, r, z, 2 * n);
             t.fill();
             t.translate(n, n);
         }
@@ -2799,17 +2814,17 @@ export function start(ModdedStarving: ModdedStarving) {
         if (e) {
             t.beginPath();
             t.fillStyle = e;
-            t.fillText(g, 0, z / 2 + m - A / 2, r);
+            t.fillText(g, l / 2, z / 2 + m - A / 2, r);
         }
         t.beginPath();
         if (u) {
             t.strokeStyle = u;
             t.lineWidth = q;
-            strokeMixedText(t, formatted, 0, (z - A) / 2, r);
+            strokeMixedText(t, formatted, l / 2, (z - A) / 2, r);
             // t.strokeText(g, 0, (z - A) / 2, r);
         }
         t.fillStyle = d;
-        fillMixedText(t, formatted, 0, (z - A) / 2, r);
+        fillMixedText(t, formatted, l / 2, (z - A) / 2, r);
         // t.fillText(g, 0, (z - A) / 2, r);
         v.text = g;
         return v;
@@ -8041,7 +8056,9 @@ export function start(ModdedStarving: ModdedStarving) {
         sprite[SPRITE.VIEW_SPECTATORS] = create_text(1, "Show spectators", 25, "#FFF", void 0, void 0, "#000", 5, 210);
         ModdedStarving.on("sprite", {
             SPRITE,
-            sprite
+            sprite,
+            create_gear,
+            create_craft_button
         });
     }
 
@@ -8779,8 +8796,11 @@ export function start(ModdedStarving: ModdedStarving) {
                     draw_image_transition(g, -g.width / 2, -g.height / 2 - 2 * scale);
             }
             ModdedStarving.on("draw_clothe", {
-                id: c,
-                sprite: g
+                c,
+                world,
+                sprite,
+                draw_image_transition,
+                scale
             });
         }
     };
@@ -8908,9 +8928,9 @@ export function start(ModdedStarving: ModdedStarving) {
         if (this.text) {
             ctx.globalAlpha = this.timeout.o ? 1 - this.timeout.v : 1;
             if (!this.label) {
-                this.label = create_text(scale, this.text, 40, c, null, null, g, 10);
+                this.label = create_text(scale, this.text, 40, c, null, null, g, 10, undefined, '#000', 10, 50);
             }
-            ctx.drawImage(this.label, (can.width - this.label.width) / 2, 50 * scale);
+            ctx.drawImage(this.label, (can.width - this.label.width) / 2, 50 * scale - 25);
             ctx.globalAlpha = 1;
             if (this.timeout.update() && this.timeout.o == 0) {
                 this.text = "";
@@ -10097,7 +10117,10 @@ export function start(ModdedStarving: ModdedStarving) {
                 case INV.DIAMOND_HELMET:
                     this.socket.send(JSON.stringify([5, c]));
             }
-            ModdedStarving.on("select_inv");
+            ModdedStarving.on("select_inv", {
+                c,
+                socket: this.socket
+            });
         };
         this.delete_inv = function (c, f) {
             user.inv.delete_item(c, f);
@@ -11961,6 +11984,7 @@ export function start(ModdedStarving: ModdedStarving) {
                 this.style.top = Math.floor(this.translate.y) + "px";
             }
         };
+        /*
         this.wiki = {
             id: document.getElementById("wiki"),
             style: document.getElementById("wiki").style,
@@ -11972,7 +11996,7 @@ export function start(ModdedStarving: ModdedStarving) {
                 this.style.left = this.translate.x + "px";
                 this.style.top = Math.floor(this.translate.y) + "px";
             }
-        };
+        };*/
         this.play = gui_create_button(0, 0, "", sprite[SPRITE.PLAY]);
         var d = 0;
         var e = function () {
@@ -12004,7 +12028,7 @@ export function start(ModdedStarving: ModdedStarving) {
                 f.creation.style.display = "none";
                 f.sidebox.style.display = "none";
                 f.discord.style.display = "none";
-                f.wiki.style.display = "none";
+                //f.wiki.style.display = "none";
                 f.stop();
                 m();
             } else {
@@ -12022,7 +12046,7 @@ export function start(ModdedStarving: ModdedStarving) {
             f.creation.style.display = "inline-block";
             f.sidebox.style.display = "inline-block";
             f.discord.style.display = "inline-block";
-            f.wiki.style.display = "inline-block";
+            //f.wiki.style.display = "inline-block";
             f.waiting = false;
             f.is_run = true;
             p = -1;
@@ -12030,24 +12054,24 @@ export function start(ModdedStarving: ModdedStarving) {
             e();
         };
         this.update = function () {
-            this.logo.translate.x = (this.can.width - this.logo.width) / 2 - 20;
+            this.logo.translate.x = (this.can.width - this.logo.width) / 2 - 25;
             this.logo.translate.y = Math.max((this.can.height - this.logo.height) / 2 - 100, 20);
             this.play.info.translate.x = (this.can.width - this.play.info.img[0].width) / 2;
-            this.play.info.translate.y = Math.max((this.can.height - this.logo.img.height) / 2 - 100, 20) + 380;
+            this.play.info.translate.y = Math.max((this.can.height - this.logo.img.height) / 2 - 100, 20) + 370;
             this.loading.translate.x = (this.can.width - this.loading.img.width) / 2;
             this.loading.translate.y = this.play.info.translate.y - 42 * scale;
             this.nickname.translate.x = (this.can.width - 300) / 2;
             this.nickname.translate.y = this.play.info.translate.y - 95;
             this.server_list.translate.x = (this.can.width - 300) / 2;
-            this.server_list.translate.y = this.play.info.translate.y - 48;
+            this.server_list.translate.y = this.play.info.translate.y - 53;
             this.creation.translate.x = 10;
             this.creation.translate.y = 5;
             this.sidebox.translate.x = this.can.width - 255;
             this.sidebox.translate.y = 0;
             this.discord.translate.x = this.can.width - 447;
             this.discord.translate.y = -25;
-            this.wiki.translate.x = this.can.width - 507;
-            this.wiki.translate.y = -25;
+            //this.wiki.translate.x = this.can.width - 507;
+            //this.wiki.translate.y = -25;
             if (d != 30 || p != -1) {
                 var c = 0;
                 if (d != 30) {
@@ -12064,14 +12088,14 @@ export function start(ModdedStarving: ModdedStarving) {
                 this.sidebox.translate.y -= c;
                 this.discord.translate.y -= 0 < c ? c : -c;
                 this.creation.translate.y -= 0 < c ? c : -c;
-                this.wiki.translate.y -= 0 < c ? c : -c;
+                //this.wiki.translate.y -= 0 < c ? c : -c;
             }
             this.nickname.update();
             this.server_list.update();
             this.creation.update();
             this.sidebox.update();
             this.discord.update();
-            this.wiki.update();
+            //this.wiki.update();
         };
         this.effect = function () {
             gui_breath_effect(this.logo);
@@ -12096,7 +12120,7 @@ export function start(ModdedStarving: ModdedStarving) {
         this.draw_please = function () {
             this.ctx.fillStyle = "white";
             this.ctx.font = "30px Comic Sans MS";
-            const text = "LOOOOOOOOOOOOOOOOL";
+            const text = "|-|";
             const size = this.ctx.measureText(text);
             const x = 150;
             const y = 150;
@@ -12564,6 +12588,14 @@ export function start(ModdedStarving: ModdedStarving) {
         this.craft_buttons[CRAFT.CAP_SCARF].id = CRAFT.CAP_SCARF;
         this.craft_buttons[CRAFT.BLUE_CORD] = gui_create_button(0, 0, "", sprite[SPRITE.CRAFT_BLUE_CORD]);
         this.craft_buttons[CRAFT.BLUE_CORD].id = CRAFT.BLUE_CORD;
+        let craft_buttons = this.craft_buttons, chest_buttons = this.chest_buttons, inv_buttons = this.inv_buttons;
+        ModdedStarving.on("buttons", {
+            sprite,
+            gui_create_button,
+            craft_buttons: this.craft_buttons,
+            inv_buttons: this.inv_buttons,
+            chest_buttons: this.chest_buttons
+        });
         this.update_craft_buttons = function () {
             var c = user.craft.can_craft;
             var d = 10;
@@ -12875,7 +12907,7 @@ export function start(ModdedStarving: ModdedStarving) {
     var user;
     window.onbeforeunload = function () {
         if (game.is_run) {
-            return "Are you sure you want quit starve.io ;-; ?";
+            return "Are you sure you want quit oldstarve.io ;-; ?";
         }
     };
     var client = new Client;
@@ -12941,5 +12973,5 @@ export function start(ModdedStarving: ModdedStarving) {
         f.appendChild(d);
     }
 
-    var ___adsvid = 1 ;
+    var ___adsvid = 1;
 }

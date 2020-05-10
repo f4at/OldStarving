@@ -42,6 +42,8 @@ export abstract class Command {
     }
 }
 
+const KITS = { "PVP": [[Items.BAG, 1], [Items.SWORD_AMETHYST, 1], [Items.AMETHYST_HELMET, 1], [Items.GOLD_SPIKE, 20], [Items.COOKED_MEAT, 200], [Items.FIRE, 10], [Items.BOOK, 1], [Items.HAMMER_AMETHYST, 1], [Items.CAP_SCARF, 1]] };
+
 export class Commands {
     static commands: Map<string, Command> = new Map([
         ["help", new class extends Command {
@@ -76,12 +78,35 @@ export class Commands {
                 let amount = (args.length >= 3 ? Number(args[3]) : NaN) || 1;
                 let id = Number(args[2]);
                 let item = Items.get(isNaN(id) ? args[2].toUpperCase() : id);
-
-                for (const target of targets) {
-                    target.gather(item, amount);
+                if (!item) {
+                    let items = KITS[args[2].toUpperCase()];
+                    if (items) {
+                        for (let i = 0; i < amount; i++) {
+                            for (let item of items) {
+                                for (const target of targets) {
+                                    if (item[0] == Items.BAG) {
+                                        target.bag = true;
+                                        target.updating = true;
+                                    } else {
+                                        target.gather(item[0], item[1]);
+                                    }
+                                }
+                            }
+                        }
+                        sender.sendMessage(`Given x${amount} ${args[2].toUpperCase()} kit to ${targets.length} players`);
+                    }
+                } else {
+                    for (const target of targets) {
+                        if (item == Items.BAG) {
+                            target.bag = true;
+                            target.updating = true;
+                        } else {
+                            target.gather(item, amount);
+                        }
+                    }
+                    sender.sendMessage(`Given x${amount} ${item.name} to ${targets.length} players`);
                 }
 
-                sender.sendMessage(`Given x${amount} ${item.name} to ${targets.length} players`);
             }
         }],
         ["tp", new class extends Command {
@@ -106,6 +131,7 @@ export class Commands {
                     for (let target of targets) {
                         target.pos.x = x;
                         target.pos.y = y;
+                        target.updateChunk(target.getChunk());
                         target.sendInfos();
                     }
                     sender.sendMessage(`Teleported ${targets.length} players to x ${x}, y ${y}`);
@@ -184,12 +210,28 @@ export class Commands {
                 if (args.length < 2) throw new SyntaxError();
                 if (world.modes[args[1]]) {
                     sender.sendMessage(`Changing mode to ${args[1]} mode`);
-                    world.mode = world.modes[args[1]];
                     world.restart();
+                    world.mode = world.modes[args[1]];
                 } else {
                     sender.sendMessage(`Can't find ${args[1]} mode`);
                 }
 
+            }
+        }],
+        ["vincible", new class extends Command {
+            invoke(sender: CommandSender, args: string[]) {
+                if (args.length !== 2) throw new SyntaxError();
+                let targets = this.matchPlayers(args[1], sender);
+                for (const target of targets) target.invincible = false;
+                sender.sendMessage(`Made ${targets.length} player vincible`);
+            }
+        }],
+        ["invincible", new class extends Command {
+            invoke(sender: CommandSender, args: string[]) {
+                if (args.length !== 2) throw new SyntaxError();
+                let targets = this.matchPlayers(args[1], sender);
+                for (const target of targets) target.invincible = true;
+                sender.sendMessage(`Made ${targets.length} player invincible`);
             }
         }]
     ]);

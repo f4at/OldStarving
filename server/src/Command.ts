@@ -1,5 +1,5 @@
 import { Items } from "./Item";
-import Player from "./Player";
+import Player, { KITS } from "./Player";
 import world from "./World";
 import chalk from "chalk";
 import Entity, { EntityTypes } from "./Entity";
@@ -41,8 +41,6 @@ export abstract class Command {
         return sender.isOp;
     }
 }
-
-const KITS = { "PVP": [[Items.BAG, 1], [Items.SWORD_AMETHYST, 1], [Items.AMETHYST_HELMET, 1], [Items.GOLD_SPIKE, 20], [Items.COOKED_MEAT, 200], [Items.FIRE, 10], [Items.BOOK, 1], [Items.HAMMER_AMETHYST, 1], [Items.CAP_SCARF, 1]] };
 
 export class Commands {
     static commands: Map<string, Command> = new Map([
@@ -210,8 +208,8 @@ export class Commands {
                 if (args.length < 2) throw new SyntaxError();
                 if (world.modes[args[1]]) {
                     sender.sendMessage(`Changing mode to ${args[1]} mode`);
-                    world.restart();
-                    world.mode = world.modes[args[1]];
+                    world.restart(world.modes[args[1]]);
+
                 } else {
                     sender.sendMessage(`Can't find ${args[1]} mode`);
                 }

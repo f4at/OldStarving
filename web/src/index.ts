@@ -125,7 +125,7 @@ for (let server of config.debugServer) {
 app.get('/servers', function (req, res) {
     res.setHeader("access-control-allow-origin", "*");
     res.setHeader("content-type", "application/json");
-    res.end(JSON.stringify(servers.filter(e => new Date().getTime() - e.lastupdate > 61), (key, value) => key === "joiningPlayers" || key === "lastupdate" ? undefined : value));
+    res.end(JSON.stringify(servers.filter(e => new Date().getTime() - e.lastupdate < 31000), (key, value) => key === "joiningPlayers" || key === "lastupdate" ? undefined : value));
 });
 
 app.get("/unauthorized", async (req, res) => {

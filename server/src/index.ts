@@ -124,7 +124,7 @@ Utils.setIntervalAsync(async () => {
     for (let player of world.players) {
         player.send(new Uint16Array([6, player.compressedScore].concat(list)));
     }
-    if (world.mode === world.modes.hunger && new Date().getTime() - world.stime > world.hungerClose) {
+    if (world.mode === world.modes.hunger && new Date().getTime() - world.stime > world.hungerClose * 60000) {
         for (let player of world.players) {
             let rplayers = [27];
             for (let playa of world.players.filter(e => e !== player && !e.spectator)) {
@@ -148,7 +148,7 @@ Utils.setIntervalAsync(async () => {
             }
         })(entity);
     }
-}, 15570);
+}, 10570);
 
 console.log('version Number', 1);
 
@@ -157,125 +157,129 @@ wss.on("connection", (ws, req) => {
     ws.binaryType = "arraybuffer";
     ws.on("message", async (message) => {
         try {
+            let data;
             if (message instanceof ArrayBuffer) {
-                //nothing
+                data = new Uint8Array(message);
             } else {
-                let data = JSON.parse(message.toString());
-                if (!player) {
-                    if (typeof data[0] === "string") {
+                data = JSON.parse(message.toString());
+            }
+            if (!player) {
+                if (typeof data[0] === "string") {
 
-                        const response = await fetch(config.api + "/api/verify", {
-                            method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ accountId: data[2], port: port, ip: config.ip })
-                        });
-                        if (response.status !== 200) {
-                            ws.send(JSON.stringify([1, "Authentication failed"]));
-                            return;
-                        }
-                        player = world.players.find(e => e.accountId == data[2]);
+                    const response = await fetch(config.api + "/api/verify", {
+                        method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ accountId: data[2], port: port, ip: config.ip })
+                    });
+                    if (response.status !== 200) {
+                        ws.send(JSON.stringify([1, "Authentication failed"]));
+                        return;
+                    }
+                    player = world.players.find(e => e.accountId == data[2]);
 
-                        let rejoin = player !== undefined;
-                        if (!rejoin) {
-                            while (data[0].indexOf('  ') != -1) {
-                                data[0] = data[0].replace('  ', ' ');
-                            }
-                            while (data[0]) {
-                                if (data[0][0] === ' ') {
-                                    data[0] = data[0].slice(1);
-                                } else if (data[0][data[0].length - 1] === ' ') {
-                                    data[0] = data[0].slice(0, data[0].length - 1);
-                                } else {
-                                    break;
-                                }
-                            }
-                            player = new Player(world.mode === world.modes.hunger && new Date().getTime() - world.stime > world.hungerClose ? "spectator" : (data[0] == "spectator" ? "notSpectator" : data[0]), data[2], ws);
-                        } else {
-                            player.join(ws);
+                    let rejoin = player !== undefined;
+                    if (!rejoin) {
+                        while (data[0].indexOf('  ') != -1) {
+                            data[0] = data[0].replace('  ', ' ');
                         }
-                        console.log(`Player ${player.nick} (${player.pid}) ${rejoin ? "rejoined" : "joined"} server from ${req.connection.remoteAddress}`);
+                        while (data[0]) {
+                            if (data[0][0] === ' ') {
+                                data[0] = data[0].slice(1);
+                            } else if (data[0][data[0].length - 1] === ' ') {
+                                data[0] = data[0].slice(0, data[0].length - 1);
+                            } else {
+                                break;
+                            }
+                        }
+                        player = new Player(world.mode === world.modes.hunger && new Date().getTime() - world.stime > world.hungerClose * 60000 ? "spectator" : (data[0] == "spectator" ? "notSpectator" : data[0]), data[2], { x: data[3], y: data[4] }, ws);
+                    } else {
+                        player.join(ws);
                     }
-                } else {
-                    switch (data[0]) {
-                        case 0:
-                            player.chat(data[1]);
-                            break;
-                        case 1:
-                            Commands.process(player, data[1]);
-                            break;
-                        case 2:
-                            player.move(data[1]);
-                            break;
-                        case 3:
-                            player.rotate(data[1]);
-                            break;
-                        case 4:
-                            player.hit(data[1]);
-                            break;
-                        case 5:
-                            player.use(data[1]);
-                            break;
-                        case 6:
-                            player.inventory.remove(Items.get(data[1]));
-                            break;
-                        case 7:
-                            player.craft(Items.get(data[1]));
-                            break;
-                        case 8:
-                            if (!this.craftTimeout) {
-                                let item = Items.get(data[1]);
-                                let stack = player.inventory.findStack(item, 1);
-                                if (stack) {
-                                    let entity = world.entities[data[3]].find(e => e.id === data[4]);
-                                    if (entity && (entity.inv.item === item || entity.inv.item === null) && Utils.distance({ x: entity.pos.x - player.pos.x, y: entity.pos.y - player.pos.y }) < 200) {
-                                        entity.inv.item = item;
-                                        let amount = Math.min(stack.amount, data[2]);
-                                        player.decreaseItem(item, amount);
-                                        entity.inv.amount += amount;
-                                        entity.info = entity.inv.amount;
-                                        entity.action = (data[1] + 1) * 2;
-                                        entity.sendInfos();
-                                    }
+                    console.log(`Player ${player.nick} (${player.pid}) ${rejoin ? "rejoined" : "joined"} server from ${req.connection.remoteAddress}`);
+                }
+            } else {
+                switch (data[0]) {
+                    case 0:
+                        player.chat(data[1]);
+                        break;
+                    case 1:
+                        Commands.process(player, data[1]);
+                        break;
+                    case 2:
+                        player.move(data[1]);
+                        break;
+                    case 3:
+                        player.rotate(data[1]);
+                        break;
+                    case 4:
+                        player.hit(data[1]);
+                        break;
+                    case 5:
+                        player.use(data[1]);
+                        break;
+                    case 6:
+                        player.inventory.remove(Items.get(data[1]));
+                        break;
+                    case 7:
+                        player.craft(Items.get(data[1]));
+                        break;
+                    case 8:
+                        if (!this.craftTimeout) {
+                            let item = Items.get(data[1]);
+                            let stack = player.inventory.findStack(item, 1);
+                            if (stack) {
+                                let entity = world.entities[data[3]].find(e => e.id === data[4]);
+                                if (entity && (entity.inv.item === item || entity.inv.item === null) && Utils.distance({ x: entity.pos.x - player.pos.x, y: entity.pos.y - player.pos.y }) < 200) {
+                                    entity.inv.item = item;
+                                    let amount = Math.min(stack.amount, data[2]);
+                                    player.decreaseItem(item, amount);
+                                    entity.inv.amount += amount;
+                                    entity.info = entity.inv.amount;
+                                    entity.action = (data[1] + 1) * 2;
+                                    entity.sendInfos();
                                 }
                             }
-                            break;
-                        case 9:
-                            if (!this.craftTimeout) {
-                                let entity = world.entities[data[1]].find(e => e.id === data[2]);
-                                if (entity && entity.inv.item && Utils.distance({ x: entity.pos.x - player.pos.x, y: entity.pos.y - player.pos.y }) < 200) {
-                                    if (player.gather(entity.inv.item, entity.inv.amount)) {
-                                        entity.inv.item = null;
-                                        entity.inv.amount = 0;
-                                        entity.info = 0;
-                                        entity.action = 0;
-                                        entity.sendInfos();
-                                    }
+                        }
+                        break;
+                    case 9:
+                        if (!this.craftTimeout) {
+                            let entity = world.entities[data[1]].find(e => e.id === data[2]);
+                            if (entity && entity.inv.item && Utils.distance({ x: entity.pos.x - player.pos.x, y: entity.pos.y - player.pos.y }) < 200) {
+                                if (player.gather(entity.inv.item, entity.inv.amount)) {
+                                    entity.inv.item = null;
+                                    entity.inv.amount = 0;
+                                    entity.info = 0;
+                                    entity.action = 0;
+                                    entity.sendInfos();
                                 }
                             }
-                            break;
-                        case 10:
-                            player.cancelCrafting();
-                            break;
-                        case 12:
-                            if (!this.craftTimeout) {
-                                let stack3 = player.inventory.findStack(Items.WOOD, 1);
-                                if (stack3) {
-                                    let entity = world.entities[data[2]].find(e => e.id === data[3]);
-                                    if (entity && Utils.distance({ x: entity.pos.x - player.pos.x, y: entity.pos.y - player.pos.y }) < 250) {
-                                        let amount = Math.min(stack3.amount, data[1]);
-                                        player.decreaseItem(Items.WOOD, amount);
-                                        entity.inv.amount += amount;
-                                        entity.info = entity.inv.amount;
-                                        entity.action = EntityState.Hurt;
-                                        entity.sendInfos();
-                                    }
+                        }
+                        break;
+                    case 10:
+                        player.cancelCrafting();
+                        break;
+                    case 12:
+                        if (!this.craftTimeout) {
+                            let stack3 = player.inventory.findStack(Items.WOOD, 1);
+                            if (stack3) {
+                                let entity = world.entities[data[2]].find(e => e.id === data[3]);
+                                if (entity && Utils.distance({ x: entity.pos.x - player.pos.x, y: entity.pos.y - player.pos.y }) < 250) {
+                                    let amount = Math.min(stack3.amount, data[1]);
+                                    player.decreaseItem(Items.WOOD, amount);
+                                    entity.inv.amount += amount;
+                                    entity.info = entity.inv.amount;
+                                    entity.action = EntityState.Hurt;
+                                    entity.sendInfos();
                                 }
                             }
-                            break;
-                        case 14:
-                            player.stopHitting();
-                            break;
-                    }
+                        }
+                        break;
+                    case 14:
+                        player.stopHitting();
+                        break;
+                    case 15:
+                        player.updateViewRange(data[1], data[2]);
                 }
             }
+
         } catch (e) {
             console.error(e, message);
         }
@@ -294,7 +298,7 @@ wss.on("listening", () => {
         const response = await fetch(config.api + "/api/serverupdate", {
             method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: config.apikey, name: config.name, online: world.players.length, max: config.maxPlayers, ip: config.ip, port: port, ssl: config.ssl ? true : false })
         });
-    }, 30000);
+    }, 5000);
 
     const rl = readline.createInterface({
         input: process.stdin,

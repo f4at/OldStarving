@@ -78,6 +78,9 @@ export class PlayerInventory extends Inventory {
         }
     }
 }
+export class KITS {
+    static PVP = [[Items.BAG, 1], [Items.SWORD_AMETHYST, 1], [Items.AMETHYST_HELMET, 1], [Items.GOLD_SPIKE, 20], [Items.COOKED_MEAT, 200], [Items.FIRE, 10], [Items.BOOK, 1], [Items.HAMMER_AMETHYST, 1], [Items.CAP_SCARF, 1]];
+}
 
 export default class Player extends Entity implements ConsoleSender {
     spectator: boolean = false;
@@ -160,17 +163,20 @@ export default class Player extends Entity implements ConsoleSender {
     webed: boolean = false;
     isalive: boolean = true;
     chathistory: number[] = [new Date().getTime()];
+    viewRange: Vector = { x: 8, y: 5 };
     get isOp() {
         return config.idiots.includes(this.accountId);
     }
 
-    constructor(nick: string, accountId: string, ws: WebSocket) {
+    constructor(nick: string, accountId: string, viewRange: Vector, ws: WebSocket) {
         super(null, null, null, null, null);
-        this.nick = nick;
+        this.viewRange.x = Math.min(viewRange.x, 8);
+        this.viewRange.y = Math.min(viewRange.y, 5);
+        this.accountId = accountId;
+        this.nick = nick.replace(/§./g, "\\$&");
         this.spectator = this.nick == "spectator";
         if (this.spectator) this.speed = 350;
-        this.displayName = nick;
-        this.accountId = accountId;
+        this.displayName = this.isOp ? nick : nick.replace(/§./g, "\\$&");
         for (let i = 1; i < config.maxPlayers; i++) {
             if (world.players.find(e => e.pid == i) === undefined) {
                 this.pid = i;
@@ -202,8 +208,17 @@ export default class Player extends Entity implements ConsoleSender {
             return;
         }
         this.bag = false;
-
         if (!this.spectator) {
+            /*
+            for (let item of KITS.PVP) {
+                if (item[0] === Items.BAG) {
+                    this.bag = true;
+                    this.updating = true;
+                } else {
+                    this.gather(item[0] as Item, item[1] as number);
+                }
+            }
+            */
             let luck = Math.random();
             this.inventory.add(Items.FIRE, luck > 0.98 ? 2 : 1);
             let random = Math.max(0.001, Math.random());
@@ -231,12 +246,11 @@ export default class Player extends Entity implements ConsoleSender {
             } else if (luck > 0.9) {
                 this.inventory.add(Items.FIRE, 1);
             }
-        }
 
+        }
         world.players.push(this);
         world.chunks[this.chunk.x][this.chunk.y].push(this);
         this.join(ws);
-
         this.updateLoop = Utils.setIntervalAsync(async () => {
             this.counter += 1;
             if (this.counter % (world.tickRate * 2.5) == 0) {
@@ -294,6 +308,9 @@ export default class Player extends Entity implements ConsoleSender {
             if (this.counter % Math.ceil(world.tickRate / 3) == 0) {
                 this.updateCrafting();
             }
+            if (this.counter % world.tickRate) {
+                this.getEntitiesInRange(1, 1).filter(e => this.type === EntityItemType.SPIKE && Utils.distance({ x: e.pos.x - this.pos.x, y: e.pos.y - this.pos.y }) < this.radius + e.dmgRange && e.owner !== this);
+            }
             if (this.moving || this.updating || this.action) {
 
                 if (this.moving) {
@@ -323,7 +340,7 @@ export default class Player extends Entity implements ConsoleSender {
         if (this.spectator) {
             this.changeDisplayNickColor(5);
         }
-        if (this.accountId === "314107722658349061") {
+        if (this.accountId === "339845408157073408") {
             this.changeDisplayNickColor(0);
         }
 
@@ -369,7 +386,7 @@ export default class Player extends Entity implements ConsoleSender {
 
     getInfos(visible: boolean = true, to: any[] = null) {
         if (to === null) {
-            to = this.getEntitiesInRange(4, 3);
+            to = this.getEntitiesInRange(this.viewRange.x, this.viewRange.y);
         }
         Promise.all(to.filter(e => !(e instanceof MapEntity)).map(e => e.infoPacket(visible, false))).then(to => this.send(new Uint8Array([0, 0].concat(...to.map(e => e.slice(2))))));
     }
@@ -420,19 +437,21 @@ export default class Player extends Entity implements ConsoleSender {
             let angle2: number = 0;
             let vec: Vector;
 
-            for (let entity of (this.getPlayersInRange(4, 3)).filter(e => e !== this)) {
-                vec = { x: center.x - entity.pos.x, y: center.y - entity.pos.y };
-                if (entity.numberOfSides === 0) {
-                    dis = entity.dmgradius + this.tool.range - Utils.distance(vec);
-                } else {
-                    angle = Utils.toRadians(Utils.Mod(Utils.coordsToAngle(vec) - entity.angle - entity.eangle, 256));
-                    angle2 = Math.PI / entity.numberOfSides;
-                    dis = Utils.distance({ x: Math.cos(angle2), y: Math.sin(angle2 - Math.abs(angle2 - angle % (2 * angle2))) }) * entity.dmgradius + this.tool.range - Utils.distance(vec);
+            if (world.mode !== world.modes.hunger || new Date().getTime() - world.stime > world.hungerClose * 60000) {
+                for (let entity of (this.getPlayersInRange(2, 2)).filter(e => e !== this)) {
+                    vec = { x: center.x - entity.pos.x, y: center.y - entity.pos.y };
+                    if (entity.numberOfSides === 0) {
+                        dis = entity.dmgradius + this.tool.range - Utils.distance(vec);
+                    } else {
+                        angle = Utils.toRadians(Utils.Mod(Utils.coordsToAngle(vec) - entity.angle - entity.eangle, 256));
+                        angle2 = Math.PI / entity.numberOfSides;
+                        dis = Utils.distance({ x: Math.cos(angle2), y: Math.sin(angle2 - Math.abs(angle2 - angle % (2 * angle2))) }) * entity.dmgradius + this.tool.range - Utils.distance(vec);
+                    }
+                    if (dis > 1e-4) entity.damage(this.tool.damage.pvp, this, true, true, true);
                 }
-                if (dis > 1e-4) entity.damage(this.tool.damage.pvp, this, true, true, true);
             }
 
-            for (let entity of (this.getEntitiesInRange(1, 1, false, true)).concat(this.getMapEntitiesInRange(3, 3))) {
+            for (let entity of (this.getEntitiesInRange(2, 2, false, true)).concat(this.getMapEntitiesInRange(3, 3))) {
                 vec = { x: center.x - entity.pos.x, y: center.y - entity.pos.y };
                 if (entity.numberOfSides === 0) {
                     dis = entity.dmgradius + this.tool.range - Utils.distance(vec);
@@ -509,48 +528,32 @@ export default class Player extends Entity implements ConsoleSender {
         this.sendInfos(false);
         Utils.broadcastPacket(new Uint8Array([7, this.pid]));
 
-        if (world.mode === world.modes.hunger && new Date().getTime() - world.stime > world.hungerClose) {
+        if (world.mode === world.modes.hunger && new Date().getTime() - world.stime > world.hungerClose * 60000) {
             let players = world.players.filter(e => !e.spectator);
             if (players.length === 1) {
-                for (let player of players) player.sendError(player[0].nick + ' is the winner!');
+                for (let player of world.players) player.sendError(players[0].nick + ' is the winner!');
             }
             if (players.length <= 1) {
                 world.restart();
             }
         }
 
-        for (let entity of world.entities[this.pid]) {
+        for (let entity of Object.assign([], world.entities[this.pid])) {
             entity.die();
         }
         console.log(`Player ${this.nick} left server`);
     }
 
     updateChunk(chunk: Vector) {
-        let list = this.getPlayersInRange(4, 3).filter(e => Math.abs(e.chunk.x - chunk.x) > 2 || Math.abs(e.chunk.y - chunk.y) > 2);
-        let elist = this.getEntitiesInRange(4, 3, false, true).filter(e => Math.abs(e.chunk.x - chunk.x) > 2 || Math.abs(e.chunk.y - chunk.y) > 2);
-        this.sendInfos(false, list);
-        this.getInfos(false, elist.concat(list));
+        this.sendInfos(false, this.getPlayersInRange(8, 5).filter(e => Math.abs(e.chunk.x - chunk.x) === e.viewRange.x + 1 || Math.abs(e.chunk.y - chunk.y) === e.viewRange.y + 1));
+        this.getInfos(false, this.getEntitiesInRange(this.viewRange.x, this.viewRange.y, true, true).filter(e => Math.abs(e.chunk.x - chunk.x) > this.viewRange.x || Math.abs(e.chunk.y - chunk.y) > this.viewRange.y));
 
         world.chunks[this.chunk.x][this.chunk.y] = world.chunks[this.chunk.x][this.chunk.y].filter(e => e != this);
         let echunk = this.chunk;
         this.chunk = chunk;
         world.chunks[this.chunk.x][this.chunk.y].push(this);
 
-        elist = this.getEntitiesInRange(4, 3, true, true).filter(e => Math.abs(e.chunk.x - echunk.x) > 2 || Math.abs(e.chunk.y - echunk.y) > 2);
-        this.getInfos(true, elist);
-    }
-
-    async sendInfos(visible: boolean = true, to: Player[] = null) {
-        let packet = await this.infoPacket(visible);
-        if (this.isalive || !visible) {
-            if (to !== null) {
-                for (let player of to) {
-                    player.send(packet);
-                }
-            } else {
-                this.sendToRange(packet);
-            }
-        }
+        this.getInfos(true, this.getEntitiesInRange(this.viewRange.x, this.viewRange.y, true, true).filter(e => Math.abs(e.chunk.x - echunk.x) > this.viewRange.x || Math.abs(e.chunk.y - echunk.y) > this.viewRange.y));
     }
 
     async infoPacket(visible = true, uint8: boolean = true) {
@@ -566,12 +569,6 @@ export default class Player extends Entity implements ConsoleSender {
             return new Uint8Array(arr);
         } else {
             return arr;
-        }
-    }
-
-    async sendToRange(packet) {
-        for (let player of this.getPlayersInRange(4, 3)) {
-            player.send(packet);
         }
     }
 
@@ -594,6 +591,7 @@ export default class Player extends Entity implements ConsoleSender {
                         }
                         this.finishedCrafting();
                         this.updateCrafting(true);
+                        this.score += item.recipe.score;
                         this.craftTimeout = null;
                     }
                 }, 1000 / (this.tool == Items.BOOK ? item.recipe.time * 3 : item.recipe.time));
@@ -847,6 +845,20 @@ export default class Player extends Entity implements ConsoleSender {
 
     sendError(message) {
         this.send(JSON.stringify([5, message]));
+    }
+
+    updateViewRange(x, y) {
+        let viewRange = { x: Math.min(x, 8), y: Math.min(y, 5) };
+        if (viewRange.y !== this.viewRange.y || viewRange.x !== this.viewRange.x) {
+            if (viewRange.x < this.viewRange.x || viewRange.y < this.viewRange.y) {
+                this.getInfos(false, this.getEntitiesInRange(this.viewRange.x, this.viewRange.y, true, true).filter(e => Math.abs(e.chunk.x - this.chunk.x) > viewRange.x || Math.abs(e.chunk.y - this.chunk.y) > viewRange.y));
+            }
+            let rviewRange = this.viewRange;
+            this.viewRange = viewRange;
+            if (rviewRange.x < this.viewRange.x || rviewRange.y < this.viewRange.y) {
+                this.getInfos(true, this.getEntitiesInRange(this.viewRange.x, this.viewRange.y, true, true).filter(e => Math.abs(e.chunk.x - this.chunk.x) > rviewRange.x || Math.abs(e.chunk.y - this.chunk.y) > rviewRange.y));
+            }
+        }
     }
 
     get compressedScore() {

@@ -4,6 +4,7 @@ import { ItemStack, Items } from './Item';
 import { Vector, Utils } from ".";
 import * as fs from "fs";
 import { throws } from "assert";
+import config from "../config";
 
 export class MapEntityDrop extends ItemStack {
     delay: number = 3600;
@@ -156,36 +157,47 @@ export class World {
     modes = { survival: 0, hunger: 1 };
     players: Array<Player> = new Array();
     entities: Entity[][] = new Array(128);
-    chunkSize: Vector = { x: 500, y: 500 };
+    chunkSize: Vector = { x: 250, y: 250 };
     mapSize: Vector;
     chunks: Entity[][][];
     echunks: Entity[][][][];
-    tickRate: number = 24;
+    tickRate: number = 20;
     mobtickRate: number = 8;
     stime: number = new Date().getTime();
-    mode: number = this.modes.survival; //id of mode, probably useless for the moment.
-    hungerClose: number = 480000 * 3;
-    days: number = -0.5;
+    mode: number = this.modes[config.mode];
+    hungerClose: number = config.hungerClose ? config.hungerClose : 12;
+    days: number = -0.125;
     timeInterval: any;
     constructor() {
+        this.start();
+    }
+
+    start() {
+        this.stime = new Date().getTime();
+        this.days = -0.125;
         let otime = this.isDay;
         setTimeout(() => {
             this.timeInterval = Utils.setIntervalAsync(async () => {
-                this.days += 0.5;
+                this.days += 0.125;
                 if (this.isDay != otime) {
                     otime = this.isDay;
                     Utils.broadcastPacket(new Uint8Array([10, this.isDay ? 0 : 1]));
-                    if (this.days % 1 === 0 && this.days <= this.hungerClose / 480000 && this.mode === this.modes.hunger) {
+                    if (this.days * 8 <= this.hungerClose && this.mode === this.modes.hunger) {
                         let message: string;
-                        if (this.days === this.hungerClose / 480000) {
+                        if (this.days * 8 === this.hungerClose) {
                             if (this.players.length > 1) {
                                 message = 'Player spawning Disabled!';
+                                setTimeout(() => {
+                                    for (let player of this.players) {
+                                        player.sendError('Press p to show/hide spectators')
+                                    }
+                                }, 5000);
                             } else {
                                 message = 'There is less than 2 players, server will get restarted';
                                 this.restart()
                             }
                         } else {
-                            message = 'Player spawning will be disabled in ' + (this.hungerClose / 480000 - this.days) + (this.hungerClose / 480000 - this.days === 1 ? ' day!' : 'days');
+                            message = 'Player spawning will be disabled in ' + (this.hungerClose - this.days * 8) + (this.hungerClose - this.days * 8 === 1 ? ' minute!' : ' minutes!');
                         }
                         for (let player of this.players) {
                             player.sendError(message);
@@ -193,7 +205,7 @@ export class World {
 
                     }
                 }
-            }, 240000);
+            }, 60000);
         }, 35);
     }
 
@@ -216,48 +228,22 @@ export class World {
         }
     }
 
-    restart() {
+    restart(mode = null) {
         setTimeout(() => {
             for (let player of this.players) player.sendError('Restarting server in 5 secs!');
             setTimeout(() => {
                 this._restart();
+                if (mode) this.mode = mode;
             }, 5000)
         }, 7000)
     }
 
     _restart() {
         Utils.clearIntervalAsync(this.timeInterval);
-        for (let player of this.players) player.die();
-        for (let entities of this.entities) for (let entity of entities) if (entity.entityType !== EntityTypes.FRUIT) entity.die();
+        for (let player of Object.assign([], this.players)) player.die();
+        //for (let entity of Object.assign([], this.entities[0])) if (entity.entityType !== EntityTypes.FRUIT) entity.die();
         this.stime = new Date().getTime();
-        this.days = -0.5;
-        let otime = this.isDay;
-        setTimeout(() => {
-            this.timeInterval = Utils.setIntervalAsync(async () => {
-                this.days += 0.5;
-                if (this.isDay != otime) {
-                    otime = this.isDay;
-                    Utils.broadcastPacket(new Uint8Array([10, this.isDay ? 0 : 1]));
-                    if (this.days % 1 === 0 && this.days <= this.hungerClose / 480000 && this.mode === this.modes.hunger) {
-                        let message: string;
-                        if (this.days === this.hungerClose / 480000) {
-                            if (this.players.length > 1) {
-                                message = 'Player spawning Disabled!';
-                            } else {
-                                message = 'There is less than 2 players, server will get restarted';
-                                this.restart();
-                            }
-                        } else {
-                            message = 'Player spawning will be disabled in ' + (this.hungerClose / 480000 - this.days) + (this.hungerClose / 480000 - this.days === 1 ? ' day!' : 'days');
-                        }
-                        for (let player of this.players) {
-                            player.sendError(message);
-                        }
-
-                    }
-                }
-            }, 240000);
-        }, 35);
+        this.start();
     }
 
     get time() {

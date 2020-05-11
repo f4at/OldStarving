@@ -683,6 +683,7 @@ export function start(ModdedStarving: ModdedStarving) {
         if (user) {
             user.cam.rw = can.width;
             user.cam.rh = can.height;
+            client.socket.send(new Uint8Array([15, Math.ceil(user.cam.rw / 500) + 1, Math.ceil(user.cam.rh / 500) + 1]));
         }
         if (loader.is_run) {
             loader.update();
@@ -1173,6 +1174,9 @@ export function start(ModdedStarving: ModdedStarving) {
         let waitingForColor = false;
         for (var i = 0; i < text.length; i++) {
             let char = text.charAt(i);
+            if (char === '\\' && text.charAt(i + 1) === '§') {
+                continue;
+            }
             if (char === '§' && text.charAt(i - 1) !== '\\') {
                 arg++;
                 waitingForColor = true;
@@ -2805,7 +2809,7 @@ export function start(ModdedStarving: ModdedStarving) {
         v.height = z;
         if (p) {
             t.fillStyle = p;
-            round_rect(t, l / 2, 0, r, z, 2 * n);
+            round_rect(t, 0, 0, r, z, 2 * n);
             t.fill();
             t.translate(n, n);
         }
@@ -8928,9 +8932,9 @@ export function start(ModdedStarving: ModdedStarving) {
         if (this.text) {
             ctx.globalAlpha = this.timeout.o ? 1 - this.timeout.v : 1;
             if (!this.label) {
-                this.label = create_text(scale, this.text, 40, c, null, null, g, 10, undefined, '#000', 10, 50);
+                this.label = create_text(scale, this.text, 40, c, null, null, g, 10, undefined, '#000', 8, 8);
             }
-            ctx.drawImage(this.label, (can.width - this.label.width) / 2, 50 * scale - 25);
+            ctx.drawImage(this.label, (can.width - this.label.width) / 2, 50 * scale - 4);
             ctx.globalAlpha = 1;
             if (this.timeout.update() && this.timeout.o == 0) {
                 this.text = "";
@@ -8956,7 +8960,7 @@ export function start(ModdedStarving: ModdedStarving) {
                 if (this.textQueue.length) {
                     this.text = this.textQueue[0];
                     this.textQueue.splice(0, 1);
-                    this.chat.min_speed = 1 / (1 + 0.029 * this.text.length);
+                    this.chat.min_speed = 1 / (0.75 + 0.03 * this.text.length);
                 } else {
                     this.text = "";
                 }
@@ -8965,7 +8969,7 @@ export function start(ModdedStarving: ModdedStarving) {
         } else if (this.textQueue.length) {
             this.text = this.textQueue[0];
             this.textQueue.splice(0, 1);
-            this.chat.min_speed = 1 / (0.5 + 0.029 * this.text.length);
+            this.chat.min_speed = 1 / (0.75 + 0.03 * this.text.length);
         }
         ctx.restore();
     }
@@ -9597,16 +9601,16 @@ export function start(ModdedStarving: ModdedStarving) {
     var CLIENT = {
         VERSION_NUMBER: 5,
         TIMEOUT_TIME: 5e3,
-        TIMEOUT_NUMBER: 3,
+        TIMEOUT_NUMBER: 2,
         PING: "[13]",
         PING_DELAY: 6e4,
-        ROTATE: 1 / 24,
+        ROTATE: 1 / 20,
         ATTACK: .2,
         CAM_DELAY: 50,
         MUTE_DELAY: 125e3,
         TIMEOUT_SERVER: 6e5,
         WAITING_FOR_SERVER: 8e3,
-        DELAY_CONNECTION_UPDATE: 5,
+        DELAY_CONNECTION_UPDATE: 4,
         LAG_DISTANCE: 500,
         LOOSE_FOCUS: 15
     };
@@ -9691,7 +9695,7 @@ export function start(ModdedStarving: ModdedStarving) {
             }
         };
         this.get_focus = function () {
-            this.socket.send(JSON.stringify([11]));
+            this.socket.send(new Uint8Array([11]));
         };
         this.build_ok = function (c) {
             user.auto_feed.delay = 0;
@@ -9938,13 +9942,13 @@ export function start(ModdedStarving: ModdedStarving) {
             }
         };
         this.give_wood = function (c, f) {
-            this.socket.send(JSON.stringify([12, f, c.pid, c.iid]));
+            this.socket.send(new Uint8Array([12, f, c.pid, c.iid]));
         };
         this.give_item = function (c, f, d) {
-            this.socket.send(JSON.stringify([8, f, d, c.pid, c.iid]));
+            this.socket.send(new Uint8Array([8, f, d, c.pid, c.iid]));
         };
         this.take_chest = function (c) {
-            this.socket.send(JSON.stringify([9, c.pid, c.iid]));
+            this.socket.send(new Uint8Array([9, c.pid, c.iid]));
         };
         this.units = function (c, f, d) {
             c = new Uint16Array(c);
@@ -9970,7 +9974,7 @@ export function start(ModdedStarving: ModdedStarving) {
                     if (world.fast_units[q]) {
                         q = world.fast_units[q];
 
-                        let dis = ((q.r.x - t) ** 2 + (q.r.y - z) ** 2) ** 0.5, rdis = ((q.x - t) ** 2 + (q.y - z) ** 2) ** 0.5, fac = Math.min(1, Math.max(0, (rdis - dis) / 200)), speed = ((1 - fac) * dis + fac * rdis), sum = 0;
+                        let dis = ((q.r.x - t) ** 2 + (q.r.y - z) ** 2) ** 0.5, rdis = ((q.x - t) ** 2 + (q.y - z) ** 2) ** 0.5, fac = Math.min(1, Math.max(0, (rdis - dis) / 250)), speed = ((1 - fac) * dis + fac * rdis), sum = 0;
                         q.ospeed = q.ospeed ? q.ospeed : [];
                         q.ospeed.push(speed);
 
@@ -9978,7 +9982,7 @@ export function start(ModdedStarving: ModdedStarving) {
                             sum += q.ospeed[q.ospeed.length - i];
                         }
 
-                        q.speed = v ? sum / Math.min(4, q.ospeed.length) * 7.67 : sum / Math.min(4, q.ospeed.length) * 23;
+                        q.speed = v ? sum / Math.min(4, q.ospeed.length) * 7.2 : sum / Math.min(4, q.ospeed.length) * 18;
 
                         q.r.x = t;
                         q.r.y = z;
@@ -10016,7 +10020,7 @@ export function start(ModdedStarving: ModdedStarving) {
         };
         this.select_craft = function (c) {
             if (user.inv.max != user.inv.can_select.length || c === INV.BAG || user.inv.find_item(c) != -1 || user.inv.free_place(RECIPES.find(e => e.id === c).r)) {
-                this.socket.send(JSON.stringify([7, c]));
+                this.socket.send(new Uint8Array([7, c]));
             } else {
                 this.inv_full();
             }
@@ -10044,10 +10048,10 @@ export function start(ModdedStarving: ModdedStarving) {
             user.inv.decrease(c, 1, user.inv.find_item(c));
         };
         this.cancel_crafting = function () {
-            this.socket.send(JSON.stringify([10]));
+            this.socket.send(new Uint8Array([10]));
         };
         this.send_build = function () {
-            this.socket.send(JSON.stringify([5, user.craft.preview]));
+            this.socket.send(new Uint8Array([5, user.craft.preview]));
         };
         this.select_inv = function (c, f) {
             switch (c) {
@@ -10056,7 +10060,7 @@ export function start(ModdedStarving: ModdedStarving) {
                 case INV.MEAT:
                 case INV.COOKED_MEAT:
                     user.craft.preview = -1;
-                    this.socket.send(JSON.stringify([5, c]));
+                    this.socket.send(new Uint8Array([5, c]));
                     break;
                 case INV.WORKBENCH:
                 case INV.SPIKE:
@@ -10101,10 +10105,10 @@ export function start(ModdedStarving: ModdedStarving) {
                 case INV.AMETHYST_SPEAR:
                     user.craft.preview = -1;
                     if (c == user.inv.id) {
-                        this.socket.send(JSON.stringify([5, INV.HAND]));
+                        this.socket.send(new Uint8Array([5, INV.HAND]));
                         user.inv.id = -1;
                     } else {
-                        this.socket.send(JSON.stringify([5, c]));
+                        this.socket.send(new Uint8Array([5, c]));
                         user.inv.id = c;
                     }
                     break;
@@ -10115,7 +10119,7 @@ export function start(ModdedStarving: ModdedStarving) {
                 case INV.STONE_HELMET:
                 case INV.GOLD_HELMET:
                 case INV.DIAMOND_HELMET:
-                    this.socket.send(JSON.stringify([5, c]));
+                    this.socket.send(new Uint8Array([5, c]));
             }
             ModdedStarving.on("select_inv", {
                 c,
@@ -10125,21 +10129,21 @@ export function start(ModdedStarving: ModdedStarving) {
         this.delete_inv = function (c, f) {
             user.inv.delete_item(c, f);
             user.craft.update();
-            this.socket.send(JSON.stringify([6, c]));
+            this.socket.send(new Uint8Array([6, c]));
         };
         this.stop_attack = function () {
-            this.socket.send(JSON.stringify([14]));
+            this.socket.send(new Uint8Array([14]));
         };
         this.send_attack = function (c) {
             var f = 2 * Math.PI;
-            this.socket.send(JSON.stringify([4, Math.floor((c + f) % f * 255 / f)]));
+            this.socket.send(new Uint8Array([4, Math.floor((c + f) % f * 256 / f)]));
         };
         this.send_angle = function (c) {
             var f = 2 * Math.PI;
-            this.socket.send(JSON.stringify([3, Math.floor((c + f) % f * 255 / f)]));
+            this.socket.send(new Uint8Array([3, Math.floor((c + f) % f * 256 / f)]));
         };
         this.send_move = function (c) {
-            this.socket.send(JSON.stringify([2, c]));
+            this.socket.send(new Uint8Array([2, c]));
         };
         this.send_chat = function (c) {
             world.fast_units[user.uid].textQueue.push(c);
@@ -10160,7 +10164,7 @@ export function start(ModdedStarving: ModdedStarving) {
                     e.push(f[c].oid);
                 }
                 d.push(e);
-                this.socket.send(JSON.stringify(d));
+                this.socket.send(new Uint8Array(d));
             }
         };
         this.cam_delay = 0;
@@ -10445,7 +10449,7 @@ export function start(ModdedStarving: ModdedStarving) {
             };
             this.socket.onopen = function () {
                 clearTimeout(c.timeout_handler);
-                c.socket.send(JSON.stringify([ui.nickname.input.value, CLIENT.VERSION_NUMBER, Cookies.get("account_id")]));
+                c.socket.send(JSON.stringify([ui.nickname.input.value, CLIENT.VERSION_NUMBER, Cookies.get("account_id"), Math.ceil(user.cam.rw / 500) + 1, Math.ceil(user.cam.rh / 500) + 1]));
                 c.timeout_handler = setTimeout(c.timeout, CLIENT.TIMEOUT_TIME);
             };
             this.timeout_handler = setTimeout(c.timeout, CLIENT.TIMEOUT_TIME);
@@ -11496,7 +11500,7 @@ export function start(ModdedStarving: ModdedStarving) {
                 this.timeout += delta;
                 if (this.timeout > CLIENT.ROTATE) {
                     this.timeout = 0;
-                    if (.005 < Math.abs(this.angle - g)) {
+                    if (.015 < Math.abs((this.angle - g) % Math.PI * 2)) {
                         client.send_angle(g);
                         this.angle = g;
                     }

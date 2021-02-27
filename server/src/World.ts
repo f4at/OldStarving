@@ -237,7 +237,7 @@ export class World {
                 setTimeout(() => {
                     this._restart();
                     this.restarting = false;
-                    if (mode) this.mode = mode;
+                    if (mode !== null) this.mode = mode;
                 }, 5000)
             }, 7000)
         }

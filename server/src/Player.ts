@@ -80,7 +80,7 @@ export class PlayerInventory extends Inventory {
     }
 }
 export class KITS {
-    static PVP = [[Items.BAG, 1], [Items.SWORD_DIAMOND, 1], [Items.GOLD_HELMET, 1], [Items.WOOD_WALL, 2], [Items.COOKED_MEAT, 200], [Items.FIRE, 5], [Items.BOOK, 1], [Items.HAMMER_AMETHYST, 1], [Items.COAT, 1], [Items.BANDAGE, 4]];
+    static PVP = [[Items.BAG, 1], [Items.SWORD_DIAMOND, 1], [Items.GOLD_HELMET, 1], [Items.COOKED_MEAT, 10], [Items.COAT, 1], [Items.BANDAGE, 3], [Items.PICK_GOLD, 1],];
 }
 
 export default class Player extends Entity implements ConsoleSender {

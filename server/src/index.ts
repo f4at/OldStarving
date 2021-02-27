@@ -124,31 +124,33 @@ Utils.setIntervalAsync(async () => {
     for (let player of world.players) {
         player.send(new Uint16Array([6, player.compressedScore].concat(list)));
     }
-    if (world.mode === world.modes.hunger && new Date().getTime() - world.stime > world.hungerClose * 60000) {
-        for (let player of world.players) {
-            let rplayers = [27];
+    for (let player of world.players) {
+        let rplayers = [27];
+        if (world.mode === world.modes.hunger && new Date().getTime() - world.stime > world.hungerClose * 60000) {
             for (let playa of world.players.filter(e => e !== player && !e.spectator)) {
                 rplayers = rplayers.concat([playa.pos.x * 256 / world.map.width, playa.pos.y * 256 / world.map.height]);
             }
-            player.send(new Uint8Array(rplayers));
         }
+        rplayers = rplayers.concat(...world.players.filter(e => e.targeted).map(e => [e.pos.x * 256 / world.map.width, e.pos.y * 256 / world.map.height]));
+        if (rplayers.length > 1) player.send(new Uint8Array(rplayers));
     }
+
 }, 2177);
 
 Utils.setIntervalAsync(async () => {
-    let entities = [{ e: EntityTypes.WOLF, m: 30, p: 0.2 }, { e: EntityTypes.RABBIT, m: 13, p: 0.2 }, { e: EntityTypes.SPIDER, m: 25, p: 0.2 }, { e: EntityTypes.FOX, m: 50, p: 0.3 }, { e: EntityTypes.BEAR, m: 25, p: 0.4 }, { e: EntityTypes.DRAGON, m: 4, p: 0.04 }];
+    let entities = [{ e: EntityTypes.WOLF, m: 35, p: 0.2 }, { e: EntityTypes.RABBIT, m: 15, p: 0.2 }, { e: EntityTypes.SPIDER, m: 30, p: 0.2 }, { e: EntityTypes.FOX, m: 60, p: 0.3 }, { e: EntityTypes.BEAR, m: 35, p: 0.4 }, { e: EntityTypes.DRAGON, m: 4, p: 0.04 }];
     for (let entity of entities) {
         (function (entity: any) {
             let r = world.entities[0].filter(e => e.entityType == entity.e).length;
-            let c = Math.ceil(Math.min(4, (entity.m + entity.p * world.players.length - r) / 2));
+            let c = Math.ceil(Math.min(3, (entity.m + entity.p * world.players.length - r) / 2));
             for (let i = 0; i < c; i++) {
                 setTimeout(() => {
                     new Entity(null, 0, null, entity.e, false);
-                }, Math.random() * 15000);
+                }, Math.random() * 5000);
             }
         })(entity);
     }
-}, 10570);
+}, 6270);
 
 console.log('version Number', 1);
 
@@ -222,7 +224,7 @@ wss.on("connection", (ws, req) => {
                         player.craft(Items.get(data[1]));
                         break;
                     case 8:
-                        if (!this.craftTimeout) {
+                        if (!player.craftTimeout) {
                             let item = Items.get(data[1]);
                             let stack = player.inventory.findStack(item, 1);
                             if (stack) {
@@ -240,7 +242,7 @@ wss.on("connection", (ws, req) => {
                         }
                         break;
                     case 9:
-                        if (!this.craftTimeout) {
+                        if (!player.craftTimeout) {
                             let entity = world.entities[data[1]].find(e => e.id === data[2]);
                             if (entity && entity.inv.item && Utils.distance({ x: entity.pos.x - player.pos.x, y: entity.pos.y - player.pos.y }) < 200) {
                                 if (player.gather(entity.inv.item, entity.inv.amount)) {
@@ -257,7 +259,7 @@ wss.on("connection", (ws, req) => {
                         player.cancelCrafting();
                         break;
                     case 12:
-                        if (!this.craftTimeout) {
+                        if (!player.craftTimeout) {
                             let stack3 = player.inventory.findStack(Items.WOOD, 1);
                             if (stack3) {
                                 let entity = world.entities[data[2]].find(e => e.id === data[3]);

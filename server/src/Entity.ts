@@ -62,12 +62,12 @@ export class EntityTypes {
     static AMETHYST_SPIKE = Items.AMETHYST_SPIKE.entityType = new EntityType(20, 7, 50, 1, 1200, EntityItemType.SPIKE, { physical: true, tier: 4, hitdmg: 25, dmg: 50, dmgDelay: 1000, dmgRange: 95 });
     static AMETHYST_DOOR = Items.AMETHYST_DOOR.entityType = new EntityType(21, 7, 50, 1, 3500, EntityItemType.DOOR, { physical: true, tier: 4 });
 
-    static RABBIT = new EntityType(60, 0, 23, 1, 60, EntityItemType.MOB, { dmgradius: 23, regen: 15, drops: [{ item: Items.FUR, amount: 1 }, { item: Items.MEAT, amount: 2 }], kscore: 60, physical: false, speed: 260, dmg: 0, genes: [0.05, 0, 300, 400, -200, 200, 3, 0.1, 0.2, 1, 0, 0.9, 0.99, 8, 2, 30, 0.1, 0.2, 0.01, 0.5, 300, 0.4, 1.5] });
-    static WOLF = new EntityType(61, 0, 35, 1, 300, EntityItemType.MOB, { dmgradius: 50, regen: 40, drops: [{ item: Items.FUR_WOLF, amount: 1 }, { item: Items.MEAT, amount: 2 }], kscore: 60, physical: false, offensive: true, dmg: 40, dmgRange: 27, speed: 155, genes: [0.05, 5, 200, 300, -200, 200, 3, 0.1, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 20, 0.1, 0.05, 0.01, 0.5, 300, 0.2, 2] });
-    static SPIDER = new EntityType(62, 0, 40, 1, 150, EntityItemType.MOB, { dmgradius: 65, rgen: 40, drops: [{ item: Items.CORD, amount: 2 }], kscore: 100, physical: false, offensive: true, dmg: 30, speed: 150, dmgRange: 46, genes: [0.05, 10, 200, 300, -200, 200, 3, 0.1, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 5, 0.1, 0.05, 0.01, 0.5, 300, 0.2, 2] });
-    static FOX = new EntityType(63, 0, 35, 1, 300, EntityItemType.MOB, { dmgradius: 50, regen: 40, drops: [{ item: Items.FUR_WINTER, amount: 1 }, { item: Items.MEAT, amount: 2 }], kscore: 90, physical: false, offensive: true, dmg: 40, speed: 140, dmgRange: 30, genes: [0.05, 6, 200, 300, -200, 200, 3, 0.1, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 20, 0.1, 0.05, 0.01, 0.5, 300, 0.2, 2] });
-    static BEAR = new EntityType(64, 0, 35, 1, 900, EntityItemType.MOB, { dmgradius: 50, regen: 40, drops: [{ item: Items.FUR_WINTER, amount: 2 }, { item: Items.MEAT, amount: 3 }], kscore: 120, physical: false, offensive: true, dmg: 70, speed: 135, dmgRange: 34, genes: [0.05, 5, 150, 300, -200, 200, 3, 0.1, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 15, 0.1, 0.06, 0.01, 0.5, 300, 0.2, 2] });
-    static DRAGON = new EntityType(65, 0, 45, 1, 1500, EntityItemType.MOB, { dmgradius: 80, regen: 50, drops: [{ item: Items.MEAT, amount: 5 }], kscore: 1000, physical: false, offensive: true, dmg: 70, speed: 155, dmgRange: 75, genes: [0.05, 5, 200, 350, -200, 200, 3, 0.1, 0.2, 1, 0.5, 0.9, 0.99, 8, 2, 5, 0.1, 0.1, 0.01, 0.5, 300, 0.2, 2] });
+    static RABBIT = new EntityType(60, 0, 23, 1, 60, EntityItemType.MOB, { dmgradius: 23, regen: 15, drops: [{ item: Items.FUR, amount: 1 }, { item: Items.MEAT, amount: 2 }], kscore: 60, physical: false, speed: 260, dmg: 0, genes: [0.05, 0, 300, 400, -200, 200, 3, 0.1, 0.1, 1, 0, 0.9, 0.99, 8, 2, 25, 0.13, 0.1, 0.01, 0.5, 300, 0.2, 2.5, 0.8] });
+    static WOLF = new EntityType(61, 0, 35, 1, 300, EntityItemType.MOB, { dmgradius: 50, regen: 40, drops: [{ item: Items.FUR_WOLF, amount: 1 }, { item: Items.MEAT, amount: 2 }], kscore: 60, physical: false, offensive: true, dmg: 40, dmgRange: 27, speed: 150, genes: [0.05, 5, 200, 300, -200, 200, 3, 0.1, 0.1, 1, 0.5, 0.9, 0.99, 8, 2, 15, 0.13, 0.05, 0.01, 0.5, 300, 0.1, 3, 0.55] });
+    static SPIDER = new EntityType(62, 0, 40, 1, 150, EntityItemType.MOB, { dmgradius: 65, rgen: 40, drops: [{ item: Items.CORD, amount: 2 }], kscore: 100, physical: false, offensive: true, dmg: 30, speed: 155, dmgRange: 46, genes: [0.05, 10, 200, 300, -200, 200, 3, 0.1, 0.1, 1, 0.5, 0.9, 0.99, 8, 2, 5, 0.13, 0.02, 0.01, 0.5, 300, 0.04, 3, 0.5] });
+    static FOX = new EntityType(63, 0, 35, 1, 300, EntityItemType.MOB, { dmgradius: 50, regen: 40, drops: [{ item: Items.FUR_WINTER, amount: 1 }, { item: Items.MEAT, amount: 2 }], kscore: 90, physical: false, offensive: true, dmg: 40, speed: 140, dmgRange: 30, genes: [0.05, 6, 200, 300, -200, 200, 3, 0.1, 0.1, 1, 0.5, 0.9, 0.99, 8, 2, 15, 0.13, 0.04, 0.01, 0.5, 300, 0.08, 3, 0.5] });
+    static BEAR = new EntityType(64, 0, 35, 1, 900, EntityItemType.MOB, { dmgradius: 50, regen: 40, drops: [{ item: Items.FUR_WINTER, amount: 2 }, { item: Items.MEAT, amount: 3 }], kscore: 120, physical: false, offensive: true, dmg: 70, speed: 135, dmgRange: 34, genes: [0.05, 5, 150, 300, -200, 200, 3, 0.1, 0.1, 1, 0.5, 0.9, 0.99, 8, 2, 10, 0.13, 0.02, 0.01, 0.5, 300, 0.06, 3, 0.65] });
+    static DRAGON = new EntityType(65, 0, 45, 1, 1500, EntityItemType.MOB, { dmgradius: 80, regen: 50, drops: [{ item: Items.MEAT, amount: 5 }], kscore: 1000, physical: false, offensive: true, dmg: 70, speed: 155, dmgRange: 75, genes: [0.05, 5, 200, 350, -200, 200, 3, 0.1, 0.1, 1, 0.5, 0.9, 0.99, 8, 2, 5, 0.13, 0.05, 0.01, 0.5, 300, 0.08, 3, 0.7] });
 
     static FRUIT = new EntityType(100, 0, 50, 1, 0, EntityItemType.HARVESTABLE, { fscore: 3, physical: false, inv: { item: Items.PLANT, amount: 3, maximum: 5, delay: 10, respawn: 1 } });
 
@@ -167,6 +167,7 @@ export default class Entity implements Collider {
     drops: any;
 
     isalive: boolean = true;
+    blocked: number = 0;
 
     constructor(pos: Vector = null, angle: number, owner: Player, entityItem: EntityType, forceSpawn: boolean = false) {
         if (entityItem !== null) {
@@ -336,15 +337,18 @@ export default class Entity implements Collider {
                             this.pos.y += movement.vec.y / world.mobtickRate;
                             this.collision();
                             opos = { x: this.pos.x - opos.x, y: this.pos.y - opos.y };
+                            let odistance = Utils.distance(opos);
                             let chunk = this.getChunk();
                             if (this.chunk.x != chunk.x || chunk.y != this.chunk.y) {
                                 this.updateChunk(chunk);
                             }
-                            if (Utils.distance(opos) > 1) {
+                            let blocked = (1 - (odistance / (Utils.distance(movement.vec) / world.mobtickRate))) ** this.genes[24];
+                            this.blocked = (this.blocked + 2 * (blocked ? this.blocked : 0)) / 3;
+                            if (odistance > 2) {
                                 let angle = Math.floor(Utils.coordsToAngle(opos) - 64);
                                 this.angle = angle < 0 ? angle + 256 : angle;
                             }
-                            if (Utils.distance(opos) || this.action) {
+                            if (odistance > 2 || this.action) {
                                 this.sendInfos();
                                 this.action = 0;
                             }
@@ -618,9 +622,8 @@ export default class Entity implements Collider {
         let v = this.genes;
         let scores = [];
         let vectors = [];
-        let distances = [];
         let players = this.getPlayersInRange(3, 3);
-        let rplayers = players.filter(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < 400);
+        let rplayers = players.filter(e => Utils.distance({ x: this.pos.x - e.pos.x, y: this.pos.y - e.pos.y }) < 450);
         let active = 0;
         let adistance = 0;
         for (let player of rplayers) {
@@ -635,7 +638,6 @@ export default class Entity implements Collider {
                 memory.score = (memory.score + s * (1 - Utils.remap(distance, 0, Utils.remap(s, -1, 1, v[2], v[3]), 0, 1, true))) / 2;
                 memory.score = memory.score < 0 ? memory.score : memory.score * v[7];
                 adistance += distance * (memory.score < 0 ? memory.score : memory.score * v[19]);
-                distances.push(distance);
                 scores.push(memory.score);
                 vectors.push({ x: this.pos.x - player.pos.x + Utils.remap(Math.random(), 0, 1, -v[15], v[15]), y: this.pos.y - player.pos.y + Utils.remap(Math.random(), 0, 1, -v[15], v[15]) });
                 memory.dmg *= 0.7;
@@ -651,9 +653,9 @@ export default class Entity implements Collider {
         let fvector = { x: 0, y: 0 };
         let time = 0;
 
-        if (rplayers.length && Math.max(...scores.map(e => Math.abs(e))) && Math.max(...distances.map(e => Math.abs(e))) > v[18]) {
+        if (rplayers.length && Math.max(...scores.map(e => Math.abs(e))) > v[18]) {
             active = 1;
-            if (Math.random() > v[17] + Utils.remap(adistance, 0, v[20], v[21], 0, true) ** v[22]) {
+            if (Math.random() > v[17] + v[23] * this.blocked + Utils.remap(adistance, 0, v[20], v[21], 0, true) ** v[22]) {
                 let min = Math.min(...scores);
                 scores = scores.map(e => -1 * (e - min * v[7]) ** v[6]);
                 let tdistance = 0;

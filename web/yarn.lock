@@ -207,6 +207,11 @@ bytes@3.1.0:
   resolved "https://registry.yarnpkg.com/bytes/-/bytes-3.1.0.tgz#f6cf7933a360e0588fa9fde85651cdc7f805d1f6"
   integrity sha512-zauLjrfCG+xvoyaqLoV8bLVXXNGC4JqlxFCutSDWA6fJrTo2ZuvLYTqZ7aHBLZSMOopbzwv8f+wZcVzfVTI2Dg==
 
+class-transformer@^0.1.9:
+  version "0.1.10"
+  resolved "https://registry.yarnpkg.com/class-transformer/-/class-transformer-0.1.10.tgz#350f168ebb4c1f87edb18b98dd973681fc20fff7"
+  integrity sha512-QiNdUxEvTBiUtc0KiapGVHhgaqGQVEhOfL9UEBnb9xRfcwmDJT5ijIDwcwJUTwXaT/kGvZZB4JCGsiuR5adX6g==
+
 combined-stream@^1.0.8:
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/combined-stream/-/combined-stream-1.0.8.tgz#c3d45a8b34fd730631a110a8a2520682b31d5a7f"
@@ -578,6 +583,13 @@ minimist@~0.0.1:
   version "0.0.10"
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-0.0.10.tgz#de3f98543dbf96082be48ad1a0c7cda836301dcf"
   integrity sha1-3j+YVD2/lggr5IrRoMfNqDYwHc8=
+
+mongodb-typescript@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/mongodb-typescript/-/mongodb-typescript-2.2.0.tgz#007dec79f37f6501b64d6dcceb64028170f0b01b"
+  integrity sha512-nGWMfQ/iHhKUnJQVHVmeyvOL2y7crL4JNBQJAns8KgsDBT/fjuali0iEIUhjn/ws8346WUmzedGzifr2LUgV9Q==
+  dependencies:
+    class-transformer "^0.1.9"
 
 ms@2.0.0:
   version "2.0.0"

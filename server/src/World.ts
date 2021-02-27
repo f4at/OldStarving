@@ -166,6 +166,7 @@ export class World {
     stime: number = new Date().getTime();
     mode: number = this.modes[config.mode];
     hungerClose: number = config.hungerClose ? config.hungerClose : 12;
+    restarting: boolean;
     days: number = -0.125;
     timeInterval: any;
     constructor() {
@@ -229,13 +230,17 @@ export class World {
     }
 
     restart(mode = null) {
-        setTimeout(() => {
-            for (let player of this.players) player.sendError('Restarting server in 5 secs!');
+        if (!this.restarting) {
+            this.restarting = true;
             setTimeout(() => {
-                this._restart();
-                if (mode) this.mode = mode;
-            }, 5000)
-        }, 7000)
+                for (let player of this.players) player.sendError('Restarting server in 5 secs!');
+                setTimeout(() => {
+                    this._restart();
+                    this.restarting = false;
+                    if (mode) this.mode = mode;
+                }, 5000)
+            }, 7000)
+        }
     }
 
     _restart() {

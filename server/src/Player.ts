@@ -7,6 +7,7 @@ import { MapEntity } from './World';
 import config from "../config";
 import { ConsoleSender } from "./Command";
 import { workerData } from "worker_threads";
+import e from "express";
 
 // TODO Move to Entity.ts
 export abstract class Inventory {
@@ -79,7 +80,7 @@ export class PlayerInventory extends Inventory {
     }
 }
 export class KITS {
-    static PVP = [[Items.BAG, 1], [Items.SWORD_AMETHYST, 1], [Items.AMETHYST_HELMET, 1], [Items.GOLD_SPIKE, 20], [Items.COOKED_MEAT, 200], [Items.FIRE, 10], [Items.BOOK, 1], [Items.HAMMER_AMETHYST, 1], [Items.CAP_SCARF, 1]];
+    static PVP = [[Items.BAG, 1], [Items.SWORD_DIAMOND, 1], [Items.GOLD_HELMET, 1], [Items.WOOD_WALL, 2], [Items.COOKED_MEAT, 200], [Items.FIRE, 5], [Items.BOOK, 1], [Items.HAMMER_AMETHYST, 1], [Items.COAT, 1], [Items.BANDAGE, 4]];
 }
 
 export default class Player extends Entity implements ConsoleSender {
@@ -102,7 +103,7 @@ export default class Player extends Entity implements ConsoleSender {
     pos: Vector;
     angle: number;
     chunk: Vector;
-    speed: number = 210;
+    speed: number = 220;
     tool: Tool = Items.HAND;
     clothes: Clothes = Items.AIR;
 
@@ -164,6 +165,7 @@ export default class Player extends Entity implements ConsoleSender {
     isalive: boolean = true;
     chathistory: number[] = [new Date().getTime()];
     viewRange: Vector = { x: 8, y: 5 };
+    targeted: boolean = false;
     get isOp() {
         return config.idiots.includes(this.accountId);
     }
@@ -209,7 +211,7 @@ export default class Player extends Entity implements ConsoleSender {
         }
         this.bag = false;
         if (!this.spectator) {
-            /*
+
             for (let item of KITS.PVP) {
                 if (item[0] === Items.BAG) {
                     this.bag = true;
@@ -218,7 +220,7 @@ export default class Player extends Entity implements ConsoleSender {
                     this.gather(item[0] as Item, item[1] as number);
                 }
             }
-            */
+            /*
             let luck = Math.random();
             this.inventory.add(Items.FIRE, luck > 0.98 ? 2 : 1);
             let random = Math.max(0.001, Math.random());
@@ -246,7 +248,7 @@ export default class Player extends Entity implements ConsoleSender {
             } else if (luck > 0.9) {
                 this.inventory.add(Items.FIRE, 1);
             }
-
+            */
         }
         world.players.push(this);
         world.chunks[this.chunk.x][this.chunk.y].push(this);
@@ -308,8 +310,13 @@ export default class Player extends Entity implements ConsoleSender {
             if (this.counter % Math.ceil(world.tickRate / 3) == 0) {
                 this.updateCrafting();
             }
-            if (this.counter % world.tickRate) {
-                this.getEntitiesInRange(1, 1).filter(e => this.type === EntityItemType.SPIKE && Utils.distance({ x: e.pos.x - this.pos.x, y: e.pos.y - this.pos.y }) < this.radius + e.dmgRange && e.owner !== this);
+            if ((this.counter % world.tickRate) == 0) {
+                let entities = this.getEntitiesInRange(1, 1, false, true).filter(e => e.type === EntityItemType.SPIKE && Utils.distance({ x: e.pos.x - this.pos.x, y: e.pos.y - this.pos.y }) < this.radius + e.dmgRange && e.owner !== this);
+                let dmg = 0;
+                for (let entity of entities) {
+                    dmg += entity.dmg;
+                }
+                this.damage(dmg, null, true, true, true);
             }
             if (this.moving || this.updating || this.action) {
 
@@ -338,12 +345,12 @@ export default class Player extends Entity implements ConsoleSender {
         this.attackLoop = null;
 
         if (this.spectator) {
-            this.changeDisplayNickColor(5);
+            this.changeDisplayNickColor('a');
         }
-        if (this.accountId === "339845408157073408") {
-            this.changeDisplayNickColor(0);
+        let role = config.roles.find(e => e.players.includes(this.accountId));
+        if (role) {
+            this.changeDisplayNickColor(role.color);
         }
-
     }
 
     join(ws) {
@@ -371,8 +378,8 @@ export default class Player extends Entity implements ConsoleSender {
         this.color = (this.color + 1) % (this.colors.length + 1);
     }
 
-    changeDisplayNickColor(color: number = 0) {
-        this.displayName = '\u00a7' + this.colors[color > this.colors.length - 1 ? color - this.colors.length : color] + this.nick;
+    changeDisplayNickColor(color: string = '') {
+        this.displayName = '\u00a7' + color + this.nick;
         this.broadcastJoin();
     }
 
@@ -483,7 +490,7 @@ export default class Player extends Entity implements ConsoleSender {
         }
         if (this.health <= 0) {
             if (attacker && attacker instanceof Player) {
-                attacker.score += Math.floor(this.score / 3);
+                attacker.score += Math.floor(this.score / 3) + 100;
                 attacker.kills += 1;
             }
             this.die();

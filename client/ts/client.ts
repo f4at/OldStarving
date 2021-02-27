@@ -49,23 +49,11 @@ export function start(ModdedStarving: ModdedStarving) {
             "keyboard": (e) => {
                 if (e.length == 1) {
                     if (e[0].toLowerCase() === 'azerty') {
-                        if (keyboard.type != keyboard.types['azerty']) {
-                            keyboard.set_azerty();
-                            gameConsole.addMessage(`<span style='color: green;'>Keyboard switched to AZERTY!</span>`);
-                        } else {
-                            keyboard.set_azerty();
-                            gameConsole.addMessage(`<span style='color: red;'>Keyboard is already AZERTY!</span>`);
-                        }
-
+                        keyboard.set_azerty();
+                        gameConsole.addMessage(`<span style='color: green;'>Keyboard switched to AZERTY!</span>`);
                     } else if (e[0].toLowerCase() === 'qwerty') {
-                        if (keyboard.type != keyboard.types['qwerty']) {
-                            keyboard.set_qwerty();
-                            gameConsole.addMessage(`<span style='color: green;'>Keyboard switched to QWERTY!</span>`);
-                        } else {
-                            keyboard.set_qwerty();
-                            gameConsole.addMessage(`<span style='color: red;'>Keyboard is already QWERTY!</span>`);
-                        }
-
+                        keyboard.set_qwerty();
+                        gameConsole.addMessage(`<span style='color: green;'>Keyboard switched to QWERTY!</span>`);
                     }
                 }
             }
@@ -113,7 +101,6 @@ export function start(ModdedStarving: ModdedStarving) {
             });
         };
     };
-    ModdedStarving.on("start", proxy);
     const Utils = {
         open_in_new_tab: function (c) {
             window.open(c, "_blank").focus();
@@ -517,7 +504,8 @@ export function start(ModdedStarving: ModdedStarving) {
             this.BOTTOM = 83;
             this.CONSOLE = 222;
             this.type = this.types['azerty'];
-            Cookies.set("starve_keyboard", '1');
+            this.updateCookies();
+            settings.update();
         };
         this.set_qwerty = function () {
             this.LEFT = 65;
@@ -526,8 +514,17 @@ export function start(ModdedStarving: ModdedStarving) {
             this.BOTTOM = 83;
             this.CONSOLE = 192;
             this.type = this.types['qwerty'];
-            Cookies.set("starve_keyboard", '0');
+            this.updateCookies();
+            settings.update();
         };
+        this.updateCookies = function () {
+            Cookies.set("starve_keyboard", JSON.stringify(settings.keys.map(e => [e.action, e.code])));
+        }
+        this.LEFT = 65;
+        this.RIGHT = 68;
+        this.TOP = 87;
+        this.BOTTOM = 83;
+        this.CONSOLE = 192;
         this.spectator = 80;
         this.console1 = 192;
         this.console2 = 222;
@@ -540,6 +537,10 @@ export function start(ModdedStarving: ModdedStarving) {
         this._3 = 51;
         this._4 = 52;
         this._5 = 53;
+        this._6 = 54;
+        this._7 = 55;
+        this._8 = 56;
+        this._9 = 57;
         this.CTRL = 17;
         this.ARROW_LEFT = 37;
         this.ARROW_RIGHT = 39;
@@ -552,7 +553,13 @@ export function start(ModdedStarving: ModdedStarving) {
         this.V = 86;
         this.B = 66;
 
-        parseInt(Cookies.get("starve_keyboard")) ? this.set_azerty() : this.set_qwerty();
+        try {
+            for (let button of JSON.parse(Cookies.get("starve_keyboard"))) {
+                console.log(button[0], button[1])
+                this[button[0]] = button[1];
+            };
+        } catch (e) {
+        }
 
         this.keys = Array(255).fill(this.UP);
         this.up = function (c) {
@@ -683,7 +690,7 @@ export function start(ModdedStarving: ModdedStarving) {
         if (user) {
             user.cam.rw = can.width;
             user.cam.rh = can.height;
-            client.socket.send(new Uint8Array([15, Math.ceil(user.cam.rw / 500) + 1, Math.ceil(user.cam.rh / 500) + 1]));
+            if (client && client.socket && client.socket.readyState === WebSocket.OPEN) client.socket.send(new Uint8Array([15, Math.ceil(user.cam.rw / 500) + 1, Math.ceil(user.cam.rh / 500) + 1]));
         }
         if (loader.is_run) {
             loader.update();
@@ -1363,6 +1370,32 @@ export function start(ModdedStarving: ModdedStarving) {
         d.fill();
         return f;
     }
+
+    function create_gear2(c, g) {
+        var f = document.createElement("canvas");
+        var d = f.getContext("2d");
+        var e = 25 * c;
+        var m = 25 * c;
+        f.width = e;
+        f.height = m;
+        var p = 5 * c;
+        var n = 28 * c;
+        var r = p / 2;
+        var u = n / 2;
+        d.translate(e / 2, m / 2);
+        for (e = 0; 4 > e; e++) {
+            round_rect(d, -r, -u, p, n, 2 * c);
+            d.rotate(Math.PI / 4);
+            fill_path(d, g);
+        }
+        d.arc(0, 0, 10 * c, 0, 2 * Math.PI);
+        fill_path(d, g);
+        d.globalCompositeOperation = "destination-out";
+        circle(d, 0, 0, 4 * c);
+        d.fill();
+        return f;
+    }
+
 
     function create_minimap_object(c, g, f, d, e, m, p?) {
         p = p === void 0 ? 0 : p;
@@ -8422,6 +8455,7 @@ export function start(ModdedStarving: ModdedStarving) {
     function draw_ui_inventory() {
         var c = user.inv;
         var g = world.fast_units[user.uid];
+
         for (var f = 0; f < c.can_select.length; f++) {
             var d = c.can_select[f];
             let e = false;
@@ -8454,6 +8488,9 @@ export function start(ModdedStarving: ModdedStarving) {
                 j++) {
                 ctx.drawImage(g, x + j * (g.width + 5), y);
             }
+        }
+        if (user.selected && user.mselected) {
+            ctx.drawImage(user.selected.info.img[0], mouse.pos.x - user.selected.info.img[0].width / 2, mouse.pos.y - user.selected.info.img[0].height / 2);
         }
     }
 
@@ -9974,15 +10011,8 @@ export function start(ModdedStarving: ModdedStarving) {
                     if (world.fast_units[q]) {
                         q = world.fast_units[q];
 
-                        let dis = ((q.r.x - t) ** 2 + (q.r.y - z) ** 2) ** 0.5, rdis = ((q.x - t) ** 2 + (q.y - z) ** 2) ** 0.5, fac = Math.min(1, Math.max(0, (rdis - dis) / 250)), speed = ((1 - fac) * dis + fac * rdis), sum = 0;
-                        q.ospeed = q.ospeed ? q.ospeed : [];
-                        q.ospeed.push(speed);
-
-                        for (let i = 1; i <= Math.min(4, q.ospeed.length); i++) {
-                            sum += q.ospeed[q.ospeed.length - i];
-                        }
-
-                        q.speed = v ? sum / Math.min(4, q.ospeed.length) * 7.2 : sum / Math.min(4, q.ospeed.length) * 18;
+                        let dis = ((q.r.x - t) ** 2 + (q.r.y - z) ** 2) ** 0.5, rdis = ((q.x - t) ** 2 + (q.y - z) ** 2) ** 0.5, fac = (rdis - dis) / rdis, speed = ((1 - fac) * dis + fac * rdis), sum = 0;
+                        q.speed = (v ? speed * 8 : speed * 20) * 0.9;
 
                         q.r.x = t;
                         q.r.y = z;
@@ -11438,6 +11468,8 @@ export function start(ModdedStarving: ModdedStarving) {
             iid: -1,
             open: false
         };
+        this.selected = null;
+        this.mselected = false;
         this.day = this.uid = this.id = 0;
         this.cam = new Utils.Ease2d(Utils.ease_out_quad, 0, .4, 0, 0, canw2, canh2, canw2, canh2);
         this.cam.delay = 0;
@@ -12593,13 +12625,6 @@ export function start(ModdedStarving: ModdedStarving) {
         this.craft_buttons[CRAFT.BLUE_CORD] = gui_create_button(0, 0, "", sprite[SPRITE.CRAFT_BLUE_CORD]);
         this.craft_buttons[CRAFT.BLUE_CORD].id = CRAFT.BLUE_CORD;
         let craft_buttons = this.craft_buttons, chest_buttons = this.chest_buttons, inv_buttons = this.inv_buttons;
-        ModdedStarving.on("buttons", {
-            sprite,
-            gui_create_button,
-            craft_buttons: this.craft_buttons,
-            inv_buttons: this.inv_buttons,
-            chest_buttons: this.chest_buttons
-        });
         this.update_craft_buttons = function () {
             var c = user.craft.can_craft;
             var d = 10;
@@ -12651,6 +12676,9 @@ export function start(ModdedStarving: ModdedStarving) {
             if (user.chat.open) {
                 user.chat.quit();
             }
+            if (settings.open) {
+                settings.quit();
+            }
             p = c;
             f.remove_event_listener();
             f.can.style.cursor = "auto";
@@ -12683,7 +12711,7 @@ export function start(ModdedStarving: ModdedStarving) {
         this.update = function () {
             this.leaderboard.translate.x = this.can.width - this.leaderboard.img.width;
             this.leaderboard.translate.y = 0;
-            user.auto_feed.translate.x = this.leaderboard.translate.x - sprite[SPRITE.AUTO_FEED].width - 10;
+            user.auto_feed.translate.x = this.leaderboard.translate.x - sprite[SPRITE.AUTO_FEED].width - 75;
             user.auto_feed.translate.y = 10;
             this.minimap.translate.x = this.can.width - 3 - sprite[SPRITE.MINIMAP][0].width;
             this.minimap.translate.y = this.can.height - 3 - sprite[SPRITE.MINIMAP][0].height;
@@ -12742,7 +12770,7 @@ export function start(ModdedStarving: ModdedStarving) {
             this.draw_UI();
         };
         this.trigger_keyup = function (c) {
-            if (gameConsole.open)
+            if (gameConsole.open || settings.open)
                 return;
 
             if (user.chat.open && c.keyCode == keyboard.esc) {
@@ -12754,12 +12782,67 @@ export function start(ModdedStarving: ModdedStarving) {
                     user.auto_feed.enabled = !user.auto_feed.enabled;
                 } else if (c.keyCode == keyboard.spectator) {
                     user.showSpectators = !user.showSpectators;
-                } else if (49 <= c.keyCode && 57 >= c.keyCode) {
+                } else if (keyboard._1 === c.keyCode) {
                     if (0 > user.craft.id) {
-                        var d = c.keyCode - 49;
-                        var e = user.inv.can_select[d];
+                        var e = user.inv.can_select[0];
                         if (e) {
-                            client.select_inv(e.id, d);
+                            client.select_inv(e.id, 0);
+                        }
+                    }
+                } else if (keyboard._2 === c.keyCode) {
+                    if (0 > user.craft.id) {
+                        var e = user.inv.can_select[1];
+                        if (e) {
+                            client.select_inv(e.id, 1);
+                        }
+                    }
+                } else if (keyboard._3 === c.keyCode) {
+                    if (0 > user.craft.id) {
+                        var e = user.inv.can_select[2];
+                        if (e) {
+                            client.select_inv(e.id, 2);
+                        }
+                    }
+                } else if (keyboard._4 === c.keyCode) {
+                    if (0 > user.craft.id) {
+                        var e = user.inv.can_select[3];
+                        if (e) {
+                            client.select_inv(e.id, 3);
+                        }
+                    }
+                } else if (keyboard._5 === c.keyCode) {
+                    if (0 > user.craft.id) {
+                        var e = user.inv.can_select[4];
+                        if (e) {
+                            client.select_inv(e.id, 4);
+                        }
+                    }
+                } else if (keyboard._6 === c.keyCode) {
+                    if (0 > user.craft.id) {
+                        var e = user.inv.can_select[5];
+                        if (e) {
+                            client.select_inv(e.id, 5);
+                        }
+                    }
+                } else if (keyboard._7 === c.keyCode) {
+                    if (0 > user.craft.id) {
+                        var e = user.inv.can_select[6];
+                        if (e) {
+                            client.select_inv(e.id, 6);
+                        }
+                    }
+                } else if (keyboard._8 === c.keyCode) {
+                    if (0 > user.craft.id) {
+                        var e = user.inv.can_select[7];
+                        if (e) {
+                            client.select_inv(e.id, 7);
+                        }
+                    }
+                } else if (keyboard._9 === c.keyCode) {
+                    if (0 > user.craft.id) {
+                        var e = user.inv.can_select[8];
+                        if (e) {
+                            client.select_inv(e.id, 8);
                         }
                     }
                 } else if (c.keyCode == keyboard.bigmap) {
@@ -12772,6 +12855,15 @@ export function start(ModdedStarving: ModdedStarving) {
             if (gameConsole.open)
                 return;
 
+            if (settings.open) {
+                let key = settings.keys.find(e => e.button.info.state === BUTTON_CLICK);
+                if (key) {
+                    settings.bind(key.action, c.keyCode);
+                    key.button.info.state = BUTTON_OUT;
+                }
+                return;
+            }
+
             keyboard.down(c);
             if (c.keyCode == 8 && !user.chat.open) {
                 c.preventDefault();
@@ -12782,7 +12874,22 @@ export function start(ModdedStarving: ModdedStarving) {
                 return;
 
             mouse.pos = get_mouse_pos(this.can, c);
+            let which = c.which;
             c = false;
+
+            if (settings.open) {
+                for (let button of settings.buttons) {
+                    if (settings.keys.find(e => e.button.info.state === BUTTON_CLICK)) return;
+                    button.trigger(f.can, mouse.pos, MOUSE_DOWN);
+                    if (button.info.state === BUTTON_CLICK && button === settings.close) settings.quit();
+                }
+                return;
+            }
+            settings.openbutton.trigger(f.can, mouse.pos, MOUSE_DOWN);
+            if (settings.openbutton.info.state === BUTTON_CLICK) {
+                settings.open = true;
+                return;
+            }
             var d = user.chest;
             if (0 > user.craft.id && 0 <= d.id) {
                 c |= f.chest_buttons[user.chest.id].trigger(f.can, mouse.pos, MOUSE_DOWN);
@@ -12791,6 +12898,11 @@ export function start(ModdedStarving: ModdedStarving) {
                 var e = user.inv.can_select;
                 for (var g = 0; g < e.length; g++) {
                     c |= e[g].trigger(f.can, mouse.pos, MOUSE_DOWN);
+                    if (e[g].info.state === BUTTON_CLICK && which == 1) {
+                        user.selected = e[g];
+                        user.mselected = false;
+                        user.mpos = { x: mouse.pos.x, y: mouse.pos.y };
+                    }
                     if (d.open && (0 > d.id || d.id == e[g].id) || user.furnace.open && e[g].id == INV.WOOD) {
                         c |= f.plus_buttons[e[g].id].trigger(f.can, mouse.pos, MOUSE_DOWN);
                     }
@@ -12816,6 +12928,16 @@ export function start(ModdedStarving: ModdedStarving) {
 
             mouse.pos = get_mouse_pos(this.can, c);
             mouse.up();
+
+            if (settings.open) {
+                for (let button of settings.buttons) {
+                    if (settings.keys.find(e => e.button.info.state === BUTTON_CLICK)) return;
+                    button.trigger(f.can, mouse.pos, MOUSE_UP);
+                }
+                return;
+            }
+            settings.openbutton.trigger(f.can, mouse.pos, MOUSE_UP);
+
             var d = user.chest;
             var e = user.furnace;
             if (user.control.attack) {
@@ -12833,7 +12955,21 @@ export function start(ModdedStarving: ModdedStarving) {
                 for (var n = 0; n < m.length; n++) {
                     if (g = m[n].trigger(f.can, mouse.pos, MOUSE_UP)) {
                         if (c.which == 1) {
-                            client.select_inv(m[n].id, n);
+                            if (user.selected) {
+                                let i = m.indexOf(user.selected);
+                                if (user.mselected) {
+                                    if (i !== -1 && i !== n) {
+                                        m[i] = m[n];
+                                        m[n] = user.selected;
+                                        this.update_inv_buttons();
+                                    }
+                                } else {
+                                    client.select_inv(m[n].id, n);
+                                }
+                                user.selected = null;
+                            } else {
+                                client.select_inv(m[n].id, n);
+                            }
                         } else if (c.which == 3 && 0 > user.craft.preview) {
                             client.delete_inv(m[n].id, n);
                         }
@@ -12845,7 +12981,9 @@ export function start(ModdedStarving: ModdedStarving) {
                         client.give_wood(e, c.shiftKey ? 10 : 1);
                     }
                 }
+                user.selected = null;
             }
+
             if (0 > user.craft.id && 0 > user.craft.preview) {
                 m = user.craft.can_craft;
                 for (n = 0; n < m.length; n++) {
@@ -12861,6 +12999,17 @@ export function start(ModdedStarving: ModdedStarving) {
         this.trigger_mousemove = (d) => {
             mouse.pos = get_mouse_pos(this.can, d);
             d = false;
+            if (settings.open) {
+                for (let button of settings.buttons) {
+                    if (settings.keys.find(e => e.button.info.state === BUTTON_CLICK)) return;
+                    button.trigger(f.can, mouse.pos, MOUSE_MOVE);
+                }
+                return;
+            }
+            if (user.selected && ((user.mpos.x - mouse.pos.x) ** 2 + (user.mpos.y - mouse.pos.y) ** 2) ** 0.5 > 5) {
+                user.mselected = true;
+            }
+            settings.openbutton.trigger(f.can, mouse.pos, MOUSE_MOVE);
             var e = user.chest;
             if (0 > user.craft.id && 0 <= e.id) {
                 d |= f.chest_buttons[e.id].trigger(f.can, mouse.pos, MOUSE_MOVE);
@@ -12915,7 +13064,189 @@ export function start(ModdedStarving: ModdedStarving) {
         }
     };
     var client = new Client;
+    function Keyfromcode(code) {
+        return String.fromCharCode(code);
+    }
     var keyboard = new Keyboard;
+    const settings = new class Settings {
+        open: boolean = false;
+        selected = null;
+        mpos = { x: 0, y: 0 };
+        buttonsprite = [CTI(this.create_settings_bindbutton(1, true, ['#4d2d14', '#432516'])), CTI(this.create_settings_bindbutton(1, true, ['#ff5050', '#804040'])), CTI(this.create_settings_bindbutton(1, true, ['#ff9090', '#a06060']))];
+        keys = [
+            { name: 'UP', action: 'TOP', code: keyboard['UP'], button: gui_create_button(225, 35, "", this.buttonsprite), text: CTI(create_text(1, 'MoveUp', 25, "#FFF")), Text: CTI(create_text(1, Keyfromcode(keyboard['TOP']), 25, "#FFF")) },
+            { name: 'DOWN', action: 'BOTTOM', code: keyboard['DOWN'], button: gui_create_button(225, 35, "", this.buttonsprite), text: CTI(create_text(1, 'MoveDown', 25, "#FFF")), Text: CTI(create_text(1, Keyfromcode(keyboard['BOTTOM']), 25, "#FFF")) },
+            { name: 'RIGHT', action: 'RIGHT', code: keyboard['RIGHT'], button: gui_create_button(225, 35, "", this.buttonsprite), text: CTI(create_text(1, 'MoveRight', 25, "#FFF")), Text: CTI(create_text(1, Keyfromcode(keyboard['RIGHT']), 25, "#FFF")) },
+            { name: 'LEFT', action: 'LEFT', code: keyboard['LEFT'], button: gui_create_button(225, 35, "", this.buttonsprite), text: CTI(create_text(1, 'MoveLeft', 25, "#FFF")), Text: CTI(create_text(1, Keyfromcode(keyboard['LEFT']), 25, "#FFF")) },
+            { name: '1', action: '_1', code: keyboard['_1'], button: gui_create_button(225, 35, "", this.buttonsprite), text: CTI(create_text(1, 'Slot 1', 25, "#FFF")), Text: CTI(create_text(1, Keyfromcode(keyboard['_1']), 25, "#FFF")) },
+            { name: '2', action: '_2', code: keyboard['_2'], button: gui_create_button(225, 35, "", this.buttonsprite), text: CTI(create_text(1, 'Slot 2', 25, "#FFF")), Text: CTI(create_text(1, Keyfromcode(keyboard['_2']), 25, "#FFF")) },
+            { name: '3', action: '_3', code: keyboard['_3'], button: gui_create_button(225, 35, "", this.buttonsprite), text: CTI(create_text(1, 'Slot 3', 25, "#FFF")), Text: CTI(create_text(1, Keyfromcode(keyboard['_3']), 25, "#FFF")) },
+            { name: '4', action: '_4', code: keyboard['_4'], button: gui_create_button(225, 35, "", this.buttonsprite), text: CTI(create_text(1, 'Slot 4', 25, "#FFF")), Text: CTI(create_text(1, Keyfromcode(keyboard['_4']), 25, "#FFF")) },
+            { name: '5', action: '_5', code: keyboard['_5'], button: gui_create_button(225, 35, "", this.buttonsprite), text: CTI(create_text(1, 'Slot 5', 25, "#FFF")), Text: CTI(create_text(1, Keyfromcode(keyboard['_5']), 25, "#FFF")) },
+            { name: '6', action: '_6', code: keyboard['_6'], button: gui_create_button(225, 35, "", this.buttonsprite), text: CTI(create_text(1, 'Slot 6', 25, "#FFF")), Text: CTI(create_text(1, Keyfromcode(keyboard['_6']), 25, "#FFF")) },
+            { name: '7', action: '_7', code: keyboard['_7'], button: gui_create_button(225, 35, "", this.buttonsprite), text: CTI(create_text(1, 'Slot 7', 25, "#FFF")), Text: CTI(create_text(1, Keyfromcode(keyboard['_7']), 25, "#FFF")) },
+            { name: '8', action: '_8', code: keyboard['_8'], button: gui_create_button(225, 35, "", this.buttonsprite), text: CTI(create_text(1, 'Slot 8', 25, "#FFF")), Text: CTI(create_text(1, Keyfromcode(keyboard['_8']), 25, "#FFF")) },
+            { name: '9', action: '_9', code: keyboard['_9'], button: gui_create_button(225, 35, "", this.buttonsprite), text: CTI(create_text(1, 'Slot 9', 25, "#FFF")), Text: CTI(create_text(1, Keyfromcode(keyboard['_9']), 25, "#FFF")) }
+        ];
+        windows = CTI(this.create_settings_window(1, true, ['#00000', '#00000']));
+        close = gui_create_button(45, 45, "", [CTI(this.create_settings_closebutton(1, true, ['#ffffff', '#000000', '#ff0000'])), CTI(this.create_settings_closebutton(1, true, ['#ff0000', '#000000', '#ffffff'])), CTI(this.create_settings_closebutton(1, true, ['#ff4040', '#606060', '#ffffff']))]);
+        openbutton = gui_create_button(45, 45, "", [CTI(create_gear2(2, "#4d2d14")), CTI(create_gear2(2, "#834536")), CTI(create_gear2(2, "#ffffff"))]);
+        buttons = this.keys.map(e => e.button).concat([this.close]);
+
+        constructor() {
+
+        }
+
+        bind(action, code) {
+            let key = this.keys.find(e => e.action === action);
+            if (key) {
+                let rkey = this.keys.find(e => keyboard[e.action] === code);
+                if (rkey) keyboard[rkey.action] = keyboard[action];
+                keyboard[action] = code;
+            }
+            keyboard.updateCookies();
+            this.update();
+        }
+
+        draw() {
+            this.openbutton.info.translate.x = canw - 260;
+            this.openbutton.info.translate.y = 10;
+            this.openbutton.draw(ctx);
+            if (this.open) {
+                ctx.drawImage(this.windows, (canw - this.windows.width) / 2, (canh - this.windows.height) / 2);
+                this.close.info.translate.x = canw / 2 + 220;
+                this.close.info.translate.y = canh / 2 - 370;
+                this.close.draw(ctx);
+                for (let key of this.keys.filter(e => true).sort((n, o) => { return n.button.info.state - o.button.info.state })) {
+                    let button = key.button;
+                    button.info.translate.x = canw / 2 - 10;
+                    button.info.translate.y = canh / 2 - 300 + 48 * this.keys.indexOf(this.keys.find(e => e.button === button));
+                    button.draw(ctx);
+                    ctx.drawImage(key.Text, button.info.translate.x + (button.info.img[button.info.state].width - key.Text.width) / 2, button.info.translate.y + (button.info.img[button.info.state].height - key.Text.height) / 2);
+                    ctx.drawImage(key.text, button.info.translate.x - key.text.width / 2 - 115, button.info.translate.y + (button.info.img[button.info.state].height - key.text.height) / 2);
+                }
+            }
+        }
+
+        update() {
+            for (let key of this.keys) {
+                if (key.code !== keyboard[key.action]) {
+                    key.code = keyboard[key.action];
+                    key.Text = CTI(create_text(1, Keyfromcode(keyboard[key.action]), 25, "#FFF"));
+                }
+            }
+        }
+
+        quit() {
+            this.open = false;
+            for (let button of settings.buttons) {
+                button.info.state = BUTTON_OUT;
+            }
+        }
+
+        create_settings_window(c, g, f) {
+            g = document.createElement("canvas");
+            let d = g.getContext("2d");
+            let w = 500 * c;
+            let h = 700 * c;
+            let lw = 5 * c;
+
+            g.width = w * 1.2;
+            g.height = h * 1.2;
+
+            d.translate(w * 0.6, h * 0.6);
+            d.beginPath();
+            d.fillStyle = f[0];
+            d.globalAlpha = 0.2;
+            round_rect(d, -w / 2, -h / 2, w, h, 20);
+            d.fill();
+            d.closePath();
+
+            w += lw - 1;
+            h += lw - 1;
+            d.beginPath();
+            d.lineWidth = lw;
+            d.strokeStyle = f[1];
+            d.globalAlpha = 0.75;
+            round_rect(d, -w / 2, -h / 2, w, h, 20);
+            d.stroke();
+            d.closePath();
+            return g;
+        }
+
+        create_settings_bindbutton(c, g, f) {
+            g = document.createElement("canvas");
+            let d = g.getContext("2d");
+            let w = 225 * c;
+            let h = 45 * c;
+            let lw = 3 * c;
+
+            g.width = w + lw;
+            g.height = h + lw;
+
+            d.translate(g.width / 2, g.height / 2);
+            d.beginPath();
+            d.fillStyle = f[0];
+            d.globalAlpha = 0.85;
+            round_rect(d, -w / 2, -h / 2, w, h, 3);
+            d.fill();
+            d.closePath();
+
+            w += lw;
+            h += lw;
+            d.beginPath();
+            d.lineWidth = lw;
+            d.strokeStyle = f[1];
+            d.globalAlpha = 1;
+            round_rect(d, -w / 2, -h / 2, w, h, 3);
+            d.stroke();
+            d.closePath();
+            return g;
+        }
+
+        create_settings_closebutton(c, g, f) {
+            g = document.createElement("canvas");
+            let d = g.getContext("2d");
+
+            let w = 50 * c;
+            let h = 50 * c;
+            let lw = 6 * c;
+
+            g.width = w + lw * 2;
+            g.height = h + lw * 2;
+
+            d.translate(g.width / 2, g.height / 2);
+            d.beginPath();
+            d.fillStyle = f[0];
+            d.globalAlpha = 0.85;
+            round_rect(d, -w / 2, -h / 2, w, h, 5);
+            d.fill();
+            d.closePath();
+
+            h += lw - 2 * c;
+            w += lw - 2 * c;
+            d.beginPath();
+            d.lineWidth = lw;
+            d.strokeStyle = f[1];
+            d.globalAlpha = 0.75;
+            round_rect(d, -w / 2, -h / 2, w, h, 5);
+            d.stroke();
+            d.closePath();
+
+            let shift = 12;
+            d.beginPath();
+            d.strokeStyle = f[2];
+            d.globalAlpha = 0.85;
+            d.lineWidth = 5;
+            d.moveTo(-w / 2 + shift, -h / 2 + shift);
+            d.lineTo(w / 2 - shift, h / 2 - shift);
+            d.moveTo(w / 2 - shift, -h / 2 + shift);
+            d.lineTo(-w / 2 + shift, h / 2 - shift);
+            d.stroke();
+            d.closePath();
+            return g;
+        }
+    }
     var mouse = new Mouse;
     var delta = 0;
     var old_timestamp = 0;
@@ -12926,6 +13257,7 @@ export function start(ModdedStarving: ModdedStarving) {
         cycle: 60,
         display: true
     };
+
     var loader = new Loader(can, ctx, function () {
         create_images();
         game = new Game(can, ctx);
@@ -12946,6 +13278,7 @@ export function start(ModdedStarving: ModdedStarving) {
         delta = 1 < delta ? 1 : delta;
         if (game.is_run) {
             game.draw();
+            settings.draw();
         } else {
             ctx.clearRect(0, 0, can.width, can.height);
             if (loader.is_run) {

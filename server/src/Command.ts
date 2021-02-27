@@ -231,6 +231,48 @@ export class Commands {
                 for (const target of targets) target.invincible = true;
                 sender.sendMessage(`Made ${targets.length} player invincible`);
             }
+        }],
+        ["tp", new class extends Command {
+            invoke(sender: CommandSender, args: string[]) {
+                if (args.length < 3 || args.length > 4)
+                    throw new SyntaxError();
+
+                let targets = this.matchPlayers(args[1], sender);
+                let x: number = NaN;
+                let y: number = NaN;
+                if (args.length > 3) {
+                    x = Number(args[2]) * 100;
+                    y = Number(args[3]) * 100;
+                } else {
+                    const destination = this.matchPlayers(args[2], sender);
+                    if (destination.length === 1) {
+                        x = destination[0].pos.x;
+                        y = destination[0].pos.y;
+                    }
+                }
+                if (!isNaN(x) && !isNaN(y)) {
+                    for (let target of targets) {
+                        target.pos.x = x;
+                        target.pos.y = y;
+                        target.updateChunk(target.getChunk());
+                        target.sendInfos();
+                    }
+                    sender.sendMessage(`Teleported ${targets.length} players to x ${x}, y ${y}`);
+                } else {
+                    sender.sendMessage("Invalid destination!", "red");
+                }
+            }
+        }],
+        ["target", new class extends Command {
+            invoke(sender: CommandSender, args: string[]) {
+                if (args.length !== 2)
+                    throw new SyntaxError();
+
+                let targets = this.matchPlayers(args[1], sender);
+                for (let target of targets) {
+                    target.targeted = !target.targeted;
+                }
+            }
         }]
     ]);
 

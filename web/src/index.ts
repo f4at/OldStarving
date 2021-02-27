@@ -182,18 +182,17 @@ app.post("/api/verify", async (req, res) => {
 app.get('/api/discord/callback', async (req, res) => {
     if (!req.query.code) throw new Error('NoCodeProvided');
     const code = req.query.code;
-    const credentials = btoa(`${config.clientId}:${config.clientSecret}`);
-    const response = await fetch(`https://discordapp.com/api/oauth2/token?grant_type=authorization_code&code=${code}&redirect_uri=${encodeURIComponent(config.redirectUri)}`,
+    const response = await fetch(`https://discord.com/api/v8/oauth2/token`,
         {
             method: 'POST',
+            body: `client_id=${config.clientId}&client_secret=${config.clientSecret}&grant_type=authorization_code&code=${code}&redirect_uri=${encodeURIComponent(config.redirectUri)}&scope=identify`,
             headers: {
-                Authorization: `Basic ${credentials}`,
+                'Content-Type': 'application/x-www-form-urlencoded',
             },
         });
     const json = await response.json();
 
     let user = await (await fetch('http://discordapp.com/api/users/@me', { headers: { Authorization: `${json.token_type} ${json.access_token}` } })).json();
-
     if (user.code || user.message) {
         res.redirect("/login");
     } else {

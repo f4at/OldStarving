@@ -206,7 +206,7 @@ export class Commands {
         ["mode", new class extends Command {
             invoke(sender: CommandSender, args: string[]) {
                 if (args.length < 2) throw new SyntaxError();
-                if (world.modes[args[1]]) {
+                if (world.modes[args[1]] !== undefined) {
                     sender.sendMessage(`Changing mode to ${args[1]} mode`);
                     world.restart(world.modes[args[1]]);
 

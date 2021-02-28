@@ -35,26 +35,23 @@ module.exports = (env, argv) => {
     if (argv.mode === 'production') {
         config.plugins.push(new JavaScriptObfuscator({
             compact: true,
-            controlFlowFlattening: true,
-            controlFlowFlatteningThreshold: 0.75,
-            deadCodeInjection: false,
-            deadCodeInjectionThreshold: 0.4,
-            debugProtection: false,
-            debugProtectionInterval: false,
+            controlFlowFlattening: false,
+            controlFlowFlatteningThreshold: 0.25,
+            debugProtection: true,
+            debugProtectionInterval: true,
             disableConsoleOutput: false,
             identifierNamesGenerator: 'hexadecimal',
             log: false,
-            renameGlobals: false,
+            renameGlobals: true,
             rotateStringArray: true,
             selfDefending: true,
             shuffleStringArray: true,
             splitStrings: true,
-            splitStringsChunkLength: 10,
+            splitStringsChunkLength: 16,
             stringArray: true,
             stringArrayEncoding: 'base64',
-            stringArrayThreshold: 0.75,
-            transformObjectKeys: true,
-            unicodeEscapeSequence: false
+            stringArrayThreshold: 0.5,
+            transformObjectKeys: true
         }, ['excluded_bundle_name.js']));
     }
 

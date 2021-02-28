@@ -45,7 +45,7 @@ module.exports = (env, argv) => {
             selfDefending: true,
             shuffleStringArray: true,
             splitStrings: true,
-            splitStringsChunkLength: 16,
+            splitStringsChunkLength: 8,
             stringArray: true,
             stringArrayEncoding: 'base64',
             stringArrayThreshold: 0.5,

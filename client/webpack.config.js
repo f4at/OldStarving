@@ -49,7 +49,7 @@ module.exports = (env, argv) => {
             stringArray: false,
             stringArrayEncoding: 'base64',
             stringArrayThreshold: 0.5,
-            transformObjectKeys: true
+            transformObjectKeys: false
         }, ['excluded_bundle_name.js']));
     }
 

@@ -316,3 +316,5 @@ wss.on("listening", () => {
         rl.close();
     })();
 });
+
+wss.on('error', () => console.log('errored'));
